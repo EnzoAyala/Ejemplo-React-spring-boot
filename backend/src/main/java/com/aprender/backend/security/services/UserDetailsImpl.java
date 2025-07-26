@@ -28,7 +28,7 @@ public class UserDetailsImpl implements UserDetails {
 
     // Constructor que toma un objeto User y construye un UserDetailsImpl.
     public UserDetailsImpl(Long id, String username, String email, String password,
-                           Collection<? extends GrantedAuthority> authorities) {
+            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -36,7 +36,8 @@ public class UserDetailsImpl implements UserDetails {
         this.authorities = authorities;
     }
 
-    // Método estático para construir un UserDetailsImpl a partir de una entidad User.
+    // Método estático para construir un UserDetailsImpl a partir de una entidad
+    // User.
     public static UserDetailsImpl build(User user) {
         // Convierte los roles del usuario en una lista de SimpleGrantedAuthority.
         List<GrantedAuthority> authorities = user.getRoles().stream()

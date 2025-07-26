@@ -2,6 +2,8 @@ import axios from 'axios'; // Importa la librería Axios para hacer peticiones H
 
 // Define la URL base de tu API de Spring Boot para autenticación
 const API_URL = 'http://192.168.1.2:8080/api/auth/';
+const API_ADMIN_URL = 'http://192.168.1.2:8080/api/admin/'; // URL para el admin
+const API_TEST_URL = 'http://192.168.1.2:8080/api/test/'; // URL para pruebas
 
 // Clase de servicio para encapsular la lógica de autenticación (login, logout, registro)
 class AuthService {
@@ -12,15 +14,15 @@ class AuthService {
       username,
       password
     })
-    .then(response => {
-      // Si el login es exitoso y el backend devuelve un token
-      if (response.data.token) {
-        // Guarda la información completa del usuario (incluyendo el token) en el almacenamiento local del navegador
-        // Esto permite mantener la sesión del usuario entre recargas de página
-        localStorage.setItem('user', JSON.stringify(response.data));
-      }
-      return response.data; // Devuelve los datos de la respuesta (incluyendo el token JWT)
-    });
+      .then(response => {
+        // Si el login es exitoso y el backend devuelve un token
+        if (response.data.token) {
+          // Guarda la información completa del usuario (incluyendo el token) en el almacenamiento local del navegador
+          // Esto permite mantener la sesión del usuario entre recargas de página
+          localStorage.setItem('user', JSON.stringify(response.data));
+        }
+        return response.data; // Devuelve los datos de la respuesta (incluyendo el token JWT)
+      });
   }
 
   // Método para cerrar la sesión del usuario
@@ -56,6 +58,52 @@ class AuthService {
       return null; // Retorna null si hay un error de parseo o el item no existe
     }
   }
+
+  // Helper para obtener el header de autorizacion con el token JWT
+  getAuthHeader() {
+    const user = this.getCurrentUser();
+    if (user && user.token) {
+      return { Authorization: 'Bearer ' + user.token }
+    } else {
+      return {};
+    }
+  }
+
+  // Metodo para verificar si el usuario actual es un administrador
+  isAdmin() {
+    const user = this.getCurrentUser();
+    return user && user.roles && user.roles.includes('ROLE_ADMIN');
+  }
+
+  // Metodo para verificar si el usuario actual es un usuario regular
+  isUser() {
+    const user = this.getCurrentUser();
+    return user && user.roles && user.roles.includes('ROLE_USER');
+  }
+
+  // Métodos para los endpoints de prueba (TestController)
+  getPublicContent() {
+    return axios.get(API_TEST_URL + 'all');
+  }
+
+  getUserBoard() {
+    return axios.get(API_TEST_URL + 'user', { headers: this.getAuthHeader() });
+  }
+
+  getAdminBoard() {
+    return axios.get(API_TEST_URL + 'admin', { headers: this.getAuthHeader() });
+  }
+
+  // Métodos para los endpoints de administrador (AdminController)
+  getAllUsersForAdmin() {
+    return axios.get(API_ADMIN_URL + 'users', { headers: this.getAuthHeader() });
+  }
+
+  updateUserRoles(userId, roles) {
+    // 'roles' debe ser un array de strings, ej. ['USER'], ['ADMIN'], ['USER', 'ADMIN']
+    return axios.put(API_ADMIN_URL + 'users/roles', { userId, roles }, { headers: this.getAuthHeader() });
+  }
+
 }
 
 // Exporta una instancia de la clase AuthService para que pueda ser importada y utilizada en otros componentes

@@ -15,7 +15,7 @@ public class SignupRequest {
 
     @NotBlank(message = "El apellido no puede estar vacío")
     @Size(min = 3, max = 50, message = "El apellido debe tener entre 3 y 50 caracteres")
-    private String lastname; // ¡Importante! Cambiado a 'lastname' para coincidir con la entidad User
+    private String lastname; 
 
     @NotBlank(message = "El DNI no puede estar vacío")
     @Size(min = 8, max = 8, message = "El DNI debe tener 8 dígitos") // Longitud exacta de 8
