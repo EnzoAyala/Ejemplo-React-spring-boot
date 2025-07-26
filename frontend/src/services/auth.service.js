@@ -1,7 +1,7 @@
 import axios from 'axios'; // Importa la librería Axios para hacer peticiones HTTP
 
 // Define la URL base de tu API de Spring Boot para autenticación
-const API_URL = 'http://localhost:8080/api/auth/';
+const API_URL = 'http://192.168.1.2:8080/api/auth/';
 
 // Clase de servicio para encapsular la lógica de autenticación (login, logout, registro)
 class AuthService {
@@ -30,11 +30,11 @@ class AuthService {
   }
 
   // Método para registrar un nuevo usuario
-  register(name, lastName, dni, username, email, phone, password) {
+  register(name, lastname, dni, username, email, phone, password) {
     // Realiza una petición POST a la URL de registro con todos los datos del nuevo usuario
     return axios.post(API_URL + 'signup', {
       name,
-      lastName,
+      lastname,
       dni,
       username,
       email,

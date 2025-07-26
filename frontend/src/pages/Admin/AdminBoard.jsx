@@ -29,28 +29,34 @@ const AdminBoard = () => {
     }, []); // El array vacío asegura que este efecto se ejecute solo una vez al montar
 
     return (
-        <div className="container mx-auto p-4">
-            <h2 className="text-3xl font-bold text-center text-red-600 mb-6">Panel de Administrador</h2>
-            <p className="text-center text-gray-600">
-                ¡Bienvenido, Administrador! Este contenido es exclusivo para usuarios con el rol ADMIN.
-            </p>
-            {/* Muestra el contenido si se cargó correctamente */}
-            {content ? (
-                <p className="mt-4 p-3 bg-green-100 text-green-700 rounded text-center">
-                    Mensaje del Backend (Admin): {content}
+        <div className="bg-light-surface dark:bg-dark-surface p-8 md:p-12 rounded-2xl shadow-lg transition-colors duration-300">
+            <div className="text-center">
+                <h2 className="text-3xl md:text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger">
+                    Panel de Administrador
+                </h2>
+                <p className="text-lg text-light-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto">
+                    ¡Bienvenido, Administrador! Este contenido es exclusivo para usuarios con el rol ADMIN.
                 </p>
-            ) : (
-                // Muestra un mensaje de carga mientras se espera la respuesta
-                <p className="mt-4 p-3 bg-gray-100 text-gray-600 rounded text-center">
-                    Cargando contenido de administrador...
-                </p>
-            )}
-            {/* Muestra un mensaje de error si la llamada a la API falló */}
-            {error && (
-                <div className="mt-4 p-3 bg-red-100 text-red-700 rounded text-center">
-                    Error al cargar contenido (Admin): {error}
-                </div>
-            )}
+            </div>
+
+            <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
+                {/* Muestra el contenido, el error, o el mensaje de carga */}
+                {content ? (
+                    <div className="p-4 rounded-md text-center bg-green-500/10 text-green-600 dark:text-green-400">
+                        <p className="font-semibold">Mensaje del Backend:</p>
+                        <p className="mt-1 text-lg">{content}</p>
+                    </div>
+                ) : error ? (
+                    <div className="p-4 rounded-md text-center bg-light-danger/10 text-light-danger dark:text-dark-danger">
+                        <p className="font-semibold">Error al cargar contenido:</p>
+                        <p className="mt-1">{error}</p>
+                    </div>
+                ) : (
+                    <div className="p-4 rounded-md text-center bg-slate-100 dark:bg-slate-700/50 text-light-text-secondary dark:text-dark-text-secondary">
+                        <p>Cargando contenido de administrador...</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

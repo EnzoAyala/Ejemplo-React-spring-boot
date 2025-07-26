@@ -1,0 +1,23 @@
+# Archivos de configuración de VS Code (excluye si no quieres que se versionen)
+.vscode/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Directorios de proyectos de IDEs comunes
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.cache/
+
+# Archivos de logs generales
+*.log
+log/
+tmp/
+
+# Archivos de entorno
+.env
+.env.*

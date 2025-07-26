@@ -2,7 +2,7 @@ import axios from 'axios';
 import AuthService from './auth.service';
 
 const instance = axios.create({
-    baseURL: 'http://localhost:8080/api/', // URL base para tus endpoints protegidos
+    baseURL: 'http://192.168.1.2:8080/api/', // URL base para tus endpoints protegidos
     headers: {
         'Content-Type': 'application/json',
     },
