@@ -1,0 +1,22 @@
+/* Directivas de Tailwind CSS. Estas líneas son procesadas por Tailwind
+   para inyectar sus estilos base, de componentes y de utilidades.
+   ¡Son esenciales para que Tailwind funcione! */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Puedes añadir tus propios estilos CSS globales adicionales aquí abajo */
+/* Por ejemplo, para el body o elementos HTML que no serán manejados por Tailwind */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
