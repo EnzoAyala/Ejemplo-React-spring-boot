@@ -1,15 +1,28 @@
 // frontend/src/components/UserDetailsModal.jsx
 import React, { useState, useEffect } from 'react';
 import UserService from '../services/user.service';
+import AuthService from '../services/auth.service';
 
 const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   // Inicializa el estado 'selectedRole' con el rol actual del usuario.
   // Asumimos que un usuario tendrá al menos un rol. Si tiene múltiples, elegimos el primero.
   // Para la funcionalidad de radio button, solo podemos tener un rol "seleccionado" en el estado.
-  const [selectedRole, setSelectedRole] = useState(user.roles && user.roles.length > 0 ? user.roles[0] : 'ROLE_USER');
+  const [selectedRole, setSelectedRole] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+
+  // Agregar para reaccionar a cambios en la prop 'user'. Esto asegura que el radio button y la visualización de "Roles actuales" se actualicen si el objeto 'user' que se le pasa al modal cambia (lo cual sucederá cuando BoardAdmin actualice su 'selectedUser' después de un fetch).
+  useEffect(() => {
+    if (user && user.roles && user.roles.length > 0) {
+      setSelectedRole(user.roles[0]); // Asume que el usuario tiene al menos un rol y toma el primero
+    } else {
+      setSelectedRole('ROLE_USER'); // O un valor predeterminado si el usuario no tiene roles
+    }
+    // Limpiar mensajes anteriores cada vez que el usuario en el modal cambia
+    setMessage('');
+    setIsError(false);
+  }, [user]);
 
   // Efecto para cerrar el modal si se presiona la tecla Escape
   useEffect(() => {
@@ -52,8 +65,8 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
         if (onRolesUpdated) {
           onRolesUpdated();
         }
-        // Puedes cerrar el modal automáticamente después de un éxito si lo deseas:
-        // setTimeout(() => onClose(), 1500);
+        // Cerrar el modal automáticamente después de un éxito 
+        setTimeout(() => onClose(), 10000);
       })
       .catch(error => {
         const errorMessage =
@@ -68,8 +81,8 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
           setMessage("Sesión expirada o no autorizado. Por favor, vuelva a iniciar sesión.");
           // Opcional: Si es 401 (Unauthorized), puedes forzar un logout y recarga para que el usuario inicie sesión de nuevo
           // import AuthService from '../services/auth.service';
-          // AuthService.logout();
-          // window.location.reload();
+          AuthService.logout();
+          window.location.reload();
         }
       })
       .finally(() => {
@@ -78,6 +91,9 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   };
 
   return (
+
+
+
     <div className="fixed inset-0 bg-light-background/70 dark:bg-dark-background/70 flex items-center justify-center z-50 p-6">
       <div className="bg-light-surface dark:bg-dark-surface rounded-xl shadow-2xl w-full max-w-2xl p-8 relative transform transition-all duration-300 scale-100 opacity-100">
 
@@ -150,7 +166,7 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
         )}
 
         {/* Botones de acción */}
-        <div className="flex justify-end gap-4">
+        <div className="flex justibg-dar gap-4">
           <button
             onClick={onClose}
             className="px-6 py-2.5 rounded-md bg-light-background text-light-text hover:bg-light-hover dark:bg-dark-background dark:text-dark-text dark:hover:bg-dark-hover transition-colors duration-200"

@@ -1,5 +1,6 @@
 package com.aprender.backend.controller;
 
+import com.aprender.backend.socketconfig.OnNewUserRegisteredEvent;
 import com.aprender.backend.model.ERole;
 import com.aprender.backend.model.Role;
 import com.aprender.backend.model.User;
@@ -13,6 +14,7 @@ import com.aprender.backend.security.jwt.JwtUtils;
 import com.aprender.backend.security.services.UserDetailsImpl; // Importar UserDetailsImpl
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +32,8 @@ import java.util.stream.Collectors;
 @RestController
 // Define el path base para todos los endpoints en esta clase.
 @RequestMapping("/api/auth")
-// Permite peticiones CORS desde cualquier origen (para desarrollo). En producción, especifica orígenes.
+// Permite peticiones CORS desde cualquier origen (para desarrollo). En
+// producción, especifica orígenes.
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 
@@ -47,7 +50,10 @@ public class AuthController {
     PasswordEncoder encoder; // El mismo BCryptPasswordEncoder que configuramos en SecurityConfig
 
     @Autowired
-    JwtUtils jwtUtils; 
+    JwtUtils jwtUtils;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher; // Inyectar ApplicationEventPublisher
 
     // Endpoint para el inicio de sesión
     @PostMapping("/signin")
@@ -71,11 +77,11 @@ public class AuthController {
 
         // Devuelve el token JWT y los detalles del usuario
         return ResponseEntity.ok(new JwtResponse(jwt,
-                                                userDetails.getId(),
-                                                userDetails.getUsername(),
-                                                userDetails.getEmail(),
-                                                roles));
-        
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
+
     }
 
     // Endpoint para el registro de usuarios
@@ -98,17 +104,18 @@ public class AuthController {
 
         // Crea una nueva cuenta de usuario
         User user = new User(signupRequest.getName(),
-                             signupRequest.getLastname(),
-                             signupRequest.getDni(),
-                             signupRequest.getUsername(),
-                             signupRequest.getEmail(),
-                             signupRequest.getPhone(),
-                             encoder.encode(signupRequest.getPassword())); // ¡Importante: encriptar la contraseña!
+                signupRequest.getLastname(),
+                signupRequest.getDni(),
+                signupRequest.getUsername(),
+                signupRequest.getEmail(),
+                signupRequest.getPhone(),
+                encoder.encode(signupRequest.getPassword())); // ¡Importante: encriptar la contraseña!
 
         Set<String> strRoles = signupRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
-        // Asigna roles al usuario. Por defecto, siempre será ROLE_USER para el registro.
+        // Asigna roles al usuario. Por defecto, siempre será ROLE_USER para el
+        // registro.
         if (strRoles == null) {
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
@@ -130,7 +137,10 @@ public class AuthController {
         }
 
         user.setRoles(roles);
-        userRepository.save(user); // Guarda el nuevo usuario en la base de datos
+        User savedUser = userRepository.save(user); // Guarda el nuevo usuario en la base de datos
+
+        // Publicar el evento de nuevo usuarios registrado
+        eventPublisher.publishEvent(new OnNewUserRegisteredEvent(this, savedUser));
 
         return ResponseEntity.ok(new MessageResponse("Usuario registrado con éxito!"));
     }

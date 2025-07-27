@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -67,6 +68,16 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return headerAuth.substring(7); // Retorna la cadena después de "Bearer "
         }
 
+        return null;
+    }
+
+    // Metodo para WebSocketConfig
+    public Authentication getAuthenticationFromJwt(String authToken){
+        if(jwtUtils.validateJwtToken(authToken)){
+            String username = jwtUtils.getUserNameFromJwtToken(authToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        }
         return null;
     }
 }

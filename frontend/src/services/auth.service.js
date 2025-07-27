@@ -15,8 +15,8 @@ class AuthService {
       password
     })
       .then(response => {
-        // Si el login es exitoso y el backend devuelve un token
-        if (response.data.token) {
+        // Si el login es exitoso y el backend devuelve un token 
+        if (response.data.accessToken) {
           // Guarda la información completa del usuario (incluyendo el token) en el almacenamiento local del navegador
           // Esto permite mantener la sesión del usuario entre recargas de página
           localStorage.setItem('user', JSON.stringify(response.data));
@@ -62,8 +62,8 @@ class AuthService {
   // Helper para obtener el header de autorizacion con el token JWT
   getAuthHeader() {
     const user = this.getCurrentUser();
-    if (user && user.token) {
-      return { Authorization: 'Bearer ' + user.token }
+    if (user && user.accessToken) {
+      return { Authorization: 'Bearer ' + user.accessToken }
     } else {
       return {};
     }
@@ -106,5 +106,4 @@ class AuthService {
 
 }
 
-// Exporta una instancia de la clase AuthService para que pueda ser importada y utilizada en otros componentes
 export default new AuthService();

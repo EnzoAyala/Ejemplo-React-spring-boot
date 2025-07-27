@@ -88,4 +88,17 @@ public class AdminController {
 
         return ResponseEntity.ok(new MessageResponse("User roles updated successfully!"));
     }
+
+    // Nuevo EndPoint para eliminar un usuario por ID
+    @DeleteMapping("/users/{id}") // URL para eliminar: /api/admin/users/{id}
+    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if(userOptional.isEmpty()){
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
+        }
+
+        userRepository.deleteById(id);
+        return ResponseEntity.ok(new MessageResponse("User deleted successfully!"));
+    }
 }

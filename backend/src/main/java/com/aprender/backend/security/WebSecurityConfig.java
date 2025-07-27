@@ -66,7 +66,7 @@ public class WebSecurityConfig {
         // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
         // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
         // En producción, DEBE ser el dominio específico de tu frontend.
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://192.168.1.2:5173"));
         // Permite los métodos HTTP que vas a usar
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Permite todas las cabeceras (incluyendo Authorization)
@@ -89,13 +89,14 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
-                        .requestMatchers("/api/test/**").permitAll() // Endpoints de prueba (puedes ajustarlos si
-                                                                     // quieres protegerlos)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
+                        .requestMatchers("/api/test/**").permitAll() // Endpoints de prueba (puedes ajustarlos si quieres protegerlos)
+                        .requestMatchers("/ws/info").permitAll()
+                        .requestMatchers("/ws/**").permitAll() 
                         // Configuración estricta de roles:
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo ROLE_USER puede acceder a /api/user/**
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo ROLE_ADMIN puede acceder a
-                                                                           // /api/admin/**
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
                         .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está
                                                       // mapeada arriba)
                 );

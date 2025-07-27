@@ -29,7 +29,13 @@ const UserService = {
   // Función para que el administrador actualice los roles de un usuario
   updateUserRoles: (userId, roles) => {
     return axios.put(API_BASE_URL + 'admin/users/roles', { userId, roles }, { headers: AuthService.getAuthHeader() });
+  },
+
+  // Funcion para Eliminar un usuario
+  deleteUser: (userId) => {
+    return axios.delete(API_BASE_URL + `admin/users/${userId}`, { headers: AuthService.getAuthHeader()})
   }
+
 };
 
 export default UserService;
