@@ -1,29 +1,35 @@
-import api from './api'; // Importa la instancia de Axios con el interceptor de JWT
+// frontend/src/services/user.service.js (Ejemplo si lo mantienes separado)
 
-// Define la sub-URL para los endpoints de prueba en el backend
-// Tus endpoints de prueba en Spring Boot están mapeados bajo /api/test/
-const API_URL = 'test/';
+import axios from 'axios';
+import AuthService from './auth.service'; // Importa el AuthService completo
 
-// Clase de servicio para interactuar con los endpoints de usuario y administrador
-class UserService {
-    // Método para obtener contenido público (accesible para todos sin autenticación)
-    getPublicContent() {
-        // Hace una petición GET a /api/test/all
-        return api.get(API_URL + 'all');
-    }
+const API_BASE_URL = 'http://192.168.1.2:8080/api/';
 
-    // Método para obtener contenido restringido para usuarios (requiere ROLE_USER o ROLE_ADMIN)
-    getUserBoard() {
-        // Hace una petición GET a /api/test/user
-        return api.get(API_URL + 'user');
-    }
+const UserService = {
+  // Función para obtener contenido público
+  getPublicContent: () => {
+    return axios.get(API_BASE_URL + 'test/all');
+  },
 
-    // Método para obtener contenido restringido para administradores (requiere ROLE_ADMIN)
-    getAdminBoard() {
-        // Hace una petición GET a /api/test/admin
-        return api.get(API_URL + 'admin');
-    }
-}
+  // Función para obtener contenido de usuario
+  getUserBoard: () => {
+    return axios.get(API_BASE_URL + 'test/user', { headers: AuthService.getAuthHeader() });
+  },
 
-// Exporta una instancia de la clase UserService
-export default new UserService();
+  // Función para obtener contenido de administrador
+  getAdminBoard: () => {
+    return axios.get(API_BASE_URL + 'test/admin', { headers: AuthService.getAuthHeader() });
+  },
+
+  // Función para que el administrador obtenga todos los usuarios
+  getAllUsers: () => {
+    return axios.get(API_BASE_URL + 'admin/users', { headers: AuthService.getAuthHeader() });
+  },
+
+  // Función para que el administrador actualice los roles de un usuario
+  updateUserRoles: (userId, roles) => {
+    return axios.put(API_BASE_URL + 'admin/users/roles', { userId, roles }, { headers: AuthService.getAuthHeader() });
+  }
+};
+
+export default UserService;

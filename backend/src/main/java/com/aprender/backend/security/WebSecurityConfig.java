@@ -21,6 +21,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity // Habilita la seguridad web de Spring
 @EnableMethodSecurity // Habilita la seguridad a nivel de método (ej. @PreAuthorize)
@@ -56,18 +61,44 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
+        // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
+        // En producción, DEBE ser el dominio específico de tu frontend.
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        // Permite los métodos HTTP que vas a usar
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Permite todas las cabeceras (incluyendo Authorization)
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        // Permite el envío de credenciales (cookies, encabezados de autorización, etc.)
+        configuration.setAllowCredentials(true);
+        // Define el tiempo máximo que el navegador puede almacenar en caché la
+        // respuesta de preflight
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Aplica esta configuración CORS a todas las rutas (/**)
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth ->
-                auth.requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
-                    .requestMatchers("/api/test/**").permitAll() // Endpoints de prueba (puedes ajustarlos si quieres protegerlos)
-                    // Configuración estricta de roles:
-                    .requestMatchers("/api/user/**").hasRole("USER")    // Solo ROLE_USER puede acceder a /api/user/**
-                    .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Solo ROLE_ADMIN puede acceder a /api/admin/**
-                    .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está mapeada arriba)
-            );
+        http.csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF para APIs sin estado (JWT)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
+                        .requestMatchers("/api/test/**").permitAll() // Endpoints de prueba (puedes ajustarlos si
+                                                                     // quieres protegerlos)
+                        // Configuración estricta de roles:
+                        .requestMatchers("/api/user/**").hasRole("USER") // Solo ROLE_USER puede acceder a /api/user/**
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo ROLE_ADMIN puede acceder a
+                                                                           // /api/admin/**
+                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está
+                                                      // mapeada arriba)
+                );
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

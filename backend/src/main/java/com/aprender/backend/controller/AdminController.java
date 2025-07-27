@@ -60,7 +60,7 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
         }
 
-        User user = userOptional.get();
+        User user = userOptional.get(); // Ej: ["ROLE_ADMIN"] O ["ROLE_USER"]
         Set<String> strRoles = roleUpdateRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
@@ -68,23 +68,18 @@ public class AdminController {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Roles cannot be empty!"));
         }
 
-        strRoles.forEach(role -> {
-            switch (role.toLowerCase()) {
-                case "admin":
-                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error: Role ADMIN is not found."));
-                    roles.add(adminRole);
-                    break;
-                case "user":
-                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role USER is not found."));
-                    roles.add(userRole);
-                    break;
-                default:
-                    // Si se envía un rol desconocido, se lanza un error.
-                    // Si quieres ignorarlos, puedes omitir el throw new RuntimeException.
-                    throw new RuntimeException(
-                            "Error: Role " + role.toUpperCase() + " is not found or not permitted for assignment.");
+        strRoles.forEach(roleName -> {
+
+            try {
+                ERole eRole = ERole.valueOf(roleName); // Intenta convertir "ROLE_ADMIN" a ERole.ROLE_ADMIN
+
+                // Busca el Role en la base de datos por el ERole
+                Role foundRole = roleRepository.findByName(eRole)
+                        .orElseThrow(() -> new RuntimeException("Error: Role " + roleName + " is not found."));
+
+                roles.add(foundRole);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException ("Error: Role " + roleName + "is invalid or not permitted for assignment. ", e);
             }
         });
 
