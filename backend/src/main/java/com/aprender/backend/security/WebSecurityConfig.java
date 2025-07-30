@@ -66,7 +66,7 @@ public class WebSecurityConfig {
         // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
         // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
         // En producción, DEBE ser el dominio específico de tu frontend.
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://192.168.1.2:5173"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173", "http://192.168.1.2:5173"));
         // Permite los métodos HTTP que vas a usar
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Permite todas las cabeceras (incluyendo Authorization)
@@ -93,6 +93,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
                         .requestMatchers("/ws/info").permitAll()
                         .requestMatchers("/ws/**").permitAll() 
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // Configuración estricta de roles:
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo ROLE_USER puede acceder a /api/user/**
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
