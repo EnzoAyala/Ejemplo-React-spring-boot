@@ -16,25 +16,29 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication; 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 // import com.aprender.backend.security.jwt.AuthTokenFilter;
 import com.aprender.backend.security.jwt.JwtUtils;
 import com.aprender.backend.security.services.impl.UserDetailsServiceImpl;
+import com.aprender.backend.security.jwt.TokenBlacklistService;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     // @Autowired // Inyecta tu filtro de token
-    // private AuthTokenFilter authTokenFilter; // O una versión modificada que puedas usar para extraer el token
+    // private AuthTokenFilter authTokenFilter; // O una versión modificada que
+    // puedas usar para extraer el token
 
     @Autowired
     private JwtUtils jwtUtils;
-
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -52,51 +56,55 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                StompHeaderAccessor accessor =
-                        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    List<String> authorization = accessor.getNativeHeader("Authorization");
+                    List<String> authHeaders = accessor.getNativeHeader("Authorization");
                     String token = null;
-                    if (authorization != null && !authorization.isEmpty()) {
-                        String bearerToken = authorization.get(0);
-                        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-                            token = bearerToken.substring(7);
+
+                    if (authHeaders != null && !authHeaders.isEmpty()) {
+                        String bearer = authHeaders.get(0);
+                        if (bearer.startsWith("Bearer ")) {
+                            token = bearer.substring(7);
                         }
                     }
 
                     if (token != null) {
                         try {
-                            // Reutiliza la lógica de validación JWT
-                            // Puedes llamar directamente a los métodos de JwtUtils y UserDetailsServiceImpl
-                            // si authTokenFilter no está configurado para ser un bean de Spring,
-                            // o si prefieres una autenticación más directa aquí.
-                            if (jwtUtils.validateJwtToken(token)) {
-                                String username = jwtUtils.getUserNameFromJwtToken(token);
-                                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                                // Crea la autenticación de Spring Security
-                                Authentication authentication =
-                                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                                accessor.setUser(authentication); // Establece el usuario autenticado
-                                System.out.println("WebSocket: Usuario autenticado con token: " + username);
-                            } else {
-                                System.err.println("WebSocket: Token JWT inválido.");
-                                // Considera lanzar una excepción o cerrar la conexión si el token es inválido
+                            if (!jwtUtils.validateJwtToken(token)) {
+                                System.err.println("WebSocket: Token inválido");
+                                throw new IllegalArgumentException("Token JWT inválido");
                             }
+
+                            // ⚠️ Aquí deberías verificar también la blacklist
+                            if (tokenBlacklistService.isBlacklisted(token)) {
+                                System.err.println("WebSocket: Token en blacklist");
+                                throw new IllegalArgumentException("Token JWT está en la lista negra");
+                            }
+
+                            String username = jwtUtils.getUserNameFromJwtToken(token);
+                            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+
+                            accessor.setUser(authentication);
+
+                            System.out.println("WebSocket: Usuario autenticado: " + username);
+
                         } catch (Exception e) {
-                            System.err.println("Error al autenticar token WebSocket: " + e.getMessage());
-                            // throw new MessageDeliveryException("Unauthorized token: " + e.getMessage());
+                            System.err.println("WebSocket: Error autenticando token: " + e.getMessage());
+                            throw new IllegalArgumentException("Error de autenticación WebSocket: " + e.getMessage());
                         }
                     } else {
-                        System.out.println("WebSocket: No se encontró token en la conexión CONNECT.");
-                        // Si la conexión debe ser autenticada, puedes lanzar una excepción aquí.
-                        // throw new MessageDeliveryException("Authentication required for WebSocket connection");
+                        System.err.println("WebSocket: No se envió token");
+                        throw new IllegalArgumentException("Token JWT requerido en cabecera Authorization");
                     }
                 }
+
                 return message;
             }
+
         });
     }
 }

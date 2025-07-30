@@ -6,7 +6,7 @@ const AdminBoard = () => {
     return (
         <div>
             <header className="jumbotron">
-                <h1 class="text-6xl font-extrabold text-blue-700 dark:text-blue-400 drop-shadow-lg mb-6">
+                <h1 className="text-6xl font-extrabold text-blue-700 dark:text-blue-400 drop-shadow-lg mb-6">
                     Admin Board
                 </h1>
             </header>

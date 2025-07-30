@@ -1,6 +1,6 @@
-package com.aprender.backend.security.jwt; 
+package com.aprender.backend.security.jwt;
 
-import com.aprender.backend.security.jwt.TokenBlacklistService;
+// import com.aprender.backend.security.jwt.TokenBlacklistService;
 import com.aprender.backend.security.services.impl.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -38,18 +38,17 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         try {
             String jwt = parseJwt(request);
             // Si hay un JWT, NO está en la lista negra, y es válido
-            if (jwt != null && !tokenBlacklistService.isBlacklisted(jwt) && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && !tokenBlacklistService.isBlacklisted(jwt) && jwtUtils.validateJwtToken(jwt))  {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt); // Obtiene el nombre de usuario del token
 
                 // Carga los detalles del usuario desde la base de datos
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 // Crea un objeto de autenticación
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null, // La contraseña no se guarda en el token JWT
-                                userDetails.getAuthorities()); // Las autoridades (roles) del usuario
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null, // La contraseña no se guarda en el token JWT
+                        userDetails.getAuthorities()); // Las autoridades (roles) del usuario
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
@@ -77,8 +76,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     // Metodo para WebSocketConfig
-    public Authentication getAuthenticationFromJwt(String authToken){
-        if(jwtUtils.validateJwtToken(authToken)){
+    public Authentication getAuthenticationFromJwt(String authToken) {
+        if (jwtUtils.validateJwtToken(authToken)) {
             String username = jwtUtils.getUserNameFromJwtToken(authToken);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

@@ -61,17 +61,18 @@ const BoardAdmin = () => {
                     // La línea stompClient.current.send("/app/registerUser", ...) se elimina
                     // ya que es un mensaje de prueba y no parte de la lógica de actualización.
                 },
-                (errorFrame) => { // El callback de error recibe un 'frame' de error
-                    console.error("Error de conexión WebSocket:", errorFrame);
-                    // Puedes analizar errorFrame.headers y errorFrame.body para más detalles
-                    if (errorFrame.headers && errorFrame.headers.message && errorFrame.headers.message.includes("Unauthorized")) {
+                (error) => { // El callback de error recibe un 'frame' de error o un string
+                    const errorMessage = error.headers ? error.headers.message : error.toString();
+                    console.error("Error de conexión WebSocket:", errorMessage);
+
+                    if (errorMessage.includes("Unauthorized") || errorMessage.includes("401")) {
                         console.error("Error de autenticación WebSocket. Token inválido o expirado. Forzando cierre de sesión.");
                         AuthService.logout(); // Forzar cierre de sesión
                         window.location.reload(); // Recargar la página
                     } else {
                         // Opcional: Reintentar la conexión después de un retardo
                         // setTimeout(connectWebSocket, 5000);
-                        setError("Error al conectar con el servicio de actualizaciones en tiempo real.");
+                        setError("Error al conectar con el servicio de actualizaciones en tiempo real: " + errorMessage);
                     }
                 }
             );

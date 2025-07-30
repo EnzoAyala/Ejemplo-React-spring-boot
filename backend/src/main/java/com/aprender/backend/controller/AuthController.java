@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 // Permite peticiones CORS desde cualquier origen (para desarrollo). En
 // producción, especifica orígenes.
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class AuthController {
 
     @Autowired
@@ -158,14 +158,13 @@ public class AuthController {
         String jwt = parseJwtFromRequest(request);
 
         // 2. Añadir el token a la lista negra para invalidarlo
-        if (jwt != null) {
+        if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
             tokenBlacklistService.addToBlacklist(jwt);
+            SecurityContextHolder.clearContext();
+            return ResponseEntity.ok(new MessageResponse("Logout successful!"));
+        } else {
+            return ResponseEntity.badRequest().body(new MessageResponse("Invalid token"));
         }
-
-        // 3. Limpiar el contexto de seguridad
-        SecurityContextHolder.clearContext();
-
-        return ResponseEntity.ok(new MessageResponse("Logout successful!"));
     }
 
     private String parseJwtFromRequest(HttpServletRequest request) {

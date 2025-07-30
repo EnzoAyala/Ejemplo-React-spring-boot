@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 @RestController
 @RequestMapping("/api/admin") // Todas las peticiones a este controlador usarán /api/admin
 @PreAuthorize("hasRole('ADMIN')") // Todas las peticiones a este controlador requieren ROLE_ADMIN
