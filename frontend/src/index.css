@@ -5,10 +5,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos base para la aplicación con soporte para tema claro y oscuro */
-body {
-  @apply bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text;
-  @apply transition-colors duration-300 ease-in-out;
+/* Aquí definimos nuestras animaciones y clases de utilidad personalizadas */
+@layer utilities {
+  /* La animación clave que hace que los elementos aparezcan */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px); /* Empieza un poco más abajo */
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0); /* Termina en su posición normal */
+    }
+  }
+
+  /* Clase principal para la animación.
+     Se usa 'forwards' para que el elemento se quede en su estado final (visible) */
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out forwards;
+  }
 }
 
-/* Aquí puedes añadir más estilos globales o @apply para componentes personalizados */
+@layer components {
+  /* Clase para el contenido que se oculta/muestra en el hover */
+  .card-content-hidden {
+    opacity: 0;
+    max-height: 0; /* Para ocultar el contenido y que no ocupe espacio */
+    overflow: hidden; /* Asegurarse de que el contenido no se desborde */
+    transition: opacity 1.5s ease-in-out, max-height 0.9s ease-in-out; /* Transición suave */
+  }
+
+  .card-content-visible {
+    opacity: 1;
+    max-height: 500px; /* Una altura lo suficientemente grande para mostrar el contenido */
+    transition: opacity 1.5s ease-in-out, max-height 0.9s ease-in-out;
+  }
+}
+
+/* Estilos base para la aplicación con soporte para tema claro y oscuro */
+body {
+  @apply bg-light-bg text-light-text transition-colors duration-300 ease-in-out;
+}
+
+/* modo oscuro */
+.dark body {
+  @apply bg-dark-bg text-dark-text;
+}
+
+.opacity-0 {
+    opacity: 0;
+}

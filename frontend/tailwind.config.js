@@ -1,11 +1,12 @@
 /** @type {import('tailwindcss').Config} */
-import forms from '@tailwindcss/forms';
+import forms from '@tailwindcss/forms'; // Asegúrate de tener este plugin si lo usas
 
 export default {
-  darkMode: 'class', // Habilita el modo oscuro basado en clases
+  darkMode: 'class', // ¡Importante! Habilita el modo oscuro basado en clases
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}", // Busca clases en todos los archivos JS, TS, JSX, TSX dentro de src
+    // Busca clases de Tailwind en todos tus archivos React (JS, TS, JSX, TSX)
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -29,6 +30,6 @@ export default {
     },
   },
   plugins: [
-    forms, // Plugin para mejorar estilos de formularios
+    forms, // Si no usas formularios con estilos personalizados, puedes quitarlo
   ],
 }

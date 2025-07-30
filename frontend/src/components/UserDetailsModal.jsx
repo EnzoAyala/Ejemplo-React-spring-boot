@@ -91,9 +91,6 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   };
 
   return (
-
-
-
     <div className="fixed inset-0 bg-light-background/70 dark:bg-dark-background/70 flex items-center justify-center z-50 p-6">
       <div className="bg-light-surface dark:bg-dark-surface rounded-xl shadow-2xl w-full max-w-2xl p-8 relative transform transition-all duration-300 scale-100 opacity-100">
 
@@ -187,7 +184,6 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
         </div>
       </div>
     </div>
-
   );
 };
 

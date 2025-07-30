@@ -6,7 +6,9 @@ const AdminBoard = () => {
     return (
         <div>
             <header className="jumbotron">
-                <h3>Admin Board </h3>
+                <h1 class="text-6xl font-extrabold text-blue-700 dark:text-blue-400 drop-shadow-lg mb-6">
+                    Admin Board
+                </h1>
             </header>
             <BoardAdmin /> {/* Renderiza el componente de gestión de usuarios para el admin */}
         </div>
