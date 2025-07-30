@@ -3,7 +3,7 @@ import axios from 'axios'; // Importa la librería Axios para hacer peticiones H
 // Define la URL base de tu API de Spring Boot para autenticación
 const API_URL = 'http://192.168.1.2:8080/api/auth/';
 const API_ADMIN_URL = 'http://192.168.1.2:8080/api/admin/'; // URL para el admin
-const API_TEST_URL = 'http://192.168.1.2:8080/api/test/'; // URL para pruebas
+
 
 // Clase de servicio para encapsular la lógica de autenticación (login, logout, registro)
 class AuthService {
@@ -27,7 +27,14 @@ class AuthService {
 
   // Método para cerrar la sesión del usuario
   logout() {
-    // Elimina la información del usuario del almacenamiento local, invalidando la sesión en el frontend
+    // 1. (Opcional pero recomendado) Notificar al backend para invalidar el token.
+    //    Esto requiere que implementes un endpoint /api/auth/signout en Spring Boot.
+    //    Este endpoint debería añadir el token a una "lista negra" (blacklist).
+    //    La llamada se puede hacer y no esperar la respuesta para que la UI sea rápida.
+    axios.post(API_URL + 'signout', {}, { headers: this.getAuthHeader() });
+
+    // 2. Elimina la información del usuario del almacenamiento local para invalidar la sesión en el frontend.
+    //    Esto se ejecuta inmediatamente, cerrando la sesión en la UI.
     localStorage.removeItem('user');
   }
 
@@ -79,19 +86,6 @@ class AuthService {
   isUser() {
     const user = this.getCurrentUser();
     return user && user.roles && user.roles.includes('ROLE_USER');
-  }
-
-  // Métodos para los endpoints de prueba (TestController)
-  getPublicContent() {
-    return axios.get(API_TEST_URL + 'all');
-  }
-
-  getUserBoard() {
-    return axios.get(API_TEST_URL + 'user', { headers: this.getAuthHeader() });
-  }
-
-  getAdminBoard() {
-    return axios.get(API_TEST_URL + 'admin', { headers: this.getAuthHeader() });
   }
 
   // Métodos para los endpoints de administrador (AdminController)

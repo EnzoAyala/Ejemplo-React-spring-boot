@@ -1,5 +1,6 @@
 package com.aprender.backend.security.jwt; 
 
+import com.aprender.backend.security.jwt.TokenBlacklistService;
 import com.aprender.backend.security.services.impl.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,14 +27,18 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String jwt = parseJwt(request); // Intenta extraer el JWT de la cabecera
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) { // Si hay un JWT y es válido
+            String jwt = parseJwt(request);
+            // Si hay un JWT, NO está en la lista negra, y es válido
+            if (jwt != null && !tokenBlacklistService.isBlacklisted(jwt) && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt); // Obtiene el nombre de usuario del token
 
                 // Carga los detalles del usuario desde la base de datos

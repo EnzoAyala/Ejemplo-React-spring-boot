@@ -91,7 +91,6 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
-                        .requestMatchers("/api/test/**").permitAll() // Endpoints de prueba (puedes ajustarlos si quieres protegerlos)
                         .requestMatchers("/ws/info").permitAll()
                         .requestMatchers("/ws/**").permitAll() 
                         // Configuración estricta de roles:

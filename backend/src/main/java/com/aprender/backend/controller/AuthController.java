@@ -10,8 +10,10 @@ import com.aprender.backend.payload.response.JwtResponse;
 import com.aprender.backend.payload.response.MessageResponse;
 import com.aprender.backend.repository.RoleRepository;
 import com.aprender.backend.repository.UserRepository;
+import com.aprender.backend.security.jwt.TokenBlacklistService;
 import com.aprender.backend.security.jwt.JwtUtils;
 import com.aprender.backend.security.services.UserDetailsImpl; // Importar UserDetailsImpl
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
@@ -54,6 +57,9 @@ public class AuthController {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher; // Inyectar ApplicationEventPublisher
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
 
     // Endpoint para el inicio de sesión
     @PostMapping("/signin")
@@ -143,5 +149,30 @@ public class AuthController {
         eventPublisher.publishEvent(new OnNewUserRegisteredEvent(this, savedUser));
 
         return ResponseEntity.ok(new MessageResponse("Usuario registrado con éxito!"));
+    }
+
+    // Para el logout
+    @PostMapping("/signout")
+    public ResponseEntity<?> logoutUser(HttpServletRequest request) {
+        // 1. Extraer el token del encabezado de la petición
+        String jwt = parseJwtFromRequest(request);
+
+        // 2. Añadir el token a la lista negra para invalidarlo
+        if (jwt != null) {
+            tokenBlacklistService.addToBlacklist(jwt);
+        }
+
+        // 3. Limpiar el contexto de seguridad
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok(new MessageResponse("Logout successful!"));
+    }
+
+    private String parseJwtFromRequest(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);
+        }
+        return null;
     }
 }
