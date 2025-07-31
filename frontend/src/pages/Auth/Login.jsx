@@ -1,5 +1,5 @@
 import React, { useState } from 'react'; // Importa hooks de React
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate para la navegación programática
+import { useNavigate, Link } from 'react-router-dom'; // Importa useNavigate y Link para la navegación
 import AuthService from '../../services/auth.service'; // Importa tu servicio de autenticación
 
 const Login = () => {
@@ -100,6 +100,14 @@ const Login = () => {
                         </div>
                     )}
                 </form>
+                <div className="text-center mt-6">
+                    <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                        ¿No tienes una cuenta?{' '}
+                        <Link to="/register" className="font-medium text-light-primary hover:underline dark:text-dark-primary">
+                            Regístrate
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
