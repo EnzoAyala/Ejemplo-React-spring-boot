@@ -59,10 +59,9 @@ function App() {
   };
 
   const getNavLinkClasses = ({ isActive }) =>
-    `transition-colors duration-300 font-medium ${
-      isActive
-        ? 'text-light-primary dark:text-dark-primary'
-        : 'text-light-text-secondary hover:text-light-primary dark:text-dark-text-secondary dark:hover:text-dark-primary'
+    `transition-colors duration-300 font-medium ${isActive
+      ? 'text-light-primary dark:text-dark-primary'
+      : 'text-light-text-secondary hover:text-light-primary dark:text-dark-text-secondary dark:hover:text-dark-primary'
     }`;
 
   // Alterna el menú móvil
@@ -149,10 +148,11 @@ function App() {
 
           {/* Menú móvil desplegable */}
           {mobileMenuOpen && (
+            // Menú móvil (corrección clases NavLink)
             <nav className="md:hidden bg-light-surface dark:bg-dark-surface border-t border-slate-200/80 dark:border-slate-700/80 shadow-inner py-4 px-6 space-y-4 transition-colors duration-300">
               <NavLink
                 to="/home"
-                className={getNavLinkClasses + ' block'}
+                className={(navData) => getNavLinkClasses(navData) + ' block'}
                 onClick={handleCloseMobileMenu}
               >
                 Inicio
@@ -162,14 +162,14 @@ function App() {
                 <>
                   <NavLink
                     to="/login"
-                    className={getNavLinkClasses + ' block'}
+                    className={(navData) => getNavLinkClasses(navData) + ' block'}
                     onClick={handleCloseMobileMenu}
                   >
                     Login
                   </NavLink>
                   <NavLink
                     to="/register"
-                    className={getNavLinkClasses + ' block'}
+                    className={(navData) => getNavLinkClasses(navData) + ' block'}
                     onClick={handleCloseMobileMenu}
                   >
                     Registro
@@ -180,7 +180,7 @@ function App() {
                   {isUser && (
                     <NavLink
                       to="/user"
-                      className={getNavLinkClasses + ' block'}
+                      className={(navData) => getNavLinkClasses(navData) + ' block'}
                       onClick={handleCloseMobileMenu}
                     >
                       Usuario
@@ -189,7 +189,7 @@ function App() {
                   {isAdmin && (
                     <NavLink
                       to="/admin"
-                      className={getNavLinkClasses + ' block'}
+                      className={(navData) => getNavLinkClasses(navData) + ' block'}
                       onClick={handleCloseMobileMenu}
                     >
                       Admin
@@ -222,10 +222,17 @@ function App() {
                 )}
               </button>
             </nav>
+
           )}
         </header>
 
-        <main className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-6 max-w-8xl mx-auto">
+        <main className="
+            w-full           /* width: 100% */
+            px-4 sm:px-6 md:px-8 lg:px-10
+            max-w-full       /* elimina el límite de max-width */
+            mx-auto          /* opcional: si quieres centrarlo; puedes quitarlo */
+            py-6
+          ">
           <Routes>
             {/* Ruta publicas (sin autenticación) */}
             <Route path="/" element={<Home />} />

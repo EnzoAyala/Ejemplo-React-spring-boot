@@ -90,9 +90,7 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Login, Register, etc.
-                        .requestMatchers("/ws/info").permitAll()
-                        .requestMatchers("/ws/**").permitAll() 
+                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**").permitAll() // Login, Register, etc.
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // Configuración estricta de roles:
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo ROLE_USER puede acceder a /api/user/**

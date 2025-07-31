@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import UserService from '../services/user.service';
+import AdminService from '../services/admin.service'; // Cambié UserService por AdminService, porque aquí usás métodos admin (getAllUsers, deleteUser)
 import UserDetailsModal from './UserDetailsModal'; // Importa el componente del modal
 import AuthService from '../services/auth.service'; // Asegúrate de que esta importación sea correcta
 
@@ -15,21 +15,24 @@ const BoardAdmin = () => {
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null); // Para el usuario seleccionado en el modal
-    const stompClient = useRef(null); // Usamos useRef para el cliente STOMP
+    const stompClient = useRef(null);
+    const connectionAttempts = useRef(0);
 
     // Este useEffect se encarga de la conexión WebSocket
     useEffect(() => {
+        // Evita ejecutar si ya hay un cliente STOMP conectado.
+        if (stompClient.current && stompClient.current.connected) {
+            return;
+        }
+
         const currentUser = AuthService.getCurrentUser();
         const token = currentUser ? currentUser.accessToken : null;
 
         if (!token) {
             console.error("No se encontró el token JWT. No se puede conectar al WebSocket. Por favor, inicie sesión.");
-            // Aquí podrías redirigir al usuario a la página de inicio de sesión
-            // Ejemplo con React Router: history.push("/login");
-            // O simplemente mostrar un error en la UI y no intentar conectar
             setError("No autenticado. Por favor, inicie sesión para ver el panel de administración.");
-            setLoading(false); // Detenemos el estado de carga
-            return; // Detiene la ejecución si no hay token
+            setLoading(false);
+            return;
         }
 
         const connectWebSocket = () => {
@@ -37,29 +40,30 @@ const BoardAdmin = () => {
             const socket = new SockJS(WS_URL);
             stompClient.current = Stomp.over(socket);
 
+            // Opcional: para evitar muchos logs de STOMP, podés desactivar la depuración
+            stompClient.current.debug = null;
+
             // Conectar con encabezados de autenticación
             stompClient.current.connect(
-                { 'Authorization': `Bearer ${token}` }, // Envía el token en el encabezado
+                { Authorization: `Bearer ${token}` }, // Envía el token en el encabezado
                 () => {
-                    console.log("Connected to WebSocket");
+                    console.log("Conectado al WebSocket");
+                    connectionAttempts.current = 0; // Reiniciar contador de intentos al conectar
+
                     // Suscribirse al topic de actualizaciones de usuarios
                     stompClient.current.subscribe("/topic/user-updates", (message) => {
                         const newUser = JSON.parse(message.body);
                         console.log("Nuevo usuario recibido:", newUser);
-                        // Añadir el nuevo usuario a la lista existente, evitando duplicados
+
+                        // Actualiza o añade el usuario en la lista
                         setUsers((prevUsers) => {
-                            // Si el usuario ya existe (por ID), no lo agregamos de nuevo.
-                            // Esto es útil si el backend envía el mismo evento por alguna razón.
-                            if (prevUsers.some(u => u.id === newUser.id)) {
-                                return prevUsers;
+                            const userExists = prevUsers.some(u => u.id === newUser.id);
+                            if (userExists) {
+                                return prevUsers.map(user => user.id === newUser.id ? newUser : user);
                             }
-                            // Si es un usuario nuevo, lo añadimos.
-                            // Puedes decidir si lo añades al principio o al final, o si lo ordenas.
                             return [...prevUsers, newUser];
                         });
                     });
-                    // La línea stompClient.current.send("/app/registerUser", ...) se elimina
-                    // ya que es un mensaje de prueba y no parte de la lógica de actualización.
                 },
                 (error) => { // El callback de error recibe un 'frame' de error o un string
                     const errorMessage = error.headers ? error.headers.message : error.toString();
@@ -69,10 +73,12 @@ const BoardAdmin = () => {
                         console.error("Error de autenticación WebSocket. Token inválido o expirado. Forzando cierre de sesión.");
                         AuthService.logout(); // Forzar cierre de sesión
                         window.location.reload(); // Recargar la página
+                    } else if (connectionAttempts.current < 3) {
+                        connectionAttempts.current++;
+                        console.log(`Intentando reconectar en 5 segundos... (${connectionAttempts.current})`);
+                        setTimeout(connectWebSocket, 5000); // Intentar reconectar
                     } else {
-                        // Opcional: Reintentar la conexión después de un retardo
-                        // setTimeout(connectWebSocket, 5000);
-                        setError("Error al conectar con el servicio de actualizaciones en tiempo real: " + errorMessage);
+                        setError("No se pudo conectar al WebSocket después de varios intentos: " + errorMessage);
                     }
                 }
             );
@@ -90,12 +96,13 @@ const BoardAdmin = () => {
         };
     }, []); // El array de dependencia vacío asegura que se ejecute una sola vez al montar y desmontar
 
+
     // fetchUsers se mantiene para la carga inicial y para recargar manualmente si es necesario
     const fetchUsers = useCallback(() => {
         setLoading(true);
         setError(null);
 
-        UserService.getAllUsers()
+        AdminService.getAllUsers() // Cambié UserService por AdminService, porque ahí están los métodos admin
             .then(response => {
                 setUsers(response.data);
             })
@@ -121,31 +128,25 @@ const BoardAdmin = () => {
     // Carga inicial de usuarios al montar el componente
     useEffect(() => {
         fetchUsers();
-    }, [fetchUsers]); // Ahora depende de la función 'fetchUsers' (que está en useCallback)
+    }, [fetchUsers]);
 
-    // NUEVO useEffect para sincronizar selectedUser
-    // con la lista de 'users' DESPUÉS de que 'users' haya sido actualizada.
-    // Esto se ejecuta *después* de que setUsers(response.data) haya finalizado.
+    // Sincronizar selectedUser con la lista actualizada de usuarios
     useEffect(() => {
-        // Solo intentamos actualizar selectedUser si el modal está abierto
-        // y hay un usuario seleccionado previamente.
         if (showModal && selectedUser) {
-            // Buscamos la versión más reciente del usuario en la lista actualizada.
             const updatedUserInList = users.find(u => u.id === selectedUser.id);
 
             if (updatedUserInList) {
-                // Comparamos los roles para evitar un setSelectedUser innecesario si los roles no han cambiado, lo que podría provocar re-renders. Usamos JSON.stringify para comparar arrays de objetos de forma simple.
+                // Evitar actualizar si roles no cambiaron para prevenir renders innecesarios
                 if (JSON.stringify(updatedUserInList.roles) !== JSON.stringify(selectedUser.roles)) {
                     setSelectedUser(updatedUserInList);
                 }
             } else {
-                // Si el usuario ya no está en la lista (p.ej., fue eliminado por otro admin),
-                // cerramos el modal y limpiamos selectedUser.
+                // Usuario eliminado: cerrar modal
                 setShowModal(false);
                 setSelectedUser(null);
             }
         }
-    }, [users, selectedUser, showModal]); // Depende de 'users' (cuando cambia la lista), 'selectedUser' (para saber qué usuario buscar), y 'showModal' (solo ejecutar si el modal está visible).
+    }, [users, selectedUser, showModal]);
 
     const openModal = (user) => {
         setSelectedUser(user);
@@ -158,18 +159,17 @@ const BoardAdmin = () => {
     };
 
     const handleRolesUpdated = () => {
-        // Si los roles se actualizan en el modal, recargamos la lista de usuarios
+        // Refrescar lista cuando los roles se actualizan en el modal
         fetchUsers();
     };
 
-    // FUNCION para eliminar usuario
+    // Función para eliminar usuario
     const handleDeleteUser = (userId, username) => {
-        // Pedir confirmacion al usuario
         if (window.confirm(`¿Estás seguro de que quieres eliminar al usuario ${username}? Esta acción es irreversible.`)) {
-            UserService.deleteUser(userId)
+            AdminService.deleteUser(userId) // Cambiado a AdminService
                 .then(response => {
                     alert(response.data.message || `Usuario ${username} eliminado exitosamente`);
-                    fetchUsers(); // Recargar la lista de usuarios para reflejar la eliminación
+                    fetchUsers(); // Recargar la lista tras eliminar usuario
                 })
                 .catch(error => {
                     const errorMessage =
@@ -185,7 +185,7 @@ const BoardAdmin = () => {
                     }
                 });
         }
-    }
+    };
 
     if (loading) {
         return (

@@ -1,61 +1,128 @@
-import React, { useState, useEffect } from 'react'; // Importa hooks de React
-import UserService from '../../services/user.service'; // Importa el servicio para interactuar con la API de usuarios
+import React, { useState } from 'react';
 
 const UserBoard = () => {
-    // Estado para almacenar el contenido recibido del backend
-    const [content, setContent] = useState('');
-    // Estado para almacenar mensajes de error si la llamada a la API falla
-    const [error, setError] = useState('');
+    // State to manage which card's extra content is visible
+    const [hoveredCard, setHoveredCard] = useState(null);
 
-    // useEffect se ejecuta después de cada renderizado. Con `[]`, se ejecuta solo al montar.
-    useEffect(() => {
-        // Llama al método `getUserBoard` de `UserService` para obtener contenido restringido para usuarios
-        UserService.getUserBoard()
-            .then(
-                (response) => {
-                    // Si la llamada es exitosa, actualiza el estado `content` con la respuesta
-                    setContent(response.data); // Asume que la respuesta directa es un string
-                },
-                (err) => {
-                    // Si hay un error, extrae el mensaje de error de la respuesta o del objeto de error
-                    const resError =
-                        (err.response && err.response.data && err.response.data.message) ||
-                        err.message ||
-                        err.toString();
-                    // Actualiza el estado `error`
-                    setError(resError);
-                }
-            );
-    }, []); // El array vacío asegura que este efecto se ejecute solo una vez al montar
+    const handleMouseEnter = (cardName) => {
+        setHoveredCard(cardName);
+    };
+
+    const handleMouseLeave = () => {
+        setHoveredCard(null);
+    };
 
     return (
-        <div className="bg-light-surface dark:bg-dark-surface p-8 md:p-12 rounded-2xl shadow-lg transition-colors duration-300">
-            <div className="text-center">
-                <h2 className="text-3xl md:text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger">
-                    Panel de Usuario
-                </h2>
-                <p className="text-lg text-light-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto">
-                    ¡Hola, Usuario! Aquí tienes contenido exclusivo para ti.
-                </p>
+        <div className="min-h-screen bg-light-bg dark:bg-dark-surface transition-colors duration-500 p-4 md:p-8 font-sans relative overflow-hidden">
+            {/* Animated background gradient overlay */}
+            <div className="absolute inset-0 z-0 opacity-20 dark:opacity-10 pointer-events-none">
+                <div className="w-full h-full bg-gradient-to-br from-light-primary/30 to-light-accent/30 dark:from-dark-primary/20 dark:to-dark-accent/20 animate-gradient-pulse"></div>
             </div>
 
-            <div className="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
-                {/* Muestra el contenido, el error, o el mensaje de carga */}
-                {content ? (
-                    <div className="p-4 rounded-md text-center bg-green-500/10 text-green-600 dark:text-green-400">
-                        <p className="font-semibold">Mensaje del Backend:</p>
-                        <p className="mt-1 text-lg">{content}</p>
+            {/* Main content z-index to be above the background animation */}
+            <div className="relative z-10 max-w-7xl mx-auto">
+                {/* Header */}
+                <header className="mb-12 text-center animate-fade-in animation-delay-100">
+                    <h1 className="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-light-primary to-light-accent dark:from-dark-primary dark:to-dark-accent drop-shadow-lg leading-tight">
+                        Panel de Usuario <span className="block text-3xl mt-2 text-light-text-secondary dark:text-dark-text-secondary font-medium">Bienvenido de vuelta, Comandante.</span>
+                    </h1>
+                    <p className="mt-5 text-xl text-light-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto">
+                        Aquí tienes un resumen holográfico de tu actividad y accesos directos a tus controles esenciales.
+                    </p>
+                </header>
+
+                {/* Information Cards */}
+                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* Card 1: Profile */}
+                    <div
+                        className="base-card animate-fade-in animation-delay-200"
+                        onMouseEnter={() => handleMouseEnter('profile')}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        <h3 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-3">
+                            <i className="fas fa-user-circle mr-2 text-light-primary dark:text-dark-primary"></i> Perfil Personal
+                        </h3>
+                        <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
+                            Administra tu identidad digital y las configuraciones de seguridad más avanzadas.
+                        </p>
+                        <button className="btn-primary group">
+                            Editar Perfil
+                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
+                        </button>
+
+                        {/* Hidden content revealed on hover */}
+                        <div className={`${hoveredCard === 'profile' ? 'card-content-visible' : 'card-content-hidden'} mt-5 pt-3 border-t border-light-bg dark:border-dark-surface`}>
+                            <h4 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2">Detalles Adicionales</h4>
+                            <ul className="list-disc list-inside text-light-text-secondary dark:text-dark-text-secondary">
+                                <li>Configuración de privacidad</li>
+                                <li>Historial de inicios de sesión</li>
+                                <li>Métodos de autenticación</li>
+                            </ul>
+                        </div>
                     </div>
-                ) : error ? (
-                    <div className="p-4 rounded-md text-center bg-light-danger/10 text-light-danger dark:text-dark-danger">
-                        <p className="font-semibold">Error al cargar contenido:</p>
-                        <p className="mt-1">{error}</p>
+
+                    {/* Card 2: Notifications */}
+                    <div
+                        className="base-card animate-fade-in animation-delay-300"
+                        onMouseEnter={() => handleMouseEnter('notifications')}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        <h3 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-3">
+                            <i className="fas fa-bell mr-2 text-light-primary dark:text-dark-primary"></i> Centro de Notificaciones
+                        </h3>
+                        <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
+                            Accede a tu flujo de alertas en tiempo real y mensajes importantes del sistema.
+                        </p>
+                        <button className="btn-primary group">
+                            Ver Notificaciones
+                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
+                        </button>
+
+                        {/* Hidden content revealed on hover */}
+                        <div className={`${hoveredCard === 'notifications' ? 'card-content-visible' : 'card-content-hidden'} mt-5 pt-3 border-t border-light-bg dark:border-dark-surface`}>
+                            <h4 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2">Preferencias</h4>
+                            <ul className="list-disc list-inside text-light-text-secondary dark:text-dark-text-secondary">
+                                <li>Ajustes de alertas</li>
+                                <li>Archivar notificaciones</li>
+                                <li>Suscribirse a canales</li>
+                            </ul>
+                        </div>
                     </div>
-                ) : (
-                    <div className="p-4 rounded-md text-center bg-slate-100 dark:bg-slate-700/50 text-light-text-secondary dark:text-dark-text-secondary">
-                        <p>Cargando contenido de usuario...</p>
+
+                    {/* Card 3: Recent Activity */}
+                    <div
+                        className="base-card animate-fade-in animation-delay-400"
+                        onMouseEnter={() => handleMouseEnter('activity')}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        <h3 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-3">
+                            <i className="fas fa-history mr-2 text-light-primary dark:text-dark-primary"></i> Historial de Actividad
+                        </h3>
+                        <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
+                            Explora tu línea de tiempo de interacciones y registros de sistema detallados.
+                        </p>
+                        <button className="btn-primary group">
+                            Ver Actividad
+                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
+                        </button>
+
+                        {/* Hidden content revealed on hover */}
+                        <div className={`${hoveredCard === 'activity' ? 'card-content-visible' : 'card-content-hidden'} mt-5 pt-3 border-t border-light-bg dark:border-dark-surface`}>
+                            <h4 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2">Filtros Rápidos</h4>
+                            <ul className="list-disc list-inside text-light-text-secondary dark:text-dark-text-secondary">
+                                <li>Actividad de seguridad</li>
+                                <li>Cambios recientes</li>
+                                <li>Exportar registro</li>
+                            </ul>
+                        </div>
                     </div>
-                )}
+                </section>
+
+                {/* Footer */}
+                <footer className="mt-20 text-center text-sm text-light-text-secondary dark:text-dark-text-secondary animate-fade-in animation-delay-500">
+                    <p className="mb-2">© 2025 CyberCorp. Todos los derechos reservados.</p>
+                    <p className="text-xs">Diseñado con tecnología de punta para el futuro.</p>
+                </footer>
             </div>
         </div>
     );

@@ -1,43 +1,38 @@
 import axios from 'axios';
 import AuthService from './auth.service';
 
+// Instancia axios con configuración base para todas las peticiones
 const instance = axios.create({
-    baseURL: 'http://192.168.1.2:8080/api/', // URL base para tus endpoints protegidos
+    baseURL: 'http://192.168.1.2:8080/api/', // URL base de la API
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Interceptador de solicitudes: se ejecuta antes de que se envie cada solicitud
-instance.interceptors.request.use (
+// Interceptor para agregar token JWT a cada petición si existe
+instance.interceptors.request.use(
     (config) => {
-        const user = AuthService.getCurrentUser(); // Optiene el usuario del almacenamiento local
-
+        const user = AuthService.getCurrentUser(); // Obtener usuario actual con token
         if (user && user.token) {
-            // Si hay un token, lo agrega al encabezado de autorizacion
-            // El formatio debe ser "Bearer TU_TOKEN_JWT"
-            config.headers['Authorization'] = 'Bearer ' + user.token;
+            config.headers['Authorization'] = 'Bearer ' + user.token; // Agregar token al header
         }
-        return config; // Retorna la configuracion de la solicitudd modificada
+        return config;
     },
     (error) => {
-        return Promise.reject(error); // Si ocurre algún error, lo retorna
+        return Promise.reject(error);
     }
 );
 
-// Interceptor de respuestas para manejo global de errores de JWT, ej. toke expirado
+// Interceptor para manejo global de errores en respuestas, ej. token expirado
 instance.interceptors.response.use(
-    (response) => {
-        return response; // Retorna la respuesta original
-    },
+    (response) => response,
     (error) => {
-        // Si el error es un 401, lo redirige a la página de login
-        if (error.response.status === 401) {
-            console.log('Token expirado, redirigiendo a la página de login'); // Debug
-            AuthService.logout(); // Elimina el token del almacenamiento local
-            window.location.reload('/login'); // Redirige a la página de login
+        if (error.response?.status === 401) {
+            console.log('Token expirado, redirigiendo a login');
+            AuthService.logout(); // Limpiar sesión local
+            window.location.reload('/login'); // Redirigir a login
         }
-        return Promise.reject(error); // Si ocurre algún error, lo retorna
+        return Promise.reject(error);
     }
 );
 

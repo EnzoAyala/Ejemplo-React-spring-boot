@@ -1,6 +1,6 @@
 // frontend/src/components/UserDetailsModal.jsx
 import React, { useState, useEffect } from 'react';
-import UserService from '../services/user.service';
+import AdminService from '../services/admin.service';
 import AuthService from '../services/auth.service';
 
 const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
@@ -57,7 +57,7 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
 
     // Envía el rol seleccionado como un array de un solo elemento,
     // que es lo que espera el backend para updateUserRoles.
-    UserService.updateUserRoles(user.id, [selectedRole])
+    AdminService.updateUserRoles(user.id, [selectedRole])
       .then(response => {
         setMessage(response.data.message);
         setIsError(false);
