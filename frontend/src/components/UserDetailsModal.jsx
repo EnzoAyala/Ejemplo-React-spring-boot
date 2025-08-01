@@ -4,49 +4,54 @@ import AdminService from '../services/admin.service';
 import AuthService from '../services/auth.service';
 
 const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
-  // Inicializa el estado 'selectedRole' con el rol actual del usuario.
-  // Asumimos que un usuario tendrá al menos un rol. Si tiene múltiples, elegimos el primero.
-  // Para la funcionalidad de radio button, solo podemos tener un rol "seleccionado" en el estado.
   const [selectedRole, setSelectedRole] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [isClosing, setIsClosing] = useState(false); // controla la animación de cierre
 
-  // Agregar para reaccionar a cambios en la prop 'user'. Esto asegura que el radio button y la visualización de "Roles actuales" se actualicen si el objeto 'user' que se le pasa al modal cambia (lo cual sucederá cuando BoardAdmin actualice su 'selectedUser' después de un fetch).
+  // Actualiza el estado cada vez que cambia el usuario recibido como prop
   useEffect(() => {
     if (user && user.roles && user.roles.length > 0) {
-      setSelectedRole(user.roles[0]); // Asume que el usuario tiene al menos un rol y toma el primero
+      setSelectedRole(user.roles[0]); // se toma el primer rol si hay varios
     } else {
-      setSelectedRole('ROLE_USER'); // O un valor predeterminado si el usuario no tiene roles
+      setSelectedRole('ROLE_USER'); // por defecto
     }
-    // Limpiar mensajes anteriores cada vez que el usuario en el modal cambia
     setMessage('');
     setIsError(false);
   }, [user]);
 
-  // Efecto para cerrar el modal si se presiona la tecla Escape
+  // Permite cerrar el modal con la tecla Escape
   useEffect(() => {
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
-        onClose();
+        handleCloseModal();
       }
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose]); // ** bota error de React Hokk useEffect ** //
 
-  // Manejador de cambio para los radio buttons
+  // Cambia el rol seleccionado al marcar un radio button
   const handleRoleChange = (event) => {
-    // El valor del radio button seleccionado se obtiene directamente de event.target.value
     setSelectedRole(event.target.value);
-    setMessage(''); // Limpiar mensajes al cambiar selección
+    setMessage('');
   };
 
+  // Cierra el modal con animación suave
+  const handleCloseModal = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 300); // duración de la animación
+  };
+
+  // Llama al backend para actualizar el rol del usuario
   const handleUpdateRoles = () => {
-    // Con radio buttons, siempre habrá un valor para selectedRole (a menos que el initial state fuera null)
-    // Pero mantenemos la validación por robustez.
     if (!selectedRole) {
-      setMessage("Debe seleccionar un rol para el usuario.");
+      setMessage('Debe seleccionar un rol para el usuario.');
       setIsError(true);
       return;
     }
@@ -55,32 +60,25 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
     setMessage('');
     setIsError(false);
 
-    // Envía el rol seleccionado como un array de un solo elemento,
-    // que es lo que espera el backend para updateUserRoles.
     AdminService.updateUserRoles(user.id, [selectedRole])
-      .then(response => {
+      .then((response) => {
         setMessage(response.data.message);
         setIsError(false);
-        // Llama al callback para que el componente padre (BoardAdmin) recargue la lista de usuarios
         if (onRolesUpdated) {
-          onRolesUpdated();
+          onRolesUpdated(selectedRole); // informa al padre para recargar usuarios
         }
-        // Cerrar el modal automáticamente después de un éxito 
-        setTimeout(() => onClose(), 10000);
       })
-      .catch(error => {
+      .catch((error) => {
         const errorMessage =
           (error.response && error.response.data && error.response.data.message) ||
           error.message ||
           error.toString();
-        setMessage("Error al actualizar roles: " + errorMessage);
+        setMessage('Error al actualizar roles: ' + errorMessage);
         setIsError(true);
-        console.error("Error al actualizar roles:", error);
+        console.error('Error al actualizar roles:', error);
 
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          setMessage("Sesión expirada o no autorizado. Por favor, vuelva a iniciar sesión.");
-          // Opcional: Si es 401 (Unauthorized), puedes forzar un logout y recarga para que el usuario inicie sesión de nuevo
-          // import AuthService from '../services/auth.service';
+          setMessage('Sesión expirada o no autorizado. Por favor, vuelva a iniciar sesión.');
           AuthService.logout();
           window.location.reload();
         }
@@ -91,82 +89,116 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-light-background/70 dark:bg-dark-background/70 flex items-center justify-center z-50 p-6">
-      <div className="bg-light-surface dark:bg-dark-surface rounded-xl shadow-2xl w-full max-w-2xl p-8 relative transform transition-all duration-300 scale-100 opacity-100">
-
-        {/* Título del modal */}
-        <h3 className="text-3xl font-extrabold text-light-primary dark:text-dark-primary mb-6 border-b pb-3 border-light-border dark:border-dark-border">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 sm:p-6 animate-fade-in backdrop-blur-sm">
+      <div
+        className={`bg-white dark:bg-gray-900 rounded-3xl shadow-3xl w-[30rem] max-w-2xl p-6 sm:p-8 relative transform transition-all duration-300 ${
+          isClosing ? 'animate-scale-out' : 'animate-scale-in'
+        }`}
+      >
+        {/* Encabezado */}
+        <h3 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700 leading-tight">
           Detalles de Usuario
         </h3>
 
         {/* Botón cerrar */}
         <button
-          onClick={onClose}
-          className="absolute top-5 right-5 text-light-text-secondary hover:text-light-primary dark:text-dark-text-secondary dark:hover:text-dark-primary text-3xl"
+          onClick={handleCloseModal}
+          className="absolute top-4 right-4 text-gray-400 hover:text-dark-danger dark:text-gray-500 dark:hover:text-dark-danger text-4xl leading-none transition-colors duration-200"
           aria-label="Cerrar modal"
         >
           &times;
         </button>
 
-        {/* Información del usuario */}
-        <div className="space-y-3 text-base text-light-text dark:text-dark-text mb-8">
-          <p><strong>ID:</strong> {user.id}</p>
-          <p><strong>Username:</strong> {user.username}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Nombre:</strong> {user.name || 'N/A'}</p>
-          <p><strong>Apellido:</strong> {user.lastname || 'N/A'}</p>
-          <p><strong>DNI:</strong> {user.dni || 'N/A'}</p>
-          <p><strong>Teléfono:</strong> {user.phone || 'N/A'}</p>
-          <p><strong>Roles actuales:</strong> {user.roles.join(', ')}</p>
+        {/* Datos del usuario */}
+        <div className="space-y-4 text-base text-gray-700 dark:text-gray-300 mb-8">
+          <p><strong className="font-semibold">ID:</strong> {user.id}</p>
+          <p><strong className="font-semibold">Username:</strong> {user.username}</p>
+          <p><strong className="font-semibold">Email:</strong> {user.email}</p>
+          <p><strong className="font-semibold">Nombre:</strong> {user.name || 'N/A'}</p>
+          <p><strong className="font-semibold">Apellido:</strong> {user.lastname || 'N/A'}</p>
+          <p><strong className="font-semibold">DNI:</strong> {user.dni || 'N/A'}</p>
+          <p><strong className="font-semibold">Teléfono:</strong> {user.phone || 'N/A'}</p>
+          <p>
+            <strong className="font-semibold">Role actual:</strong>{' '}
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+              {user.roles.join(', ')}
+            </span>
+          </p>
         </div>
 
-        {/* Sección cambiar rol */}
-        <div className="border-t pt-6 border-light-border dark:border-dark-border mb-6">
-          <h4 className="text-xl font-semibold text-light-primary dark:text-dark-primary mb-4">Cambiar Rol:</h4>
-          <div className="flex flex-wrap gap-6">
-            <label className="inline-flex items-center">
-              <input
-                type="radio" // <-- ¡CAMBIO IMPORTANTE! Ahora es un radio button
-                className="form-radio text-light-primary dark:text-dark-primary h-5 w-5"
-                name="userRole" // <-- ¡IMPORTANTE! Mismo 'name' para el grupo de radio buttons
-                value="ROLE_USER"
-                checked={selectedRole === "ROLE_USER"} // <-- Compara con selectedRole
-                onChange={handleRoleChange}
+        {/* Selector de rol */}
+        <div className="border-t pt-6 border-gray-200 dark:border-gray-700 mb-6">
+          <h4 className="text-xl font-bold flex items-center text-gray-800 dark:text-gray-200 mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 mr-2 text-indigo-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2V8m-2 4l4-4m-4 4l-4-4m4 4V3"
               />
-              <span className="ml-3 text-light-text dark:text-dark-text">User</span>
-            </label>
+            </svg>
+            Cambiar Rol:
+          </h4>
 
-            <label className="inline-flex items-center">
+          <div className="flex flex-wrap gap-6">
+            {/* Radio para ROLE_USER */}
+            <label className="inline-flex items-center cursor-pointer">
               <input
                 type="radio"
-                className="form-radio text-light-primary dark:text-dark-primary h-5 w-5"
+                className="form-radio h-5 w-5 text-indigo-600"
                 name="userRole"
-                value="ROLE_ADMIN"
-                checked={selectedRole === "ROLE_ADMIN"}
+                value="ROLE_USER"
+                checked={selectedRole === 'ROLE_USER'}
                 onChange={handleRoleChange}
               />
-              <span className="ml-3 text-light-text dark:text-dark-text">Admin</span>
+              <span className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+                User
+              </span>
             </label>
 
-            {/* Si tienes más roles y quieres que sean mutuamente excluyentes, añádelos aquí con el mismo name="userRole" */}
+            {/* Radio para ROLE_ADMIN */}
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="radio"
+                className="form-radio h-5 w-5 text-indigo-600"
+                name="userRole"
+                value="ROLE_ADMIN"
+                checked={selectedRole === 'ROLE_ADMIN'}
+                onChange={handleRoleChange}
+              />
+              <span className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+                Admin
+              </span>
+            </label>
+
+            {/* Agrega más roles aquí si es necesario */}
           </div>
         </div>
 
-        {/* Mensaje de estado */}
+        {/* Mensaje de éxito o error */}
         {message && (
-          <div className={`p-4 rounded-md mb-6 text-sm font-medium ${isError
-            ? 'bg-light-danger/10 text-light-danger dark:bg-dark-danger/20 dark:text-dark-danger'
-            : 'bg-light-success/10 text-light-success dark:bg-dark-success/20 dark:text-dark-success'
-            }`}>
+          <div
+            className={`p-4 rounded-lg mb-6 text-sm font-medium transition-all duration-300 ${
+              isError
+                ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-700'
+                : 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-700'
+            }`}
+          >
             {message}
           </div>
         )}
 
-        {/* Botones de acción */}
-        <div className="flex justibg-dar gap-4">
+        {/* Acciones */}
+        <div className="flex justify-end gap-4 mt-8">
           <button
-            onClick={onClose}
-            className="px-6 py-2.5 rounded-md bg-light-background text-light-text hover:bg-light-hover dark:bg-dark-background dark:text-dark-text dark:hover:bg-dark-hover transition-colors duration-200"
+            onClick={handleCloseModal}
+            className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-dark-danger hover:text-light-surface dark:hover:bg-dark-danger dark:hover:text-light-surface transition-all duration-300 font-medium shadow-sm"
           >
             Cerrar
           </button>
@@ -174,10 +206,11 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
           <button
             onClick={handleUpdateRoles}
             disabled={loadingUpdate}
-            className={`px-6 py-2.5 rounded-md font-semibold transition-colors duration-200 ${loadingUpdate
-              ? 'bg-light-primary/50 dark:bg-dark-primary/50 cursor-not-allowed'
-              : 'bg-light-primary text-white hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90'
-              }`}
+            className={`px-6 py-2.5 rounded-lg text-white font-semibold transition-all duration-300 shadow-md ${
+              loadingUpdate
+                ? 'bg-indigo-300 cursor-not-allowed'
+                : 'bg-indigo-600 hover:bg-indigo-700'
+            }`}
           >
             {loadingUpdate ? 'Actualizando...' : 'Actualizar Rol'}
           </button>

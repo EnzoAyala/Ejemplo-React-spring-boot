@@ -46,7 +46,7 @@ const Header = ({
             ) : (
                 <>
                     {isUser && <NavLink to="/user" className={getNavLinkClasses}>Usuario</NavLink>}
-                    {isAdmin && <NavLink to="/admin" className={getNavLinkClasses}>Admin</NavLink>}
+                    {isAdmin && <NavLink to="/gestion-usuarios" className={getNavLinkClasses}>Gestión de Usuarios</NavLink>}
 
                     {/* Menú de perfil */}
                     <div className="relative" ref={profileRef}>
@@ -91,7 +91,7 @@ const Header = ({
     );
 
     return (
-        <header className="relative sticky top-0 z-50 backdrop-blur-md bg-light-surface/80 dark:bg-dark-surface/80 border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm transition-all duration-300">
+        <header className="sticky top-0 z-50 backdrop-blur-md bg-light-surface/80 dark:bg-dark-surface/80 border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm transition-all duration-300">
             <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 md:px-8 py-3">
                 {/* Logo */}
                 <Link
