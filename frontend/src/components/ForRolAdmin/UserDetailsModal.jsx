@@ -1,7 +1,7 @@
 // frontend/src/components/UserDetailsModal.jsx
 import React, { useState, useEffect } from 'react';
-import AdminService from '../services/admin.service';
-import AuthService from '../services/auth.service';
+import AdminService from '../../services/admin.service';
+import AuthService from '../../services/auth.service';
 
 const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   const [selectedRole, setSelectedRole] = useState('');

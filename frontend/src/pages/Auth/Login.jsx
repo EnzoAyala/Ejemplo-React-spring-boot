@@ -1,45 +1,44 @@
-import React, { useState } from 'react'; // Importa hooks de React
-import { useNavigate, Link } from 'react-router-dom'; // Importa useNavigate y Link para la navegación
-import AuthService from '../../services/auth.service'; // Importa tu servicio de autenticación
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthService from '../../services/auth.service';
 
+/**
+ * Componente para el formulario de login.
+ * Maneja estados de inputs, carga y mensajes de error.
+ */
 const Login = () => {
-    const navigate = useNavigate(); // Inicializa el hook useNavigate
+    const navigate = useNavigate();
 
-    // Estados para los campos del formulario
+    // Estados para usuario y contraseña
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
-    // Estados para controlar el proceso de la petición y los mensajes
-    const [loading, setLoading] = useState(false); // Para mostrar un indicador de carga
-    const [message, setMessage] = useState('');   // Para mostrar mensajes de éxito/error
+    // Estados para controlar la carga y mensajes
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
 
-    // Función que se ejecuta al enviar el formulario de login
+    // Función que maneja el envío del formulario
     const handleLogin = (e) => {
-        e.preventDefault(); // Previene el comportamiento por defecto del formulario (recarga de página)
+        e.preventDefault();
+        setMessage('');
+        setLoading(true);
 
-        setMessage('');     // Limpia cualquier mensaje anterior
-        setLoading(true);   // Activa el estado de carga
-
-        // Llama al método `login` de tu servicio de autenticación
         AuthService.login(username, password)
             .then(
-                // Si el login es exitoso
                 () => {
-                    navigate('/home'); // Redirige al usuario a la página de inicio
-                    window.location.reload(); // Recarga la página para que App.jsx actualice el estado de autenticación
+                    // Login exitoso: redirigir y recargar para actualizar estado global
+                    navigate('/home');
+                    window.location.reload();
                 },
-                // Si hay un error en el login
                 (error) => {
-                    // Extrae el mensaje de error de la respuesta del backend o del objeto de error
+                    // Extraer mensaje de error y mostrarlo
                     const resMessage =
-                        (error.response &&
-                            error.response.data &&
-                            error.response.data.message) ||
+                        (error.response && error.response.data && error.response.data.message) ||
                         error.message ||
                         error.toString();
 
-                    setLoading(false); // Desactiva el estado de carga
-                    setMessage(resMessage); // Muestra el mensaje de error
+                    setLoading(false);
+                    setMessage(resMessage);
                 }
             );
     };
@@ -51,6 +50,7 @@ const Login = () => {
                     Iniciar Sesión
                 </h2>
                 <form onSubmit={handleLogin} className="space-y-6">
+                    {/* Input usuario */}
                     <div>
                         <label htmlFor="username" className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
                             Nombre de Usuario
@@ -58,12 +58,14 @@ const Login = () => {
                         <input
                             type="text"
                             id="username"
-                            className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)} // Actualiza el estado con cada cambio
-                            required // Hace el campo obligatorio
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                         />
                     </div>
+
+                    {/* Input contraseña */}
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
                             Contraseña
@@ -71,17 +73,19 @@ const Login = () => {
                         <input
                             type="password"
                             id="password"
-                            className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)} // Actualiza el estado con cada cambio
-                            required // Hace el campo obligatorio
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                         />
                     </div>
+
+                    {/* Botón de envío con indicador de carga */}
                     <div className="pt-4">
                         <button
                             type="submit"
+                            disabled={loading}
                             className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-primary dark:focus:ring-dark-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            disabled={loading} // Deshabilita el botón mientras la petición está en curso
                         >
                             {loading ? (
                                 <>
@@ -94,12 +98,16 @@ const Login = () => {
                             ) : 'Login'}
                         </button>
                     </div>
-                    {message && ( // Muestra el mensaje si existe
+
+                    {/* Mostrar mensaje de error o info */}
+                    {message && (
                         <div className="mt-4 p-3 rounded-md text-center text-sm bg-light-danger/10 text-light-danger dark:text-dark-danger">
                             {message}
                         </div>
                     )}
                 </form>
+
+                {/* Link para registro */}
                 <div className="text-center mt-6">
                     <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
                         ¿No tienes una cuenta?{' '}

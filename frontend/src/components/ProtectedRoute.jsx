@@ -1,68 +1,62 @@
-// frontend/src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import AuthService from '../services/auth.service';
 
+/**
+ * Componente para proteger rutas según si el usuario está autenticado
+ * y/o tiene un rol específico. Redirige según corresponda.
+ *
+ * Props:
+ * - children: el contenido de la ruta protegida
+ * - requiredRole: rol requerido para acceder (opcional)
+ * - redirectIfAuthenticated: true para rutas públicas como Login/Register
+ */
 const ProtectedRoute = ({ children, requiredRole, redirectIfAuthenticated = false }) => {
   const currentUser = AuthService.getCurrentUser();
-  const location = useLocation(); // Obtiene la ubicación actual del usuario
+  const location = useLocation();
 
-  // Función auxiliar para obtener la URL de redirección principal del usuario
-  const getUserDashboardUrl = (userRoles) => {
-    if (userRoles.includes('ROLE_ADMIN')) {
-      return '/admin';
-    }
-    if (userRoles.includes('ROLE_USER')) {
-      return '/user';
-    }
-    return '/home'; // Por defecto si no tiene roles específicos
+  // Devuelve la URL principal del dashboard del usuario según su rol
+  const getUserDashboardUrl = (roles) => {
+    if (roles.includes('ROLE_ADMIN')) return '/admin';
+    if (roles.includes('ROLE_USER')) return '/user';
+    return '/home';
   };
 
-  // Caso 1: Rutas que SOLO deben ser accesibles para usuarios NO AUTENTICADOS (Login, Register)
+  // 🔒 CASO 1: Ruta pública (login, registro) pero el usuario ya está autenticado
   if (redirectIfAuthenticated) {
     if (currentUser) {
-      // Si hay un usuario logueado, redirige a su dashboard principal
-      const userRoles = currentUser.roles || [];
-      const dashboardUrl = getUserDashboardUrl(userRoles);
-      // Aquí redirigimos al dashboard, ya que no "volvimos" de una página anterior,
-      // sino que intentamos ir a una página de auth estando ya logueados.
+      const dashboardUrl = getUserDashboardUrl(currentUser.roles || []);
       return <Navigate to={dashboardUrl} replace />;
     }
-    // Si no hay currentUser, permite el acceso a Login/Register
-    return children;
+    return children; // Usuario no autenticado, permitir acceso
   }
 
-  // Caso 2: Rutas que requieren AUTENTICACIÓN (UserBoard, AdminBoard, y otras páginas internas)
+  // 🔒 CASO 2: Ruta privada, requiere autenticación
   if (!currentUser) {
-    // Si no hay usuario logueado, redirige a la página de login
-    // Guardamos la ubicación actual en el estado para poder volver después del login exitoso
+    // Redirige al login y guarda la ruta original
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Lógica de redirección específica por rol para rutas protegidas
   const userRoles = currentUser.roles || [];
   const hasRequiredRole = requiredRole ? userRoles.includes(requiredRole) : true;
 
-  // VERIFICACIÓN DE ROLES CRUZADOS CON REDIRECCIÓN A LA PÁGINA ANTERIOR
-  // Si un ADMIN intenta acceder a una ruta de USUARIO
+  // ❌ Restricción cruzada: ADMIN en ruta de USER
   if (requiredRole === 'ROLE_USER' && userRoles.includes('ROLE_ADMIN')) {
-    // Redirige al ADMIN a su dashboard
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/gestion-usuarios" replace />;
   }
-  // Si un USER intenta acceder a una ruta de ADMIN
+
+  // ❌ Restricción cruzada: USER en ruta de ADMIN
   if (requiredRole === 'ROLE_ADMIN' && userRoles.includes('ROLE_USER')) {
-    // Similar al caso anterior, redirige al USER a su dashboard.
     return <Navigate to="/user" replace />;
   }
 
-  // Si no tiene el rol requerido para una ruta protegida (y no cae en las excepciones de rol cruzado)
+  // ❌ No tiene el rol requerido
   if (!hasRequiredRole) {
-    
-    const fromPath = location.state?.from?.pathname || getUserDashboardUrl(userRoles); // Redirige al dashboard si no hay "from"
-    return <Navigate to={fromPath} replace />;
+    const fallback = location.state?.from?.pathname || getUserDashboardUrl(userRoles);
+    return <Navigate to={fallback} replace />;
   }
 
-  // Si el usuario está logueado y tiene el rol correcto (o está en una ruta permitida), renderiza el componente hijo
+  // ✅ Usuario autorizado, renderizar contenido
   return children;
 };
 
