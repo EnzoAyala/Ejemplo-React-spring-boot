@@ -1,5 +1,6 @@
 # Archivos de configuración de VS Code (excluye si no quieres que se versionen)
 .vscode/
+.qodo/
 
 # Archivos de sistema operativo
 .DS_Store

@@ -37,10 +37,8 @@ public class WebSecurityConfig {
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
+    @Autowired
+    private AuthTokenFilter authenticationJwtTokenFilter;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -66,7 +64,7 @@ public class WebSecurityConfig {
         // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
         // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
         // En producción, DEBE ser el dominio específico de tu frontend.
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173", "http://192.168.1.2:5173"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://192.168.1.2:5173", "http://localhost:5173"));
         // Permite los métodos HTTP que vas a usar
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Permite todas las cabeceras (incluyendo Authorization)
@@ -90,18 +88,19 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/forgot-password").permitAll() // Permitir explícitamente forgot-password
                         .requestMatchers("/api/auth/**", "/ws/info", "/ws/**").permitAll() // Login, Register, etc.
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // Configuración estricta de roles:
                         .requestMatchers("/api/user/**").hasRole("USER") // Solo ROLE_USER puede acceder a /api/user/**
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
-                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está
-                                                      // mapeada arriba)
+                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está mapeada arriba)
                 );
 
         http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authenticationJwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }

@@ -80,6 +80,15 @@ const Login = () => {
                         />
                     </div>
 
+                    {message && (
+                        <p className="text-light-text-secondary text-center dark:text-dark-text-secondary mt-4">
+                            ¿Olvidaste tu contraseña?{' '}
+                            <Link to="/forgot-password" className="font-medium text-light-primary hover:underline dark:text-dark-primary">
+                                Recuperar
+                            </Link>
+                        </p>
+                    )}
+
                     {/* Botón de envío con indicador de carga */}
                     <div className="pt-4">
                         <button

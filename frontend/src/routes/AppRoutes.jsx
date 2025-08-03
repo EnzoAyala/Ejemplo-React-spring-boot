@@ -4,6 +4,9 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home/Home';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
+import VerifyCode from '../pages/Auth/VerifyCode';
+import ForgotPassword from '../pages/Auth/ForgotPassword';
+import ResetPassword from '../pages/Auth/ResetPassword';
 import UserBoard from '../pages/User/UserBoard';
 import AdminBoard from '../pages/Admin/AdminBoard';
 // ¡Importa el componente ProtectedRoute!
@@ -29,6 +32,30 @@ const AppRoutes = () => (
             element={
                 <ProtectedRoute redirectIfAuthenticated={true}>
                     <Register />
+                </ProtectedRoute>
+            }
+        />
+        <Route
+            path="/forgot-password"
+            element={
+                <ProtectedRoute redirectIfAuthenticated={true}>
+                    <ForgotPassword />
+                </ProtectedRoute>
+            }
+        />
+        <Route
+            path="/verify-code"
+            element={
+                <ProtectedRoute redirectIfAuthenticated={true}>
+                    <VerifyCode />
+                </ProtectedRoute>
+            }
+        />
+        <Route
+            path="/reset-password"
+            element={
+                <ProtectedRoute redirectIfAuthenticated={true}>
+                    <ResetPassword />
                 </ProtectedRoute>
             }
         />

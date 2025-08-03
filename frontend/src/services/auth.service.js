@@ -28,6 +28,21 @@ class AuthService {
     });
   }
 
+  // Recuperar contraseña
+  forgotPassword(data) {
+    return axios.post(API_URL + 'forgot-password', data);
+  }
+
+  // Validar código de restablecimiento de contraseña
+  validateResetCode(data) {
+    return axios.post(API_URL + 'validate-reset-code', data);
+  }
+
+  // Restablecer contraseña
+  resetPassword(data) {
+    return axios.post(API_URL + 'reset-password', data);
+  }
+
   // Obtiene usuario actual guardado en localStorage
   getCurrentUser() {
     try {

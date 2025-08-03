@@ -13,8 +13,8 @@ const instance = axios.create({
 instance.interceptors.request.use(
     (config) => {
         const user = AuthService.getCurrentUser(); // Obtener usuario actual con token
-        if (user && user.token) {
-            config.headers['Authorization'] = 'Bearer ' + user.token; // Agregar token al header
+        if (user && user.accessToken) {
+            config.headers['Authorization'] = 'Bearer ' + user.accessToken; // Agregar token al header
         }
         return config;
     },

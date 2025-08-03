@@ -4,6 +4,8 @@ import com.aprender.backend.socketconfig.OnNewUserRegisteredEvent;
 import com.aprender.backend.model.ERole;
 import com.aprender.backend.model.Role;
 import com.aprender.backend.model.User;
+import com.aprender.backend.model.PasswordResetCode;
+import com.aprender.backend.repository.PasswordReserCodeRepository;
 import com.aprender.backend.payload.request.LoginRequest;
 import com.aprender.backend.payload.request.SignupRequest;
 import com.aprender.backend.payload.response.JwtResponse;
@@ -12,6 +14,7 @@ import com.aprender.backend.repository.RoleRepository;
 import com.aprender.backend.repository.UserRepository;
 import com.aprender.backend.security.jwt.TokenBlacklistService;
 import com.aprender.backend.security.jwt.JwtUtils;
+import com.aprender.backend.security.services.PasswordResetService;
 import com.aprender.backend.security.services.UserDetailsImpl; // Importar UserDetailsImpl
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs
@@ -26,18 +29,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// Marca esta clase como un controlador REST.
-@RestController
-// Define el path base para todos los endpoints en esta clase.
-@RequestMapping("/api/auth")
-// Permite peticiones CORS desde cualquier origen (para desarrollo). En
-// producción, especifica orígenes.
-
+@RestController // Marca esta clase como un controlador REST.
+@CrossOrigin(origins = "http://0.0.0.0:5173") // Permite peticiones CORS desde cualquier origen (para desarrollo). En producción, especifica orígenes.
+@RequestMapping("/api/auth") // Define el path base para todos los endpoints en esta clase.
 public class AuthController {
 
     @Autowired
@@ -60,6 +63,12 @@ public class AuthController {
 
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
+
+    @Autowired
+    private PasswordResetService passwordResetService; // Para enviar correo
+
+    @Autowired
+    private PasswordReserCodeRepository passwordResetCodeRepository;
 
     // Endpoint para el inicio de sesión
     @PostMapping("/signin")
@@ -174,4 +183,89 @@ public class AuthController {
         }
         return null;
     }
+
+    // Para restaurar la contraseña de un usuario
+    public String generateSixDigitCode() {
+        Random random = new Random();
+        int code = 10000 + random.nextInt(90000);
+        return String.valueOf(code);
+    }
+
+    // Endpoint para el restablecimiento de contraseña
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        // Verificamos si el usuario existe
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Error: No se encontró un usuario con ese correo."));
+        }
+
+        // Elimina codigos previos para este email
+        passwordResetCodeRepository.deleteByEmail(email);
+
+        String code = generateSixDigitCode();
+        Date expirationDate = new Date(System.currentTimeMillis() + 5 * 60 * 1000); // 5 minutos de expiración
+
+        PasswordResetCode resetCode = new PasswordResetCode();
+        resetCode.setEmail(email);
+        resetCode.setCode(code);
+        resetCode.setExpirationDate(expirationDate);
+        passwordResetCodeRepository.save(resetCode);
+
+        passwordResetService.sendResetCodeEmail(userOptional.get(), code);
+
+        return ResponseEntity
+                .ok(new MessageResponse("Se ha enviado un codigo de 6 dígitos para restablecer la contraseña."));
+    }
+
+    // Endpoint para validar el código de restablecimiento de contraseña
+    @PostMapping("/validate-reset-code")
+    public ResponseEntity<?> validateResetCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+
+        Optional<PasswordResetCode> resetCodeOptional = passwordResetCodeRepository.findByEmailAndCode(email, code);
+        if (!resetCodeOptional.isPresent()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Código inválido."));
+        }
+
+        PasswordResetCode resetCode = resetCodeOptional.get();
+
+        if (resetCode.getExpirationDate().before(new Date())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("El código ha expirado."));
+        }
+
+        return ResponseEntity.ok(new MessageResponse("Código válido."));
+    }
+
+    // Endpoint para restablecer la contraseña
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+        String newPassword = request.get("password");
+
+        Optional<PasswordResetCode> resetCodeOptional = passwordResetCodeRepository.findByEmailAndCode(email, code);
+        if (!resetCodeOptional.isPresent() || resetCodeOptional.get().getExpirationDate().before(new Date())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Código inválido o expirado."));
+        }
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Usuario no encontrado."));
+        }
+
+        User user = userOptional.get();
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Elimina el código tras usarlo
+        passwordResetCodeRepository.delete(resetCodeOptional.get());
+
+        return ResponseEntity.ok(new MessageResponse("Contraseña restablecida con éxito."));
+    }
+
 }

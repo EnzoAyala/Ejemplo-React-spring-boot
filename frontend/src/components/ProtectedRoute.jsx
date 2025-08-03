@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children, requiredRole, redirectIfAuthenticated = fals
 
   // Devuelve la URL principal del dashboard del usuario según su rol
   const getUserDashboardUrl = (roles) => {
-    if (roles.includes('ROLE_ADMIN')) return '/admin';
+    if (roles.includes('ROLE_ADMIN')) return '/gestion-usuarios';
     if (roles.includes('ROLE_USER')) return '/user';
     return '/home';
   };

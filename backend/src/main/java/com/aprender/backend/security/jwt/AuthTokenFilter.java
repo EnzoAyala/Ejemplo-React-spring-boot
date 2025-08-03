@@ -14,12 +14,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 // Este filtro se ejecutará una vez por cada petición HTTP.
+@Component
 public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
@@ -36,9 +38,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
+            String path = request.getRequestURI();
+
+            // Si la ruta es pública, no procesamos el token JWT
+            if (path.startsWith("/api/auth/signin") || path.startsWith("/api/auth/signup")
+                    || path.startsWith("/api/auth/forgot-password") || path.startsWith("/api/auth/validate-reset-code")
+                    || path.startsWith("/api/auth/reset-password")) {
+                filterChain.doFilter(request, response); // Permite que continúe el flujo sin autenticación
+                return;
+            }
+
             String jwt = parseJwt(request);
             // Si hay un JWT, NO está en la lista negra, y es válido
-            if (jwt != null && !tokenBlacklistService.isBlacklisted(jwt) && jwtUtils.validateJwtToken(jwt))  {
+            if (jwt != null && !tokenBlacklistService.isBlacklisted(jwt) && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt); // Obtiene el nombre de usuario del token
 
                 // Carga los detalles del usuario desde la base de datos

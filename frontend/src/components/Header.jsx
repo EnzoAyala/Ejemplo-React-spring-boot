@@ -138,7 +138,7 @@ const Header = ({
                             ) : (
                                 <>
                                     {isUser && <NavLink to="/user" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Usuario</NavLink>}
-                                    {isAdmin && <NavLink to="/admin" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Admin</NavLink>}
+                                    {isAdmin && <NavLink to="/gestion-usuarios" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Gestión de Usuarios</NavLink>}
                                     <button
                                         onClick={() => { logOut(); handleCloseMobileMenu(); }}
                                         className="w-full text-center bg-light-danger/10 text-light-danger hover:bg-light-danger/20 dark:bg-dark-danger/20 dark:text-dark-danger dark:hover:bg-dark-danger/30 font-semibold py-2 px-4 rounded-md text-sm transition"
