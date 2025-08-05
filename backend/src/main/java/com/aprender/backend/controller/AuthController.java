@@ -215,7 +215,13 @@ public class AuthController {
         resetCode.setExpirationDate(expirationDate);
         passwordResetCodeRepository.save(resetCode);
 
-        passwordResetService.sendResetCodeEmail(userOptional.get(), code);
+        try {
+            passwordResetService.sendResetCodeEmail(userOptional.get(), code);
+        } catch (jakarta.mail.MessagingException e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body(new MessageResponse("Error al enviar el correo de restablecimiento de contraseña."));
+        }
 
         return ResponseEntity
                 .ok(new MessageResponse("Se ha enviado un codigo de 6 dígitos para restablecer la contraseña."));

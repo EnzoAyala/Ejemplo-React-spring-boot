@@ -4,7 +4,6 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home/Home';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
-import VerifyCode from '../pages/Auth/VerifyCode';
 import ForgotPassword from '../pages/Auth/ForgotPassword';
 import ResetPassword from '../pages/Auth/ResetPassword';
 import UserBoard from '../pages/User/UserBoard';
@@ -40,14 +39,6 @@ const AppRoutes = () => (
             element={
                 <ProtectedRoute redirectIfAuthenticated={true}>
                     <ForgotPassword />
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/verify-code"
-            element={
-                <ProtectedRoute redirectIfAuthenticated={true}>
-                    <VerifyCode />
                 </ProtectedRoute>
             }
         />

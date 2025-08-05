@@ -27,6 +27,7 @@ const Register = () => {
     const [dniError, setDniError] = useState('');
     const [phoneError, setPhoneError] = useState('');
     const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     // Función que maneja el registro
     const handleRegister = (e) => {
@@ -59,6 +60,44 @@ const Register = () => {
                 }
             );
     };
+
+    // Función para validar email en tiempo real
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        setEmailError(emailRegex.test(value) ? '' : 'El correo electrónico no es válido.');
+    };
+
+    // Función para validar DNI en tiempo real
+    const handleDniChange = (e) => {
+        const value = e.target.value;
+        setDni(value);
+        const dniRegex = /^\d{8}$/;
+        setDniError(dniRegex.test(value) ? '' : 'El DNI debe tener 8 dígitos.');
+    };
+
+    // Función para validar teléfono en tiempo real
+    const handlePhoneChange = (e) => {
+        const value = e.target.value;
+        setPhone(value);
+        const phoneRegex = /^9\d{8}$/;
+        setPhoneError(phoneRegex.test(value) ? '' : 'El teléfono debe tener 9 dígitos y empezar por 9.');
+    };
+
+    // Función para validar contraseña en tiempo real
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+        setPasswordError(value.length < 6 ? 'La contraseña debe tener al menos 6 caracteres.' : '');
+    };
+
+    // Comprobar si el formulario está listo para ser enviado
+    const isFormValid =
+        email && !emailError &&
+        dni && !dniError &&
+        phone && !phoneError &&
+        password && !passwordError;
 
     return (
         <div className="flex justify-center items-center min-h-[calc(100vh-150px)] py-10">
@@ -124,19 +163,14 @@ const Register = () => {
                                     type="email"
                                     id="email"
                                     value={email}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        setEmail(value);
-                                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                                        setEmailError(emailRegex.test(value) ? '' : 'El correo electrónico no es válido.');
-                                    }}
+                                    onChange={handleEmailChange} // Validación en tiempo real
                                     required
                                     className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                 />
                                 {emailError && <p className="text-light-danger dark:text-dark-danger text-xs mt-1">{emailError}</p>}
                             </div>
 
-                            {/* Campos DNI y Teléfono con validación */}
+                            {/* Campos DNI y Teléfono con validación en tiempo real */}
                             <div className="grid md:grid-cols-2 md:gap-6">
                                 <div>
                                     <label htmlFor="dni" className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
@@ -146,12 +180,7 @@ const Register = () => {
                                         type="text"
                                         id="dni"
                                         value={dni}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setDni(value);
-                                            const dniRegex = /^\d{8}$/;
-                                            setDniError(dniRegex.test(value) ? '' : 'El DNI debe tener 8 dígitos.');
-                                        }}
+                                        onChange={handleDniChange} // Validación en tiempo real
                                         required
                                         className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                     />
@@ -165,12 +194,7 @@ const Register = () => {
                                         type="tel"
                                         id="phone"
                                         value={phone}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setPhone(value);
-                                            const phoneRegex = /^9\d{8}$/;
-                                            setPhoneError(phoneRegex.test(value) ? '' : 'El teléfono debe tener 9 dígitos y empezar por 9.');
-                                        }}
+                                        onChange={handlePhoneChange} // Validación en tiempo real
                                         required
                                         className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                     />
@@ -178,7 +202,7 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* Campo Contraseña */}
+                            {/* Campo Contraseña con validación en tiempo real */}
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
                                     Contraseña
@@ -187,10 +211,11 @@ const Register = () => {
                                     type="password"
                                     id="password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={handlePasswordChange} // Validación en tiempo real
                                     required
                                     className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                 />
+                                {passwordError && <p className="text-light-danger dark:text-dark-danger text-xs mt-1">{passwordError}</p>}
                             </div>
 
                             {/* Botón de envío */}
@@ -198,7 +223,7 @@ const Register = () => {
                                 <button
                                     type="submit"
                                     className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-primary dark:focus:ring-dark-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    disabled={loading}
+                                    disabled={loading || !isFormValid}
                                 >
                                     {loading ? (
                                         <>

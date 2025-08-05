@@ -16,6 +16,20 @@ const Login = () => {
     // Estados para controlar la carga y mensajes
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
+    // Función que maneja el cambio en el input de contraseña
+    const handlePasswordChange = (e) => {
+        const passwordInput = e.target.value;
+        setPassword(passwordInput);
+
+        // Validación de la contraseña (mínimo 6 caracteres)
+        if (passwordInput.length < 6) {
+            setPasswordError('La contraseña debe tener al menos 6 caracteres.');
+        } else {
+            setPasswordError('');
+        }
+    };
 
     // Función que maneja el envío del formulario
     const handleLogin = (e) => {
@@ -23,24 +37,29 @@ const Login = () => {
         setMessage('');
         setLoading(true);
 
-        AuthService.login(username, password)
-            .then(
-                () => {
-                    // Login exitoso: redirigir y recargar para actualizar estado global
-                    navigate('/home');
-                    window.location.reload();
-                },
-                (error) => {
-                    // Extraer mensaje de error y mostrarlo
-                    const resMessage =
-                        (error.response && error.response.data && error.response.data.message) ||
-                        error.message ||
-                        error.toString();
+        // Si la contraseña es válida, proceder con el login
+        if (password.length >= 6) {
+            AuthService.login(username, password)
+                .then(
+                    () => {
+                        // Login exitoso: redirigir y recargar para actualizar estado global
+                        navigate('/home');
+                        window.location.reload();
+                    },
+                    (error) => {
+                        // Extraer mensaje de error y mostrarlo
+                        const resMessage =
+                            (error.response && error.response.data && error.response.data.message) ||
+                            error.message ||
+                            error.toString();
 
-                    setLoading(false);
-                    setMessage(resMessage);
-                }
-            );
+                        setLoading(false);
+                        setMessage(resMessage);
+                    }
+                );
+        } else {
+            setLoading(false);
+        }
     };
 
     return (
@@ -74,10 +93,14 @@ const Login = () => {
                             type="password"
                             id="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange} // Se maneja en tiempo real
                             required
                             className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                         />
+                        {/* Mostrar mensaje de error si la contraseña es demasiado corta */}
+                        {passwordError && (
+                            <p className="text-sm text-light-danger dark:text-dark-danger mt-2">{passwordError}</p>
+                        )}
                     </div>
 
                     {message && (
@@ -93,7 +116,7 @@ const Login = () => {
                     <div className="pt-4">
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || password.length < 6} // Deshabilitar si la contraseña es demasiado corta
                             className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-primary dark:focus:ring-dark-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {loading ? (
