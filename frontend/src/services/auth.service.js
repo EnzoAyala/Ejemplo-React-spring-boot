@@ -60,18 +60,6 @@ class AuthService {
     }
     return {};
   }
-
-  // Verifica si el usuario tiene rol ADMIN
-  isAdmin() {
-    const user = this.getCurrentUser();
-    return user?.roles?.includes('ROLE_ADMIN');
-  }
-
-  // Verifica si el usuario tiene rol USER
-  isUser() {
-    const user = this.getCurrentUser();
-    return user?.roles?.includes('ROLE_USER');
-  }
 }
 
 export default new AuthService();

@@ -41,6 +41,11 @@ const useWebSocket = (setUsers, setError, setLoading) => {
                     stompClient.current.subscribe("/topic/user-updates", (message) => {
                         const newUser = JSON.parse(message.body);
 
+                        newUser.online = newUser.isOnline;
+                        delete newUser.isOnline;
+
+                        console.log("WebSocket: Nuevo usuario registrado y/o conectado:", newUser);
+
                         // Agrega o actualiza el usuario en la lista
                         setUsers(prev => {
                             const exists = prev.some(u => u.id === newUser.id);

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor; // Anotación de Lombok para generar un constr
 
 import java.util.HashSet; // Importa HashSet para colecciones de roles
 import java.util.Set; // Importa Set para colecciones de roles (asegura unicidad)
+import java.time.LocalDateTime;
 
 @Data // Genera automáticamente getters, setters, toString, equals y hashCode
 @NoArgsConstructor // Genera un constructor sin argumentos
@@ -53,17 +54,12 @@ public class User {
 
     @Column(nullable = false, length = 9)
     @NotBlank(message = "El teléfono no puede estar vacío")
-    @Pattern(regexp = "^9\\d{8}$", message = "El número de teléfono debe tener 9 dígitos y comenzar con 9") // Validación:
-                                                                                                            // 9
-                                                                                                            // dígitos,
-                                                                                                            // empieza
-                                                                                                            // con 9
+    @Pattern(regexp = "^9\\d{8}$", message = "El número de teléfono debe tener 9 dígitos y comenzar con 9")
     private String phone;
 
     @Column(nullable = false, length = 120) // La contraseña encriptada puede ser larga (BCrypt)
     @NotBlank(message = "La contraseña no puede estar vacía")
-    @Size(min = 6, max = 120, message = "La contraseña debe tener entre 6 y 120 caracteres") // Longitud para texto
-                                                                                             // plano antes de encriptar
+    @Size(min = 6, max = 120, message = "La contraseña debe tener entre 6 y 120 caracteres") // Longitud para textoplano antes de encriptar
     private String password;
 
     // Relación Many-to-Many con la tabla 'roles'
@@ -72,6 +68,12 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"), // Columna en user_roles que referencia a la tabla users
             inverseJoinColumns = @JoinColumn(name = "role_id")) // Columna en user_roles que referencia a la tabla roles
     private Set<Role> roles = new HashSet<>(); // Usa un Set para asegurar que no haya roles duplicados para un usuario
+
+    @Column(name = "is_online")
+    private boolean isOnline = false;
+
+    @Column(name = "last_active")
+    private LocalDateTime lastActive;
 
     // Constructor para registro simplificado (sin ID, usado al crear un nuevo
     // usuario)

@@ -1,5 +1,6 @@
 package com.aprender.backend.payload.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserResponse {
@@ -12,7 +13,10 @@ public class UserResponse {
     private String phone;
     private List<String> roles; // Representa los roles como Strings (ej. "ROLE_USER", "ROLE_ADMIN")
 
-    public UserResponse(Long id, String username, String email, String name, String lastname, String dni, String phone, List<String> roles) {
+    private Boolean isOnline;
+    private LocalDateTime lastActive;
+
+    public UserResponse(Long id, String username, String email, String name, String lastname, String dni, String phone, List<String> roles, Boolean isOnline, LocalDateTime lastActive) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -21,6 +25,8 @@ public class UserResponse {
         this.dni = dni;
         this.phone = phone;
         this.roles = roles;
+        this.isOnline = isOnline;
+        this.lastActive = lastActive;
     }
 
     // Getters
@@ -56,6 +62,14 @@ public class UserResponse {
         return roles;
     }
 
+    public Boolean isOnline() {
+        return isOnline;
+    }
+
+    public LocalDateTime getLastActive() {
+        return lastActive;
+    }
+
     // Setters (opcional si solo se usa para respuesta, pero buena práctica para DTOs)
     public void setId(Long id) {
         this.id = id;
@@ -87,5 +101,13 @@ public class UserResponse {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public void setIsOnline(Boolean isOnline) {
+        this.isOnline = isOnline;
+    }
+
+    public void setLastActive(LocalDateTime lastActive) {
+        this.lastActive = lastActive;
     }
 }

@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -84,6 +85,14 @@ public class AuthController {
 
         // Obtiene los detalles del usuario autenticado
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        // Actualiza el usuario en la base de datos para reflejar que está en línea
+        User user = userRepository.findById(userDetails.getId()).orElse(null);
+        if (user != null) {
+            user.setOnline(true);
+            user.setLastActive(LocalDateTime.now());
+            userRepository.save(user);
+        }
 
         // Obtiene los roles del usuario
         List<String> roles = userDetails.getAuthorities().stream()
@@ -168,11 +177,22 @@ public class AuthController {
 
         // 2. Añadir el token a la lista negra para invalidarlo
         if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+
+            String username = jwtUtils.getUserNameFromJwtToken(jwt);
+
+            Optional<User> userOptional = userRepository.findByUsername(username);
+            if(userOptional.isPresent()) {
+                User user = userOptional.get();
+                user.setOnline(false);
+                user.setLastActive(java.time.LocalDateTime.now());
+                userRepository.save(user);
+            }
+
             tokenBlacklistService.addToBlacklist(jwt);
             SecurityContextHolder.clearContext();
-            return ResponseEntity.ok(new MessageResponse("Logout successful!"));
+            return ResponseEntity.ok(new MessageResponse("Logout exitoso!"));
         } else {
-            return ResponseEntity.badRequest().body(new MessageResponse("Invalid token"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Token invalido o no encontrado"));
         }
     }
 

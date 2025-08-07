@@ -46,7 +46,10 @@ public class AdminController {
                         user.getPhone(),
                         user.getRoles().stream()
                                 .map(role -> role.getName().name()) // Convierte ERole a String (ej. "ROLE_USER")
-                                .collect(Collectors.toList())))
+                                .collect(Collectors.toList()),
+                        user.isOnline(), 
+                        user.getLastActive()
+                        ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
@@ -57,7 +60,7 @@ public class AdminController {
         Optional<User> userOptional = userRepository.findById(roleUpdateRequest.getUserId());
 
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: usuario no encontrado!"));
         }
 
         User user = userOptional.get(); // Ej: ["ROLE_ADMIN"] O ["ROLE_USER"]
@@ -65,7 +68,7 @@ public class AdminController {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null || strRoles.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Roles cannot be empty!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: roles no pueden estar vacíos!"));
         }
 
         strRoles.forEach(roleName -> {

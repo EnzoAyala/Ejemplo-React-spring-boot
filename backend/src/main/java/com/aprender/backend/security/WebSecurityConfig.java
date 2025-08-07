@@ -64,7 +64,7 @@ public class WebSecurityConfig {
         // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
         // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
         // En producción, DEBE ser el dominio específico de tu frontend.
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://192.168.1.2:5173", "http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://192.168.1.2:5173", "http://localhost:5173", "http://26.57.187.96:5173"));
         // Permite los métodos HTTP que vas a usar
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Permite todas las cabeceras (incluyendo Authorization)
