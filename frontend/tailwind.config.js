@@ -10,29 +10,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        'light-bg': '#f1f5f9', // slate-100
-        'light-surface': '#ffffff', // white
-        'light-elevated': '#fefefe', // Slightly lighter than surface for cards
-        'light-primary': '#0ea5e9', // sky-500 (Azul vibrante)
-        'light-accent': '#14b8a6', // teal-500 (Un color de acento para contrastar)
-        'light-danger': '#ef4444', // red-500 (Rojo vibrante)
-        'light-text': '#1e293b', // slate-800
-        'light-text-secondary': '#64748b', // slate-500
-        'light-success': '#22c55e', // green-500 (Para mensajes de éxito)
-        'light-info': '#3b82f6', // blue-500 (Para mensajes informativos, si los necesitas)
-        'light-warning': '#f59e0b', // amber-500 (Para advertencias)
+        /* Light Theme - Paleta Más Viva */
+        'light-bg': '#ffffff',           /* Blanco puro */
+        'light-surface': '#d1d8ff',      /* Azul más brillante y saturado */
+        'light-elevated': '#a3c1ff',     /* Azul claro pero con intensidad */
+        'light-primary': '#ff005c',      /* Rojo vibrante y neón */
+        'light-accent': '#0099ff',       /* Azul eléctrico brillante */
+        'light-danger': '#ff1c36',       /* Rojo neón más intenso */
+        'light-text': '#0f0f0f',         /* Gris oscuro para máximo contraste */
+        'light-text-secondary': '#383d47', /* Gris más oscuro pero saturado */
+        'light-success': '#00ff19',      /* Verde fluorescente brillante */
+        'light-info': '#0064ff',         /* Azul más brillante, casi cian */
+        'light-warning': '#ffdb00',      /* Amarillo intenso, similar a oro */
 
-        'dark-bg': '#0a0d14', // Even darker for a more futuristic feel
-        'dark-surface': '#1e293b', // slate-800
-        'dark-elevated': '#2d3748', // Darker blue-grey for cards
-        'dark-primary': '#22d3ee', // cyan-400 (Azul neón)
-        'dark-accent': '#67e8f9', // cyan-200 (Acento neón)
-        'dark-danger': '#f43f5e', // rose-500 (Rojo neón)
-        'dark-text': '#e2e8f0', // slate-200
-        'dark-text-secondary': '#94a3b8', // slate-400
-        'dark-success': '#4ade80', // green-400 (Para mensajes de éxito en dark mode)
-        'dark-info': '#60a5fa', // blue-400 (Para mensajes informativos en dark mode)
-        'dark-warning': '#fbbf24', // amber-400 (Para advertencias en dark mode)
+        /* Dark Theme - Paleta Más Viva */
+        'dark-bg': '#000000',            /* Negro puro para mayor contraste */
+        'dark-surface': '#1d1f25',       /* Azul muy oscuro, casi negro, con toques de morado */
+        'dark-elevated': '#2d3547',      /* Azul intenso con morado vibrante */
+        'dark-primary': '#e1001a',       /* Rojo neón aún más saturado */
+        'dark-accent': '#00f4ff',        /* Azul cian muy brillante */
+        'dark-danger': '#ff2048',        /* Rojo eléctrico e intenso */
+        'dark-text': '#ffffff',          /* Blanco puro para máxima claridad */
+        'dark-text-secondary': '#b0b8c0', /* Gris pálido y frío */
+        'dark-success': '#00ff66',       /* Verde muy brillante y saturado */
+        'dark-info': '#0099ff',          /* Azul eléctrico fuerte */
+        'dark-warning': '#ff4f00',       /* Naranja vibrante y neón */
       },
       keyframes: {
         'fade-in': {

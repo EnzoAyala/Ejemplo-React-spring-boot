@@ -89,28 +89,27 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 sm:p-6 animate-fade-in backdrop-blur-sm">
+    <div className="fixed inset-0 bg-black/50 dark:bg-dark-bg/70 flex items-center justify-center z-50 p-4 sm:p-6 animate-fade-in backdrop-blur-sm">
       <div
-        className={`bg-white dark:bg-gray-900 rounded-3xl shadow-3xl w-[30rem] max-w-2xl p-6 sm:p-8 relative transform transition-all duration-300 ${
-          isClosing ? 'animate-scale-out' : 'animate-scale-in'
-        }`}
+        className={`bg-light-bg dark:bg-dark-surface rounded-3xl shadow-3xl w-[30rem] max-w-2xl p-6 sm:p-8 relative transform transition-all duration-300 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'
+          }`}
       >
         {/* Encabezado */}
-        <h3 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700 leading-tight">
+        <h3 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-light-primary to-light-accent dark:from-dark-primary dark:to-dark-accent mb-6 pb-4 border-b border-light-surface dark:border-dark-surface leading-tight">
           Detalles de Usuario
         </h3>
 
         {/* Botón cerrar */}
         <button
           onClick={handleCloseModal}
-          className="absolute top-4 right-4 text-gray-400 hover:text-dark-danger dark:text-gray-500 dark:hover:text-dark-danger text-4xl leading-none transition-colors duration-200"
+          className="absolute top-4 right-4 text-light-text-secondary dark:text-dark-text-secondary hover:text-light-danger dark:hover:text-dark-danger text-4xl leading-none transition-colors duration-200"
           aria-label="Cerrar modal"
         >
           &times;
         </button>
 
         {/* Datos del usuario */}
-        <div className="space-y-4 text-base text-gray-700 dark:text-gray-300 mb-8">
+        <div className="space-y-4 text-base text-light-text dark:text-dark-text mb-8">
           <p><strong className="font-semibold">ID:</strong> {user.id}</p>
           <p><strong className="font-semibold">Username:</strong> {user.username}</p>
           <p><strong className="font-semibold">Email:</strong> {user.email}</p>
@@ -120,18 +119,18 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
           <p><strong className="font-semibold">Teléfono:</strong> {user.phone || 'N/A'}</p>
           <p>
             <strong className="font-semibold">Role actual:</strong>{' '}
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-info text-light-text dark:bg-dark-info dark:text-dark-text">
               {user.roles.join(', ')}
             </span>
           </p>
         </div>
 
         {/* Selector de rol */}
-        <div className="border-t pt-6 border-gray-200 dark:border-gray-700 mb-6">
-          <h4 className="text-xl font-bold flex items-center text-gray-800 dark:text-gray-200 mb-4">
+        <div className="border-t pt-6 border-light-surface dark:border-dark-surface mb-6">
+          <h4 className="text-xl font-bold flex items-center text-light-text dark:text-dark-text mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 mr-2 text-indigo-500"
+              className="h-6 w-6 mr-2 text-light-accent dark:text-dark-accent"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -151,13 +150,13 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="radio"
-                className="form-radio h-5 w-5 text-indigo-600"
+                className="form-radio h-5 w-5 text-light-accent dark:text-dark-accent"
                 name="userRole"
                 value="ROLE_USER"
                 checked={selectedRole === 'ROLE_USER'}
                 onChange={handleRoleChange}
               />
-              <span className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+              <span className="ml-3 text-light-text dark:text-dark-text font-medium">
                 User
               </span>
             </label>
@@ -166,13 +165,13 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="radio"
-                className="form-radio h-5 w-5 text-indigo-600"
+                className="form-radio h-5 w-5 text-light-accent dark:text-dark-accent"
                 name="userRole"
                 value="ROLE_ADMIN"
                 checked={selectedRole === 'ROLE_ADMIN'}
                 onChange={handleRoleChange}
               />
-              <span className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+              <span className="ml-3 text-light-text dark:text-dark-text font-medium">
                 Admin
               </span>
             </label>
@@ -184,11 +183,10 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
         {/* Mensaje de éxito o error */}
         {message && (
           <div
-            className={`p-4 rounded-lg mb-6 text-sm font-medium transition-all duration-300 ${
-              isError
-                ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-700'
-                : 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-700'
-            }`}
+            className={`p-4 rounded-lg mb-6 text-sm font-medium transition-all duration-300 ${isError
+              ? 'bg-light-warning dark:bg-dark-warning text-light-danger dark:text-dark-danger border border-light-danger dark:border-dark-danger'
+              : 'bg-light-success dark:bg-dark-success text-light-text dark:text-dark-text border border-light-success dark:border-dark-success'
+              }`}
           >
             {message}
           </div>
@@ -198,7 +196,7 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
         <div className="flex justify-end gap-4 mt-8">
           <button
             onClick={handleCloseModal}
-            className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-dark-danger hover:text-light-surface dark:hover:bg-dark-danger dark:hover:text-light-surface transition-all duration-300 font-medium shadow-sm"
+            className="px-6 py-2.5 rounded-lg border border-light-surface dark:border-dark-surface bg-light-bg dark:bg-dark-surface text-light-text dark:text-dark-text hover:bg-light-danger hover:text-light-surface dark:hover:bg-dark-danger dark:hover:text-light-surface transition-all duration-300 font-medium shadow-sm"
           >
             Cerrar
           </button>
@@ -206,17 +204,17 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
           <button
             onClick={handleUpdateRoles}
             disabled={loadingUpdate}
-            className={`px-6 py-2.5 rounded-lg text-white font-semibold transition-all duration-300 shadow-md ${
-              loadingUpdate
-                ? 'bg-indigo-300 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-700'
-            }`}
+            className={`px-6 py-2.5 rounded-lg text-white font-semibold transition-all duration-300 shadow-md ${loadingUpdate
+              ? 'bg-light-info cursor-not-allowed'
+              : 'bg-light-primary hover:bg-light-accent'
+              }`}
           >
             {loadingUpdate ? 'Actualizando...' : 'Actualizar Rol'}
           </button>
         </div>
       </div>
     </div>
+
   );
 };
 

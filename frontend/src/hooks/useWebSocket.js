@@ -39,18 +39,31 @@ const useWebSocket = (setUsers, setError, setLoading) => {
 
                     // Suscribirse a actualizaciones de usuarios
                     stompClient.current.subscribe("/topic/user-updates", (message) => {
-                        const newUser = JSON.parse(message.body);
+                        const incoming = JSON.parse(message.body);
 
-                        newUser.online = newUser.isOnline;
+                        // Si es un evento de eliminación, remover del estado y salir
+                        if (incoming?.eventType === 'USER_DELETED' && incoming?.id != null) {
+                            console.log("WebSocket: Usuario eliminado recibido:", incoming);
+                            setUsers(prev => prev.filter(u => u.id !== incoming.id));
+                            return;
+                        }
+
+                        // Normaliza la propiedad de estado en línea (acepta 'online' o 'isOnline')
+                        const newUser = {
+                            ...incoming,
+                            online: (incoming.online !== undefined)
+                                ? incoming.online
+                                : (incoming.isOnline !== undefined ? incoming.isOnline : false),
+                        };
                         delete newUser.isOnline;
 
-                        console.log("WebSocket: Nuevo usuario registrado y/o conectado:", newUser);
+                        console.log("WebSocket: Actualización de usuario recibida:", newUser);
 
-                        // Agrega o actualiza el usuario en la lista
+                        // Agrega o actualiza el usuario en la lista (fusiona con el previo para no perder campos)
                         setUsers(prev => {
                             const exists = prev.some(u => u.id === newUser.id);
                             return exists
-                                ? prev.map(u => u.id === newUser.id ? newUser : u)
+                                ? prev.map(u => u.id === newUser.id ? { ...u, ...newUser } : u)
                                 : [...prev, newUser];
                         });
                     });

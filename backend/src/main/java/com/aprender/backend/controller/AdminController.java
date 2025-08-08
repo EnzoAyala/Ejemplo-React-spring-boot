@@ -10,6 +10,7 @@ import com.aprender.backend.repository.RoleRepository;
 import com.aprender.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -31,6 +34,9 @@ public class AdminController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    SimpMessagingTemplate messagingTemplate;
 
     // Endpoint para obtener todos los usuarios (para que el admin pueda verlos)
     @GetMapping("/users")
@@ -102,6 +108,13 @@ public class AdminController {
         }
 
         userRepository.deleteById(id);
-        return ResponseEntity.ok(new MessageResponse("User deleted successfully!"));
+
+        // Emitir evento de eliminación a través de WebSocket para que los clientes puedan actualizarse en tiempo real
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("eventType", "USER_DELETED");
+        payload.put("id", id);
+        messagingTemplate.convertAndSend("/topic/user-updates", payload);
+
+        return ResponseEntity.ok(new MessageResponse("Usuario eliminado con éxito!"));
     }
 }

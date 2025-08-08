@@ -13,7 +13,7 @@ const UserBoard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-light-bg dark:bg-dark-surface transition-colors duration-500 p-4 md:p-8 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-light-surface dark:bg-dark-surface transition-colors duration-500 p-4 md:p-8 font-sans relative overflow-hidden">
             {/* Animated background gradient overlay */}
             <div className="absolute inset-0 z-0 opacity-20 dark:opacity-10 pointer-events-none">
                 <div className="w-full h-full bg-gradient-to-br from-light-primary/30 to-light-accent/30 dark:from-dark-primary/20 dark:to-dark-accent/20 animate-gradient-pulse"></div>

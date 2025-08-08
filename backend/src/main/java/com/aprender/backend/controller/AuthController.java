@@ -9,6 +9,7 @@ import com.aprender.backend.repository.PasswordReserCodeRepository;
 import com.aprender.backend.payload.request.LoginRequest;
 import com.aprender.backend.payload.request.SignupRequest;
 import com.aprender.backend.payload.response.JwtResponse;
+import com.aprender.backend.payload.response.UserResponse;
 import com.aprender.backend.payload.response.MessageResponse;
 import com.aprender.backend.repository.RoleRepository;
 import com.aprender.backend.repository.UserRepository;
@@ -20,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,6 +65,9 @@ public class AuthController {
     private ApplicationEventPublisher eventPublisher; // Inyectar ApplicationEventPublisher
 
     @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
     @Autowired
@@ -98,6 +103,23 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
+
+        // Emitir actualización de estado via WebSocket (online)
+        if (user != null) {
+            UserResponse userResponse = new UserResponse(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getLastname(),
+                    user.getDni(),
+                    user.getPhone(),
+                    roles,
+                    user.isOnline(),
+                    user.getLastActive()
+            );
+            messagingTemplate.convertAndSend("/topic/user-updates", userResponse);
+        }
 
         // Devuelve el token JWT y los detalles del usuario
         return ResponseEntity.ok(new JwtResponse(jwt,
@@ -186,6 +208,24 @@ public class AuthController {
                 user.setOnline(false);
                 user.setLastActive(java.time.LocalDateTime.now());
                 userRepository.save(user);
+
+                // Emitir actualización de estado via WebSocket (offline)
+                List<String> roles = user.getRoles().stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toList());
+                UserResponse userResponse = new UserResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getName(),
+                        user.getLastname(),
+                        user.getDni(),
+                        user.getPhone(),
+                        roles,
+                        user.isOnline(),
+                        user.getLastActive()
+                );
+                messagingTemplate.convertAndSend("/topic/user-updates", userResponse);
             }
 
             tokenBlacklistService.addToBlacklist(jwt);

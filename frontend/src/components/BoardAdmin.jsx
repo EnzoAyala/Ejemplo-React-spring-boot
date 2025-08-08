@@ -36,10 +36,11 @@ const BoardAdmin = () => {
     }, [searchTerm, setSearchParams]);
 
     // Filtrar usuarios por nombre o ID
-    const filteredUsers = users.filter((user) =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.id.toString().includes(searchTerm)
-    );
+    const filteredUsers = users.filter((user) => {
+        const uname = typeof user?.username === 'string' ? user.username : '';
+        const idStr = user?.id != null ? String(user.id) : '';
+        return uname.toLowerCase().includes(searchTerm.toLowerCase()) || idStr.includes(searchTerm);
+    });
 
     // Abrir modal con datos de usuario
     const openModal = (user) => {
@@ -128,7 +129,7 @@ const BoardAdmin = () => {
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">ID</th>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Nombre</th>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Correo</th>
-                                <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Rol</th>
+                                <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Rol</th>
                                 <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
