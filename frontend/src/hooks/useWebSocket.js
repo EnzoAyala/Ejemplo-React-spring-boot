@@ -48,14 +48,10 @@ const useWebSocket = (setUsers, setError, setLoading) => {
                             return;
                         }
 
-                        // Normaliza la propiedad de estado en línea (acepta 'online' o 'isOnline')
                         const newUser = {
                             ...incoming,
-                            online: (incoming.online !== undefined)
-                                ? incoming.online
-                                : (incoming.isOnline !== undefined ? incoming.isOnline : false),
+                            isOnline: incoming.isOnline !== undefined ? incoming.isOnline : false,
                         };
-                        delete newUser.isOnline;
 
                         console.log("WebSocket: Actualización de usuario recibida:", newUser);
 

@@ -38,8 +38,8 @@ export default {
       },
       keyframes: {
         'fade-in': {
-          from: { opacity: '0', transform: 'translateY(20px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
+          from: { opacity: '0', transform: 'translateX(-100%)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
         },
         'gradient-pulse': {
           '0%, 100%': { backgroundPosition: '0% 50%' },
@@ -60,11 +60,10 @@ export default {
         }
       },
       animation: {
-        'fade-in': 'fade-in 0.3s ease-out forwards', // Adjusted duration for snappier feel
+        'fade-in': 'fade-in 0.7s ease-out forwards', 
         'gradient-pulse': 'gradient-pulse 6s ease infinite',
         'button-glow': 'button-glow 1.5s ease-in-out infinite alternate',
-        'scale-in': 'scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards', // Adjusted duration and easing
-        // Optional: Animation for smooth exit
+        'scale-in': 'scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards', 
         'scale-out': 'scale-out 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards'
       },
     },

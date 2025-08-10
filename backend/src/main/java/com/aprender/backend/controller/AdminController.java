@@ -5,7 +5,7 @@ import com.aprender.backend.model.Role;
 import com.aprender.backend.model.User;
 import com.aprender.backend.payload.request.RoleUpdateRequest;
 import com.aprender.backend.payload.response.MessageResponse;
-import com.aprender.backend.payload.response.UserResponse; // <-- Usar el nuevo DTO
+import com.aprender.backend.payload.response.UserResponseAdmin;
 import com.aprender.backend.repository.RoleRepository;
 import com.aprender.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid; // Asegúrate de tener esta importación
+import jakarta.validation.Valid; 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin") // Todas las peticiones a este controlador usarán /api/admin
-@PreAuthorize("hasRole('ADMIN')") // Todas las peticiones a este controlador requieren ROLE_ADMIN
+@PreAuthorize("hasAnyRole('ADMIN')") // Todas las peticiones a este controlador requieren ROLE_ADMIN
 public class AdminController {
 
     @Autowired
@@ -41,8 +41,8 @@ public class AdminController {
     // Endpoint para obtener todos los usuarios (para que el admin pueda verlos)
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
-        List<UserResponse> users = userRepository.findAll().stream()
-                .map(user -> new UserResponse(
+        List<UserResponseAdmin> users = userRepository.findAll().stream()
+                .map(user -> new UserResponseAdmin(
                         user.getId(),
                         user.getUsername(),
                         user.getEmail(),

@@ -8,7 +8,7 @@ import AuthService from '../services/auth.service';
  *
  * Props:
  * - children: el contenido de la ruta protegida
- * - requiredRole: rol requerido para acceder (opcional)
+ * - requiredRole: rol requerido para acceder
  * - redirectIfAuthenticated: true para rutas públicas como Login/Register
  */
 const ProtectedRoute = ({ children, requiredRole, redirectIfAuthenticated = false }) => {
@@ -40,9 +40,11 @@ const ProtectedRoute = ({ children, requiredRole, redirectIfAuthenticated = fals
   const userRoles = currentUser.roles || [];
   const hasRequiredRole = requiredRole ? userRoles.includes(requiredRole) : true;
 
-  // ❌ Restricción cruzada: ADMIN en ruta de USER
+  // ❌ Restricción cruzada: ADMIN en ruta de USER (Se elimina esta restricción)
   if (requiredRole === 'ROLE_USER' && userRoles.includes('ROLE_ADMIN')) {
-    return <Navigate to="/gestion-usuarios" replace />;
+    // const fallback = location.state?.from?.pathname || getUserDashboardUrl(userRoles);
+    // return <Navigate to={fallback} replace />; // Para redireccionar por el momento desabilitado
+    return children;
   }
 
   // ❌ Restricción cruzada: USER en ruta de ADMIN

@@ -65,9 +65,22 @@ const Register = () => {
     const handleEmailChange = (e) => {
         const value = e.target.value;
         setEmail(value);
+
+        // Expresión regular para validar el formato general de un correo electrónico
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        setEmailError(emailRegex.test(value) ? '' : 'El correo electrónico no es válido.');
+
+        // Verifica si el correo es válido y si termina con '@gmail.com'
+        if (emailRegex.test(value)) {
+            if (value.endsWith('@gmail.com')) {
+                setEmailError('');  // No hay error
+            } else {
+                setEmailError('El correo debe ser un Gmail válido (ejemplo@gmail.com)');
+            }
+        } else {
+            setEmailError('El correo electrónico no es válido.');
+        }
     };
+
 
     // Función para validar DNI en tiempo real
     const handleDniChange = (e) => {
@@ -181,6 +194,7 @@ const Register = () => {
                                         id="dni"
                                         value={dni}
                                         onChange={handleDniChange} // Validación en tiempo real
+                                        maxLength={8} // Limita la cantidad a 8 diigtos
                                         required
                                         className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                     />
@@ -195,6 +209,7 @@ const Register = () => {
                                         id="phone"
                                         value={phone}
                                         onChange={handlePhoneChange} // Validación en tiempo real
+                                        maxLength={9} // Limita la cantidad a 9 diigtos
                                         required
                                         className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                     />

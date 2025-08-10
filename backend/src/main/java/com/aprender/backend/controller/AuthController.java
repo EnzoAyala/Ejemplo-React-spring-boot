@@ -9,7 +9,7 @@ import com.aprender.backend.repository.PasswordReserCodeRepository;
 import com.aprender.backend.payload.request.LoginRequest;
 import com.aprender.backend.payload.request.SignupRequest;
 import com.aprender.backend.payload.response.JwtResponse;
-import com.aprender.backend.payload.response.UserResponse;
+import com.aprender.backend.payload.response.UserResponseAdmin;
 import com.aprender.backend.payload.response.MessageResponse;
 import com.aprender.backend.repository.RoleRepository;
 import com.aprender.backend.repository.UserRepository;
@@ -106,7 +106,7 @@ public class AuthController {
 
         // Emitir actualización de estado via WebSocket (online)
         if (user != null) {
-            UserResponse userResponse = new UserResponse(
+            UserResponseAdmin userResponse = new UserResponseAdmin(
                     user.getId(),
                     user.getUsername(),
                     user.getEmail(),
@@ -213,7 +213,7 @@ public class AuthController {
                 List<String> roles = user.getRoles().stream()
                         .map(role -> role.getName().name())
                         .collect(Collectors.toList());
-                UserResponse userResponse = new UserResponse(
+                UserResponseAdmin userResponse = new UserResponseAdmin(
                         user.getId(),
                         user.getUsername(),
                         user.getEmail(),

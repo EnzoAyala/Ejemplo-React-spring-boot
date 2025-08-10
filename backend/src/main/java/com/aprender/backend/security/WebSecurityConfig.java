@@ -92,8 +92,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**", "/ws/info", "/ws/**").permitAll() // Login, Register, etc.
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // Configuración estricta de roles:
-                        .requestMatchers("/api/user/**").hasRole("USER") // Solo ROLE_USER puede acceder a /api/user/**
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // Solo ROLE_USER puede acceder a /api/user/**
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
                         .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está mapeada arriba)
                 );
 

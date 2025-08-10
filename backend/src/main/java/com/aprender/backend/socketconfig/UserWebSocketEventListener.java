@@ -1,7 +1,7 @@
 package com.aprender.backend.socketconfig;
 
 //import com.aprender.backend.socketconfig.OnNewUserRegisteredEvent;
-import com.aprender.backend.payload.response.UserResponse;
+import com.aprender.backend.payload.response.UserResponseAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,7 +21,7 @@ public class UserWebSocketEventListener {
 
         // Converir el objeto a User a UserResponse para enviar solo datos relevantes y
         // reducir la carga
-        UserResponse userResponse = new UserResponse(
+        UserResponseAdmin userResponse = new UserResponseAdmin(
                 newUser.getId(),
                 newUser.getUsername(),
                 newUser.getEmail(),

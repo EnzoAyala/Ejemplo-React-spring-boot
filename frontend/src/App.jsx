@@ -29,7 +29,6 @@ function App() {
     setCurrentUser(undefined);
     setIsAdmin(false);
     setIsUser(false);
-    window.location.href = '/home';
   };
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
@@ -57,7 +56,7 @@ function App() {
           handleCloseMobileMenu={handleCloseMobileMenu}
           getNavLinkClasses={getNavLinkClasses}
         />
-        <main className="w-full max-w-full mx-auto py-6 transition-colors duration-300">
+        <main className="w-full max-w-full mx-auto py-6 mt-16 transition-colors duration-300">
           <AppRoutes />
         </main>
       </div>

@@ -29,8 +29,7 @@ instance.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             console.log('Token expirado, redirigiendo a login');
-            AuthService.logout(); // Limpiar sesión local
-            window.location.reload('/login'); // Redirigir a login
+            
         }
         return Promise.reject(error);
     }

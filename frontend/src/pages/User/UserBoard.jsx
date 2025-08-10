@@ -1,128 +1,123 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import UserService from '../../services/user.service';
+import useWebSocket from '../../hooks/useWebSocket';
 
 const UserBoard = () => {
-    // State to manage which card's extra content is visible
-    const [hoveredCard, setHoveredCard] = useState(null);
+    // Estados del componente
+    const [error, setError] = useState(null);             // Mensaje de error
+    const [nowTick, setNowTick] = useState(Date.now());
+    const [users, setUsers] = useState([]); // Estado para almacenar los usuarios
+    const [isOpen, setIsOpen] = useState(false);  // Estado para controlar la visibilidad de la sidebar
 
-    const handleMouseEnter = (cardName) => {
-        setHoveredCard(cardName);
+    // Escuchar cambios en tiempo real
+    useWebSocket(setUsers, setError);
+
+    useEffect(() => {
+        const interval = setInterval(() => setNowTick(Date.now()), 60000); // Actualiza el tick cada 60 segundos
+        return () => clearInterval(interval);
+    }, []);
+
+    // Cargar los usuarios al montar el componente
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await UserService.getAllUsers();
+                setUsers(response.data); // Suponiendo que el servicio devuelve un array de usuarios
+            } catch (error) {
+                console.error('Error al cargar los usuarios:', error);
+            }
+        };
+
+        fetchUsers();
+    }, []); // Este useEffect solo se ejecutará una vez al montar el componente
+
+    // Función para calcular el tiempo desde la última conexión del usuario
+    function tiempoDesde(fechaISO) {
+        const fecha = new Date(fechaISO);
+        const ahora = new Date(nowTick);
+        const diffMs = ahora - fecha;
+        const diffMin = Math.floor(diffMs / 60000);
+
+        if (diffMin < 1) return "Hace un momento";
+        if (diffMin === 1) return "Hace 1 minuto";
+        if (diffMin < 60) return `Hace ${diffMin} minutos`;
+
+        const diffHrs = Math.floor(diffMin / 60);
+        if (diffHrs === 1) return "Hace 1 hora";
+        if (diffHrs < 24) return `Hace ${diffHrs} horas`;
+
+        const diffDias = Math.floor(diffHrs / 24);
+        if (diffDias === 1) return "Hace 1 día";
+        if (diffDias < 7) return `Hace ${diffDias} días`;
+
+        const diffSemanas = Math.floor(diffDias / 7);
+        if (diffSemanas === 1) return "Hace 1 semana";
+        if (diffDias < 30) return `Hace ${diffSemanas} semanas`;
+
+        const diffMeses = Math.floor(diffDias / 30);
+        if (diffMeses === 1) return "Hace 1 mes";
+        if (diffDias < 365) return `Hace ${diffMeses} meses`;
+
+        const diffAnios = Math.floor(diffDias / 365);
+        return diffAnios === 1 ? "Hace 1 año" : `Hace ${diffAnios} años`;
+    }
+
+
+    // Función para alternar la visibilidad de la sidebar
+    const toggleSidebar = () => {
+        setIsOpen(prevState => !prevState);
     };
 
-    const handleMouseLeave = () => {
-        setHoveredCard(null);
-    };
+    // Si hay un error, muestra el mensaje de error
+    if (error) {
+        return <div className="text-center p-4 text-light-danger dark:text-dark-danger">{error}</div>;
+    }
 
     return (
-        <div className="min-h-screen bg-light-surface dark:bg-dark-surface transition-colors duration-500 p-4 md:p-8 font-sans relative overflow-hidden">
-            {/* Animated background gradient overlay */}
-            <div className="absolute inset-0 z-0 opacity-20 dark:opacity-10 pointer-events-none">
-                <div className="w-full h-full bg-gradient-to-br from-light-primary/30 to-light-accent/30 dark:from-dark-primary/20 dark:to-dark-accent/20 animate-gradient-pulse"></div>
-            </div>
-
-            {/* Main content z-index to be above the background animation */}
-            <div className="relative z-10 max-w-7xl mx-auto">
-                {/* Header */}
-                <header className="mb-12 text-center animate-fade-in animation-delay-100">
-                    <h1 className="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-light-primary to-light-accent dark:from-dark-primary dark:to-dark-accent drop-shadow-lg leading-tight">
-                        Panel de Usuario <span className="block text-3xl mt-2 text-light-text-secondary dark:text-dark-text-secondary font-medium">Bienvenido de vuelta, Comandante.</span>
-                    </h1>
-                    <p className="mt-5 text-xl text-light-text-secondary dark:text-dark-text-secondary max-w-2xl mx-auto">
-                        Aquí tienes un resumen holográfico de tu actividad y accesos directos a tus controles esenciales.
-                    </p>
-                </header>
-
-                {/* Information Cards */}
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {/* Card 1: Profile */}
-                    <div
-                        className="base-card animate-fade-in animation-delay-200"
-                        onMouseEnter={() => handleMouseEnter('profile')}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <h3 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-3">
-                            <i className="fas fa-user-circle mr-2 text-light-primary dark:text-dark-primary"></i> Perfil Personal
-                        </h3>
-                        <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
-                            Administra tu identidad digital y las configuraciones de seguridad más avanzadas.
-                        </p>
-                        <button className="btn-primary group">
-                            Editar Perfil
-                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
-                        </button>
-
-                        {/* Hidden content revealed on hover */}
-                        <div className={`${hoveredCard === 'profile' ? 'card-content-visible' : 'card-content-hidden'} mt-5 pt-3 border-t border-light-bg dark:border-dark-surface`}>
-                            <h4 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2">Detalles Adicionales</h4>
-                            <ul className="list-disc list-inside text-light-text-secondary dark:text-dark-text-secondary">
-                                <li>Configuración de privacidad</li>
-                                <li>Historial de inicios de sesión</li>
-                                <li>Métodos de autenticación</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Card 2: Notifications */}
-                    <div
-                        className="base-card animate-fade-in animation-delay-300"
-                        onMouseEnter={() => handleMouseEnter('notifications')}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <h3 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-3">
-                            <i className="fas fa-bell mr-2 text-light-primary dark:text-dark-primary"></i> Centro de Notificaciones
-                        </h3>
-                        <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
-                            Accede a tu flujo de alertas en tiempo real y mensajes importantes del sistema.
-                        </p>
-                        <button className="btn-primary group">
-                            Ver Notificaciones
-                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
-                        </button>
-
-                        {/* Hidden content revealed on hover */}
-                        <div className={`${hoveredCard === 'notifications' ? 'card-content-visible' : 'card-content-hidden'} mt-5 pt-3 border-t border-light-bg dark:border-dark-surface`}>
-                            <h4 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2">Preferencias</h4>
-                            <ul className="list-disc list-inside text-light-text-secondary dark:text-dark-text-secondary">
-                                <li>Ajustes de alertas</li>
-                                <li>Archivar notificaciones</li>
-                                <li>Suscribirse a canales</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Card 3: Recent Activity */}
-                    <div
-                        className="base-card animate-fade-in animation-delay-400"
-                        onMouseEnter={() => handleMouseEnter('activity')}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <h3 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary mb-3">
-                            <i className="fas fa-history mr-2 text-light-primary dark:text-dark-primary"></i> Historial de Actividad
-                        </h3>
-                        <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
-                            Explora tu línea de tiempo de interacciones y registros de sistema detallados.
-                        </p>
-                        <button className="btn-primary group">
-                            Ver Actividad
-                            <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform duration-200">→</span>
-                        </button>
-
-                        {/* Hidden content revealed on hover */}
-                        <div className={`${hoveredCard === 'activity' ? 'card-content-visible' : 'card-content-hidden'} mt-5 pt-3 border-t border-light-bg dark:border-dark-surface`}>
-                            <h4 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2">Filtros Rápidos</h4>
-                            <ul className="list-disc list-inside text-light-text-secondary dark:text-dark-text-secondary">
-                                <li>Actividad de seguridad</li>
-                                <li>Cambios recientes</li>
-                                <li>Exportar registro</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Footer */}
-                <footer className="mt-20 text-center text-sm text-light-text-secondary dark:text-dark-text-secondary animate-fade-in animation-delay-500">
-                    <p className="mb-2">© 2025 CyberCorp. Todos los derechos reservados.</p>
-                    <p className="text-xs">Diseñado con tecnología de punta para el futuro.</p>
-                </footer>
+        <div>
+            {/* Sidebar */}
+            <div
+                className={`fixed left-0 top-0 h-full w-64 bg-light-bg dark:bg-dark-bg p-4 transition-all transform ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} animate-fade-in z-50`}
+            >
+                {/* Botón para abrir/cerrar la sidebar */}
+                <button
+                    onClick={toggleSidebar}
+                    className="absolute top-4 right-4 text-3xl text-light-text dark:text-dark-text"
+                >
+                    {isOpen ? (
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    ) : (
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    )}
+                </button>
+                {/* Contenido del sidebar */}
+                <h2 className="text-lg font-semibold text-light-text dark:text-dark-text">Usuarios en Línea</h2>
+                <ul className="mt-6 space-y-4">
+                    {users.length > 0 ? (
+                        users.map((user) => (
+                            <li key={user.id} className="flex items-center justify-between px-4 py-2 text-light-text dark:text-dark-text">
+                                <div className="flex items-center gap-2">
+                                    <span>{user.name}</span>
+                                    {user.isOnline ? (
+                                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
+                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-500 dark:text-gray-400 text-xs italic">
+                                            {user.lastActive ? tiempoDesde(user.lastActive) : ""}
+                                        </span>
+                                    )}
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <li className="text-gray-500 dark:text-gray-400">No hay usuarios disponibles</li>
+                    )}
+                </ul>
             </div>
         </div>
     );

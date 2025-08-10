@@ -1,7 +1,7 @@
 package com.aprender.backend.socketconfig;
 
 import com.aprender.backend.model.User;
-import com.aprender.backend.payload.response.UserResponse;
+import com.aprender.backend.payload.response.UserResponseAdmin;
 import com.aprender.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -54,7 +54,7 @@ public class UserPresenceEventListener {
                 .map(role -> role.getName().name())
                 .collect(Collectors.toList());
 
-        UserResponse payload = new UserResponse(
+        UserResponseAdmin payload = new UserResponseAdmin(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -98,7 +98,7 @@ public class UserPresenceEventListener {
                         .map(role -> role.getName().name())
                         .collect(Collectors.toList());
 
-                UserResponse payload = new UserResponse(
+                UserResponseAdmin payload = new UserResponseAdmin(
                         user.getId(),
                         user.getUsername(),
                         user.getEmail(),

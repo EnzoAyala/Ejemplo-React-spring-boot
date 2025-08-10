@@ -55,7 +55,7 @@ const AppRoutes = () => (
         <Route
             path="/user"
             element={
-                <ProtectedRoute requiredRole="ROLE_USER">
+                <ProtectedRoute requiredRole="ROLE_USER" >
                     <UserBoard />
                 </ProtectedRoute>
             }

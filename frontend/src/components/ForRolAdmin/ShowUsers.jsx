@@ -9,17 +9,7 @@ const ShowUsers = ({ users, onOpenModal, onDeleteUser }) => {
         const interval = setInterval(() => setNowTick(Date.now()), 60000); // cada 60s
         return () => clearInterval(interval);
     }, []);
-
-    if (users.length === 0) {
-        return (
-            <tr>
-                <td colSpan="5" className="px-6 py-6 text-center text-gray-500 dark:text-gray-400 italic">
-                    No hay usuarios registrados.
-                </td>
-            </tr>
-        );
-    }
-
+    
     // Función para ver la última vez que se conectó el usuario
     function tiempoDesde(fechaISO) {
         const fecha = new Date(fechaISO);
@@ -35,7 +25,15 @@ const ShowUsers = ({ users, onOpenModal, onDeleteUser }) => {
         return `Hace ${diffHrs} ${diffHrs === 1 ? "hora" : "horas"}`;
     }
 
-    
+    if (users.length === 0) {
+        return (
+            <tr>
+                <td colSpan="5" className="px-6 py-6 text-center text-gray-500 dark:text-gray-400 italic">
+                    No hay usuarios registrados.
+                </td>
+            </tr>
+        );
+    }
 
     return (
         <>
@@ -51,7 +49,7 @@ const ShowUsers = ({ users, onOpenModal, onDeleteUser }) => {
                     <td className="px-6 py-4 whitespace-nowrap text-gray-800 dark:text-gray-200 flex items-center gap-2">
                         <div className="flex items-center gap-2">
                             <span>{user.username}</span>
-                            {user.online ? (
+                            {user.isOnline ? (
                                 <span className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
                                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 </span>
