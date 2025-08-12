@@ -16,6 +16,7 @@ import com.aprender.backend.repository.UserRepository;
 import com.aprender.backend.security.jwt.TokenBlacklistService;
 import com.aprender.backend.security.jwt.JwtUtils;
 import com.aprender.backend.security.services.PasswordResetService;
+import com.aprender.backend.security.jwt.UserSessionService;
 import com.aprender.backend.security.services.UserDetailsImpl; // Importar UserDetailsImpl
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs
@@ -42,7 +43,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController // Marca esta clase como un controlador REST.
-@CrossOrigin(origins = "http://0.0.0.0:5173") // Permite peticiones CORS desde cualquier origen (para desarrollo). En producción, especifica orígenes.
 @RequestMapping("/api/auth") // Define el path base para todos los endpoints en esta clase.
 public class AuthController {
 
@@ -69,6 +69,9 @@ public class AuthController {
 
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
+
+    @Autowired
+    private UserSessionService userSessionService;
 
     @Autowired
     private PasswordResetService passwordResetService; // Para enviar correo
@@ -119,6 +122,12 @@ public class AuthController {
                     user.getLastActive()
             );
             messagingTemplate.convertAndSend("/topic/user-updates", userResponse);
+        }
+
+        // Registrar el token como el más reciente y blacklistear el previo (si existía)
+        String previousToken = userSessionService.replaceToken(userDetails.getUsername(), jwt);
+        if (previousToken != null && !previousToken.equals(jwt)) {
+            tokenBlacklistService.addToBlacklist(previousToken);
         }
 
         // Devuelve el token JWT y los detalles del usuario
@@ -229,6 +238,9 @@ public class AuthController {
             }
 
             tokenBlacklistService.addToBlacklist(jwt);
+            // Eliminar token vigente del mapa solo si coincide con el que se está cerrando
+            userSessionService.removeIfMatch(username, jwt);
+
             SecurityContextHolder.clearContext();
             return ResponseEntity.ok(new MessageResponse("Logout exitoso!"));
         } else {
