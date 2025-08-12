@@ -70,7 +70,7 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
     return (
         <div className="h-full flex flex-col">
             {/* Header del sidebar */}
-            <div className="flex items-center justify-between p-4 border-b border-light-divider dark:border-dark-divider">
+            <div className="flex items-center justify-between p-6 border-b border-light-divider dark:border-dark-divider">
                 <h2 className="text-xl font-semibold text-light-text dark:text-dark-text">
                     Chats
                 </h2>
@@ -113,7 +113,11 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
-                                        <img src={`https://i.pravatar.cc/40?u=${user.id}`} alt={user.name} className="w-10 h-10 rounded-full" />
+                                        <img
+                                            src={user.profilePictureUrl ? `http://localhost:8080/uploads/${user.profilePictureUrl}` : (user.gender === 'MALE' ? 'https://avatar.iran.liara.run/public/boy' : 'https://avatar.iran.liara.run/public/girl')}
+                                            alt={user.name}
+                                            className="w-10 h-10 rounded-full"
+                                        />
                                         {user.isOnline && (
                                             <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-light-surface dark:border-dark-surface" />
                                         )}

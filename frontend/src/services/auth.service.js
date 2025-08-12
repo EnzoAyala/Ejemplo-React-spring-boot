@@ -22,9 +22,9 @@ class AuthService {
   }
 
   // Registro de nuevo usuario
-  register(name, lastname, dni, username, email, phone, password) {
+  register(name, lastname, dni, username, email, phone, password, gender) {
     return axios.post(API_URL + 'signup', {
-      name, lastname, dni, username, email, phone, password
+      name, lastname, dni, username, email, phone, password, gender
     });
   }
 

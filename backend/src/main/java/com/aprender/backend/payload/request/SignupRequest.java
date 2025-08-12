@@ -49,6 +49,9 @@ public class SignupRequest {
     // necesario.
     private Set<String> roles; // Puede ser 'user', 'admin'
 
+    @NotBlank(message = "El género no puede estar vacío")
+    private String gender;
+
     // Getters y Setters (generados por Lombok con @Data, pero explícitos para
     // claridad aquí)
     public String getName() {
@@ -113,5 +116,13 @@ public class SignupRequest {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

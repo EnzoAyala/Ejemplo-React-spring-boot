@@ -1,5 +1,6 @@
 package com.aprender.backend.controller;
 
+import com.aprender.backend.model.EGender;
 import com.aprender.backend.socketconfig.OnNewUserRegisteredEvent;
 import com.aprender.backend.model.ERole;
 import com.aprender.backend.model.Role;
@@ -165,6 +166,16 @@ public class AuthController {
                 signupRequest.getEmail(),
                 signupRequest.getPhone(),
                 encoder.encode(signupRequest.getPassword())); // ¡Importante: encriptar la contraseña!
+
+        if (signupRequest.getGender() != null) {
+            String genderStr = signupRequest.getGender().toUpperCase();
+            try {
+                EGender gender = EGender.valueOf(genderStr);
+                user.setGender(gender);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Error: Género inválido."));
+            }
+        }
 
         Set<String> strRoles = signupRequest.getRoles();
         Set<Role> roles = new HashSet<>();

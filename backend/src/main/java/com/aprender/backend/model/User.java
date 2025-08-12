@@ -75,6 +75,13 @@ public class User {
     @Column(name = "last_active")
     private LocalDateTime lastActive;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private EGender gender;
+
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
+
     // Constructor para registro simplificado (sin ID, usado al crear un nuevo
     // usuario)
     public User(String name, String lastname, String dni, String username, String email, String phone,

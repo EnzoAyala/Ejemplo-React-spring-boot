@@ -91,8 +91,7 @@ const UserDetailsModal = ({ user, onClose, onRolesUpdated }) => {
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-dark-bg/70 flex items-center justify-center z-50 p-4 sm:p-6 animate-fade-in backdrop-blur-sm">
       <div
-        className={`bg-light-bg dark:bg-dark-surface rounded-3xl shadow-3xl w-[30rem] max-w-2xl p-6 sm:p-8 relative transform transition-all duration-300 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'
-          }`}
+        className={`bg-light-bg dark:bg-dark-surface rounded-3xl shadow-3xl w-[30rem] max-w-2xl p-6 sm:p-8 relative transform transition-all duration-300 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'}`}
       >
         {/* Encabezado */}
         <h3 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-light-primary to-light-accent dark:from-dark-primary dark:to-dark-accent mb-6 pb-4 border-b border-light-surface dark:border-dark-surface leading-tight">

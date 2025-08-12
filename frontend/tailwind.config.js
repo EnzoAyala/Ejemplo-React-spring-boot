@@ -57,6 +57,10 @@ export default {
         'scale-out': {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(0.95)', opacity: '0' }
+        },
+        'float' : {
+          '0%, 100%' : { transform: 'translateY(0)'},
+          '50%' : { transform: 'translateY(-10px)'}
         }
       },
       animation: {
@@ -64,7 +68,8 @@ export default {
         'gradient-pulse': 'gradient-pulse 6s ease infinite',
         'button-glow': 'button-glow 1.5s ease-in-out infinite alternate',
         'scale-in': 'scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards', 
-        'scale-out': 'scale-out 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards'
+        'scale-out': 'scale-out 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards',
+        'float': 'float 2s ease-in-out infinite'
       },
     },
   },

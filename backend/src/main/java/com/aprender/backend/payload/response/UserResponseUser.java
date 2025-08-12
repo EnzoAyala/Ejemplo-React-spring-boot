@@ -1,5 +1,6 @@
 package com.aprender.backend.payload.response;
 
+import com.aprender.backend.model.EGender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +19,7 @@ public class UserResponseUser {
     private String phone;
     private Boolean isOnline;
     private LocalDateTime lastActive;
-    
+    private EGender gender;
+    private String profilePictureUrl;
+
 }

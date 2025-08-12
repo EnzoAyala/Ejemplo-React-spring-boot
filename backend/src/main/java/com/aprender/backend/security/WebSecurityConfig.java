@@ -20,10 +20,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import java.util.Arrays;
 
 @Configuration
@@ -82,6 +84,17 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public WebMvcConfigurer webMvcConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                registry.addResourceHandler("/uploads/**")
+                        .addResourceLocations("file:uploads/");
+            }
+        };
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF para APIs sin estado (JWT)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -89,7 +102,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/forgot-password").permitAll() // Permitir explícitamente forgot-password
-                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**").permitAll() // Login, Register, etc.
+                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**", "/uploads/**").permitAll() // Login, Register, etc.
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // Configuración estricta de roles:
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // Solo ROLE_USER puede acceder a /api/user/**

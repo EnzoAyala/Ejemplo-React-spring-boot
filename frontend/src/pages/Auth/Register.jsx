@@ -17,6 +17,7 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [gender, setGender] = useState('');
 
     // Estados para control de éxito, mensajes y carga
     const [successful, setSuccessful] = useState(false);
@@ -37,7 +38,7 @@ const Register = () => {
         setLoading(true);
 
         // Llamada al servicio de autenticación para registrar al usuario
-        AuthService.register(name, lastname, dni, username, email, phone, password)
+        AuthService.register(name, lastname, dni, username, email, phone, password, gender)
             .then(
                 (response) => {
                     setMessage(response.data.message); // Mensaje de éxito
@@ -110,7 +111,8 @@ const Register = () => {
         email && !emailError &&
         dni && !dniError &&
         phone && !phoneError &&
-        password && !passwordError;
+        password && !passwordError &&
+        gender;
 
     return (
         <div className="flex justify-center items-center min-h-[calc(100vh-150px)] py-10">
@@ -231,6 +233,21 @@ const Register = () => {
                                     className="block w-full rounded-md border-0 py-2.5 px-3 bg-transparent text-light-text dark:text-dark-text shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-light-primary dark:focus:ring-dark-primary sm:text-sm sm:leading-6 transition"
                                 />
                                 {passwordError && <p className="text-light-danger dark:text-dark-danger text-xs mt-1">{passwordError}</p>}
+                            </div>
+
+                            {/* Selección de Género */}
+                            <div>
+                                <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-2">Género</label>
+                                <div className="flex items-center gap-6 mt-2">
+                                    <label className="inline-flex items-center cursor-pointer">
+                                        <input type="radio" name="gender" value="MALE" checked={gender === 'MALE'} onChange={(e) => setGender(e.target.value)} className="form-radio h-5 w-5 text-light-primary dark:text-dark-primary focus:ring-light-primary dark:focus:ring-dark-primary border-light-divider dark:border-dark-divider" />
+                                        <span className="ml-3 text-light-text dark:text-dark-text">Masculino</span>
+                                    </label>
+                                    <label className="inline-flex items-center cursor-pointer">
+                                        <input type="radio" name="gender" value="FEMALE" checked={gender === 'FEMALE'} onChange={(e) => setGender(e.target.value)} className="form-radio h-5 w-5 text-light-primary dark:text-dark-primary focus:ring-light-primary dark:focus:ring-dark-primary border-light-divider dark:border-dark-divider" />
+                                        <span className="ml-3 text-light-text dark:text-dark-text">Femenino</span>
+                                    </label>
+                                </div>
                             </div>
 
                             {/* Botón de envío */}
