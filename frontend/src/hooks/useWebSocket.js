@@ -3,8 +3,8 @@ import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import AuthService from '../services/auth.service';
 
-// URL del WebSocket (debe coincidir con el backend)
-const WS_URL = 'http://192.168.1.2:8080/ws';
+// URL del WebSocket (dinámica según host del frontend)
+const WS_URL = `${window.location.protocol}//${window.location.hostname}:8080/ws`;
 
 /**
  * Hook que maneja la conexión WebSocket para escuchar actualizaciones de usuarios.
@@ -76,8 +76,9 @@ const useWebSocket = (setUsers, setError, setLoading) => {
                         connectionAttempts.current++;
                         setTimeout(connectWebSocket, 5000);
                     } else {
-                        setError("No se pudo conectar al WebSocket: " + msg);
+                        setError("No se pudo acceder a la conexión. Por favor, actualiza la página.");
                     }
+
                 }
             );
         };

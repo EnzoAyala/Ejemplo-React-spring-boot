@@ -32,6 +32,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private TokenBlacklistService tokenBlacklistService;
 
+    @Autowired
+    private UserSessionService userSessionService;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
     @Override
@@ -52,6 +55,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             // Si hay un JWT, NO está en la lista negra, y es válido
             if (jwt != null && !tokenBlacklistService.isBlacklisted(jwt) && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt); // Obtiene el nombre de usuario del token
+
+                // Rechazar tokens obsoletos: si el token no es el último registrado para ese usuario
+                String current = userSessionService.getCurrentToken(username);
+                if (current != null && !current.equals(jwt)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
 
                 // Carga los detalles del usuario desde la base de datos
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

@@ -102,7 +102,7 @@ const BoardAdmin = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Buscar por nombre de usuario o ID"
-                    className="w-full pr-10 bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border focus:border-light-primary dark:focus:border-dark-primary transition-all"
+                    className="w-full pr-10 bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border transition-all"
                 />
                 {searchTerm && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">

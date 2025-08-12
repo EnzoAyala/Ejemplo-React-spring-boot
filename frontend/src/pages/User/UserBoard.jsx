@@ -1,37 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import UserService from '../../services/user.service';
-import useWebSocket from '../../hooks/useWebSocket';
+import ChatSidebar from '../../components/Sidebar/chatSidebar';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 
 const UserBoard = () => {
-    // Estados del componente
-    const [error, setError] = useState(null);             // Mensaje de error
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [nowTick, setNowTick] = useState(Date.now());
-    const [users, setUsers] = useState([]); // Estado para almacenar los usuarios
-    const [isOpen, setIsOpen] = useState(false);  // Estado para controlar la visibilidad de la sidebar
-
-    // Escuchar cambios en tiempo real
-    useWebSocket(setUsers, setError);
 
     useEffect(() => {
-        const interval = setInterval(() => setNowTick(Date.now()), 60000); // Actualiza el tick cada 60 segundos
+        const interval = setInterval(() => setNowTick(Date.now()), 60000);
         return () => clearInterval(interval);
     }, []);
 
-    // Cargar los usuarios al montar el componente
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await UserService.getAllUsers();
-                setUsers(response.data); // Suponiendo que el servicio devuelve un array de usuarios
-            } catch (error) {
-                console.error('Error al cargar los usuarios:', error);
-            }
-        };
-
-        fetchUsers();
-    }, []); // Este useEffect solo se ejecutará una vez al montar el componente
-
-    // Función para calcular el tiempo desde la última conexión del usuario
     function tiempoDesde(fechaISO) {
         const fecha = new Date(fechaISO);
         const ahora = new Date(nowTick);
@@ -62,62 +42,93 @@ const UserBoard = () => {
         return diffAnios === 1 ? "Hace 1 año" : `Hace ${diffAnios} años`;
     }
 
-
-    // Función para alternar la visibilidad de la sidebar
-    const toggleSidebar = () => {
-        setIsOpen(prevState => !prevState);
-    };
-
-    // Si hay un error, muestra el mensaje de error
-    if (error) {
-        return <div className="text-center p-4 text-light-danger dark:text-dark-danger">{error}</div>;
-    }
-
     return (
-        <div>
-            {/* Sidebar */}
-            <div
-                className={`fixed left-0 top-0 h-full w-64 bg-light-bg dark:bg-dark-bg p-4 transition-all transform ${isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} animate-fade-in z-50`}
-            >
-                {/* Botón para abrir/cerrar la sidebar */}
-                <button
-                    onClick={toggleSidebar}
-                    className="absolute top-4 right-4 text-3xl text-light-text dark:text-dark-text"
-                >
-                    {isOpen ? (
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    ) : (
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
+        <div className="flex items-center justify-center max-h-screen bg-light-background dark:bg-dark-background p-4">
+            <div className="relative flex h-[calc(80vh-2rem)] w-full max-w-6xl rounded-lg shadow-lg overflow-hidden bg-light-surface dark:bg-dark-surface">
+
+                {/* Sidebar */}
+                <aside
+                    className={`absolute top-0 left-0 z-20 w-80 h-full bg-light-surface dark:bg-dark-surface shadow-lg transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                    <div className="h-full overflow-y-auto">
+                        <ChatSidebar
+                            onSelectUser={setSelectedUser}
+                            selectedUser={selectedUser}
+                            setSidebarOpen={setSidebarOpen}
+                        />
+                    </div>
+                </aside>
+
+                {/* Main */}
+                <main className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-80' : 'ml-0'}`}>
+
+                    {/* Botón para abrir Sidebar */}
+                    {!isSidebarOpen && (
+                        <button
+                            className="absolute top-4 left-4 z-30 text-light-text dark:text-dark-text"
+                            onClick={() => setSidebarOpen(true)}
+                        >
+                            <Bars3Icon className="h-8 w-8" />
+                        </button>
                     )}
-                </button>
-                {/* Contenido del sidebar */}
-                <h2 className="text-lg font-semibold text-light-text dark:text-dark-text">Usuarios en Línea</h2>
-                <ul className="mt-6 space-y-4">
-                    {users.length > 0 ? (
-                        users.map((user) => (
-                            <li key={user.id} className="flex items-center justify-between px-4 py-2 text-light-text dark:text-dark-text">
-                                <div className="flex items-center gap-2">
-                                    <span>{user.name}</span>
-                                    {user.isOnline ? (
-                                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
-                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                        </span>
-                                    ) : (
-                                        <span className="text-gray-500 dark:text-gray-400 text-xs italic">
-                                            {user.lastActive ? tiempoDesde(user.lastActive) : ""}
-                                        </span>
-                                    )}
+
+                    {selectedUser ? (
+                        <div className="flex flex-col h-full bg-light-background dark:bg-dark-background">
+                            {/* Header del chat */}
+                            <header className="p-4 border-b border-light-divider dark:border-dark-divider shadow-sm flex justify-center">
+                                <div className="flex flex-col items-center">
+                                    <span className="font-semibold text-light-text dark:text-dark-text">
+                                        {selectedUser.name}
+                                    </span>
+                                    <p
+                                        className={`text-sm ${selectedUser.isOnline
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-gray-500 dark:text-gray-400'
+                                            }`}
+                                    >
+                                        {selectedUser.isOnline
+                                            ? "En línea"
+                                            : (selectedUser.lastActive
+                                                ? tiempoDesde(selectedUser.lastActive)
+                                                : "Desconectado")}
+                                    </p>
                                 </div>
-                            </li>
-                        ))
+                            </header>
+
+                            {/* Historial */}
+                            <div className="flex-1 p-4 overflow-y-auto flex items-center justify-center">
+                                <div className="text-center text-light-text-secondary dark:text-dark-text-secondary">
+                                    Historial de chat con {selectedUser.name}...
+                                </div>
+                            </div>
+
+                            {/* Input de mensaje */}
+                            <footer className="p-4 border-t border-light-divider dark:border-dark-divider flex justify-center">
+                                <input
+                                    type="text"
+                                    placeholder="Escribe un mensaje..."
+                                    className="w-full max-w-2xl p-2 rounded-lg bg-light-hover dark:bg-dark-hover border border-light-divider dark:border-dark-divider focus:outline-none focus:ring-2 text-ligth-text dark:text-dark-text bg-light-bg dark:bg-dark-bg"
+                                />
+                                <button type='submit' className="ml-4 text-light-text dark:text-dark-text">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                                        <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                                    </svg>
+
+                                </button>
+
+                            </footer>
+                        </div>
                     ) : (
-                        <li className="text-gray-500 dark:text-gray-400">No hay usuarios disponibles</li>
+                        // Pantalla de bienvenida
+                        <div className="flex flex-col items-center justify-center flex-1 text-center p-6 bg-light-background dark:bg-dark-background">
+                            <h1 className="text-3xl font-bold text-light-primary dark:text-dark-primary">
+                                Bienvenido al Chat
+                            </h1>
+                            <p className="mt-4 text-light-text-secondary dark:text-dark-text-secondary max-w-md">
+                                Selecciona un usuario de la lista para comenzar a chatear.
+                            </p>
+                        </div>
                     )}
-                </ul>
+                </main>
             </div>
         </div>
     );

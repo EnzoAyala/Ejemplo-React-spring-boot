@@ -3,7 +3,7 @@ import AuthService from './auth.service';
 
 // Instancia axios con configuración base para todas las peticiones
 const instance = axios.create({
-    baseURL: 'http://192.168.1.2:8080/api/', // URL base de la API
+    baseURL: `${window.location.protocol}//${window.location.hostname}:8080/api/`, // URL base dinámica
     headers: {
         'Content-Type': 'application/json',
     },
