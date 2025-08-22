@@ -22,7 +22,23 @@ const ShowUsers = ({ users, onOpenModal, onDeleteUser }) => {
         if (diffMin < 60) return `Hace ${diffMin} minutos`;
 
         const diffHrs = Math.floor(diffMin / 60);
-        return `Hace ${diffHrs} ${diffHrs === 1 ? "hora" : "horas"}`;
+        if (diffHrs === 1) return "Hace 1 hora";
+        if (diffHrs < 24) return `Hace ${diffHrs} horas`;
+
+        const diffDias = Math.floor(diffHrs / 24);
+        if (diffDias === 1) return "Hace 1 día";
+        if (diffDias < 7) return `Hace ${diffDias} días`;
+
+        const diffSemanas = Math.floor(diffDias / 7);
+        if (diffSemanas === 1) return "Hace 1 semana";
+        if (diffDias < 30) return `Hace ${diffSemanas} semanas`;
+
+        const diffMeses = Math.floor(diffDias / 30);
+        if (diffMeses === 1) return "Hace 1 mes";
+        if (diffDias < 365) return `Hace ${diffMeses} meses`;
+
+        const diffAnios = Math.floor(diffDias / 365);
+        return diffAnios === 1 ? "Hace 1 año" : `Hace ${diffAnios} años`;
     }
 
     if (users.length === 0) {

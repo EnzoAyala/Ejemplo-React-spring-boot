@@ -12,7 +12,7 @@ export default {
       colors: {
         /* Light Theme - Paleta Más Viva */
         'light-bg': '#ffffff',           /* Blanco puro */
-        'light-surface': '#d1d8ff',      /* Azul más brillante y saturado */
+        'light-surface': '#b0b8c0',      /* Gris claro, casi negro */
         'light-elevated': '#a3c1ff',     /* Azul claro pero con intensidad */
         'light-primary': '#ff005c',      /* Rojo vibrante y neón */
         'light-accent': '#0099ff',       /* Azul eléctrico brillante */
@@ -58,16 +58,16 @@ export default {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(0.95)', opacity: '0' }
         },
-        'float' : {
-          '0%, 100%' : { transform: 'translateY(0)'},
-          '50%' : { transform: 'translateY(-10px)'}
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' }
         }
       },
       animation: {
-        'fade-in': 'fade-in 0.7s ease-out forwards', 
+        'fade-in': 'fade-in 0.7s ease-out forwards',
         'gradient-pulse': 'gradient-pulse 6s ease infinite',
         'button-glow': 'button-glow 1.5s ease-in-out infinite alternate',
-        'scale-in': 'scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards', 
+        'scale-in': 'scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
         'scale-out': 'scale-out 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards',
         'float': 'float 2s ease-in-out infinite'
       },

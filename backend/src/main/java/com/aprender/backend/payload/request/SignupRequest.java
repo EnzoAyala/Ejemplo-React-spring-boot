@@ -33,15 +33,11 @@ public class SignupRequest {
 
     @NotBlank(message = "El teléfono no puede estar vacío")
     @Size(min = 9, max = 9, message = "El teléfono debe tener 9 dígitos") // Longitud exacta de 9
-    @Pattern(regexp = "^9\\d{8}$", message = "El número de teléfono debe tener 9 dígitos y comenzar con 9") // Valida
-                                                                                                            // formato
-                                                                                                            // de
-                                                                                                            // teléfono
+    @Pattern(regexp = "^9\\d{8}$", message = "El número de teléfono debe tener 9 dígitos y comenzar con 9") // Valida formato de teléfono
     private String phone;
 
     @NotBlank(message = "La contraseña no puede estar vacía")
-    @Size(min = 6, max = 40, message = "La contraseña debe tener entre 6 y 40 caracteres") // La longitud de la
-                                                                                           // contraseña en texto plano
+    @Size(min = 6, max = 40, message = "La contraseña debe tener entre 6 y 40 caracteres") // La longitud de la contraseña en texto plano
     private String password;
 
     // Campo para roles, aunque para el registro será siempre "user" por defecto.
