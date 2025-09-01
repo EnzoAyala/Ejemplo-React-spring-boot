@@ -127,7 +127,7 @@ const BoardAdmin = () => {
                         <thead className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white animate-gradient-pulse">
                             <tr>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Nombre</th>
+                                <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">User Name</th>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Correo</th>
                                 <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Rol</th>
                                 <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Acciones</th>

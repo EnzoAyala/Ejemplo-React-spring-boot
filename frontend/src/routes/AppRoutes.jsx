@@ -6,7 +6,7 @@ import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import ForgotPassword from '../pages/Auth/ForgotPassword';
 import ResetPassword from '../pages/Auth/ResetPassword';
-import UserBoard from '../pages/User/UserBoard';
+import Chat from '../components/Sidebar/chat';
 import AdminBoard from '../pages/Admin/AdminBoard';
 // ¡Importa el componente ProtectedRoute!
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -56,7 +56,7 @@ const AppRoutes = () => (
             path="/user"
             element={
                 <ProtectedRoute requiredRole="ROLE_USER" >
-                    <UserBoard />
+                    <Chat />
                 </ProtectedRoute>
             }
         />

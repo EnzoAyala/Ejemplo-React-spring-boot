@@ -1,7 +1,7 @@
 package com.aprender.backend.controller;
 
-import com.aprender.backend.model.EGender;
 import com.aprender.backend.model.User;
+import com.aprender.backend.payload.request.ProfileUpdateRequest;
 import com.aprender.backend.payload.response.MessageResponse;
 import com.aprender.backend.payload.response.UserResponseUser;
 import com.aprender.backend.repository.UserRepository;
@@ -49,20 +49,37 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    // Actualización con JSON puro (sin imagen)
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUserProfile(@PathVariable Long id,
-                                               @RequestParam("name") String name,
-                                               @RequestParam("gender") String gender,
-                                               @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) {
+                                               @RequestBody ProfileUpdateRequest profileUpdateRequest) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
 
-        user.setName(name);
-        user.setGender(EGender.valueOf(gender));
+        user.setName(profileUpdateRequest.getName());
+        user.setLastname(profileUpdateRequest.getLastname());
+        user.setPhone(profileUpdateRequest.getPhone());
 
-        if (profilePicture != null && !profilePicture.isEmpty()) {
-            String fileName = fileStorageService.storeFile(profilePicture);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Usuario actualizado correctamente.");
+    }
+
+    // Actualización con multipart/form-data (perfil + archivo de imagen)
+    @PutMapping(path = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateUserProfileWithPhoto(@PathVariable Long id,
+                                                        @RequestPart("profile") ProfileUpdateRequest profileUpdateRequest,
+                                                        @RequestPart(value = "file", required = false) MultipartFile file) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Error: Usuario no encontrado."));
+
+        user.setName(profileUpdateRequest.getName());
+        user.setLastname(profileUpdateRequest.getLastname());
+        user.setPhone(profileUpdateRequest.getPhone());
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file);
             user.setProfilePictureUrl(fileName);
         }
 

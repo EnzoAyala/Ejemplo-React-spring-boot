@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { SunIcon, MoonIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import UserService from '../services/user.service';
 
 const Header = ({
     currentUser,
@@ -20,6 +21,9 @@ const Header = ({
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef(null);
 
+    const [headerUser, setHeaderUser] = useState(null);
+    const [avatarUrl, setAvatarUrl] = useState(null);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -29,6 +33,34 @@ const Header = ({
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Cargar datos completos del usuario para obtener profilePictureUrl
+    useEffect(() => {
+        const loadUser = async () => {
+            if (!currentUser?.id) {
+                setHeaderUser(null);
+                setAvatarUrl(null);
+                return;
+            }
+            try {
+                const res = await UserService.getAllUsers();
+                const list = Array.isArray(res.data) ? res.data : [];
+                const full = list.find((u) => u.id === currentUser.id) || null;
+                setHeaderUser(full);
+                if (full?.profilePictureUrl) {
+                    const base = `${window.location.protocol}//${window.location.hostname}:8080/uploads/`;
+                    setAvatarUrl(base + full.profilePictureUrl);
+                } else {
+                    setAvatarUrl(null);
+                }
+            // eslint-disable-next-line no-unused-vars
+            } catch (e) {
+                setHeaderUser(null);
+                setAvatarUrl(null);
+            }
+        };
+        loadUser();
+    }, [currentUser?.id]);
 
     const renderDesktopLinks = () => (
         <>
@@ -58,7 +90,15 @@ const Header = ({
                             onClick={() => setProfileOpen(!profileOpen)}
                             className="flex items-center gap-2 px-3 py-1 rounded-md text-sm font-medium text-light-text dark:text-dark-text hover:bg-slate-100 dark:hover:bg-dark-surface transition"
                         >
-                            Perfil ▾
+                            <span>Perfil</span>
+                            <img
+                                src={avatarUrl ? avatarUrl : (headerUser?.gender === 'MALE'
+                                        ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7'
+                                        : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
+                                alt="Foto de perfil"
+                                className="w-6 h-6 rounded-full object-cover border border-light-divider dark:border-dark-divider"
+                            />
+                            <span>▾</span>
                         </button>
 
                         <AnimatePresence>
@@ -154,6 +194,13 @@ const Header = ({
                                         className="w-full text-center px-4 py-2 text-base text-dark-surface dark:text-light-surface bg-light-surface dark:bg-dark-surface hover:bg-light-danger/10 dark:hover:bg-dark-danger/20 border-t border-slate-200 dark:border-slate-700 rounded-b-md transition"
                                     >
                                         Perfil
+                                        <img
+                                            src={avatarUrl ? avatarUrl : (headerUser?.gender === 'MALE'
+                                                ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7'
+                                                : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
+                                            alt="Foto de perfil"
+                                            className="w-6 h-6 justify-self-center rounded-full object-cover border border-light-divider dark:border-dark-divider"
+                                        />
                                     </button>
                                     <button
                                         onClick={() => { logOut(); handleCloseMobileMenu(); }}
@@ -180,4 +227,3 @@ const Header = ({
 };
 
 export default Header;
-

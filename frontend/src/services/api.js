@@ -4,9 +4,6 @@ import AuthService from './auth.service';
 // Instancia axios con configuración base para todas las peticiones
 const instance = axios.create({
     baseURL: `${window.location.protocol}//${window.location.hostname}:8080/api/`, // URL base dinámica
-    headers: {
-        'Content-Type': 'application/json',
-    },
 });
 
 // Interceptor para agregar token JWT a cada petición si existe

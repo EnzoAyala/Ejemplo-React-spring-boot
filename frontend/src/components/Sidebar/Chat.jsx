@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import ChatSidebar from '../../components/Sidebar/chatSidebar';
+import ChatSidebar from './chatSidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 
-const UserBoard = () => {
+const Chat = () => {
     const [selectedUser, setSelectedUser] = useState(null);
-    const [isSidebarOpen, setSidebarOpen] = useState(true);
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [nowTick, setNowTick] = useState(Date.now());
 
     useEffect(() => {
@@ -44,10 +44,9 @@ const UserBoard = () => {
 
     return (
         <div className="flex items-center justify-center max-h-screen bg-light-background dark:bg-dark-background p-4">
-            <div className="relative flex h-[calc(80vh-2rem)] w-full max-w-6xl rounded-lg shadow-lg overflow-hidden bg-light-surface dark:bg-dark-surface">
-
+            <div className="relative flex h-[calc(80vh-2rem)] w-full max-w-6xl rounded-lg shadow-lg overflow-hidden bg-light-surface dark:bg-dark-surface">                
                 {/* Sidebar */}
-                <aside
+                <aside 
                     className={`absolute top-0 left-0 z-20 w-80 h-full bg-light-surface dark:bg-dark-surface shadow-lg transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <div className="h-full overflow-y-auto">
                         <ChatSidebar
@@ -134,4 +133,4 @@ const UserBoard = () => {
     );
 };
 
-export default UserBoard;
+export default Chat;
