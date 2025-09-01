@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import UserService from '../../services/user.service';
+import AuthService from '../../services/auth.service';
 import useWebSocket from '../../hooks/useWebSocket';
 import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -8,10 +9,17 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
     const [nowTick, setNowTick] = useState(Date.now());
     const [users, setUsers] = useState([]);
     const [query, setQuery] = useState('');
+
     const filteredUsers = useMemo(() => {
+        const current = AuthService.getCurrentUser();
+        const selfId = current?.id;
+        const selfUsername = current?.username;
+        const list = Array.isArray(users) ? users : [];
+        // Excluir al propio usuario por id/username antes de filtrar por búsqueda
+        const base = list.filter((u) => u.id !== selfId && u.username !== selfUsername);
         const q = query.trim().toLowerCase();
-        if (!q) return users;
-        return users.filter((u) => (u.name || '').toLowerCase().includes(q));
+        if (!q) return base;
+        return base.filter((u) => (u.name || '').toLowerCase().includes(q));
     }, [users, query]);
 
     useWebSocket(setUsers, setError);
