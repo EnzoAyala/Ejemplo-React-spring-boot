@@ -50,7 +50,6 @@ function App() {
       const userId = currentUser.id;
       // updateUserProfile asume interceptor con Authorization
       // y maneja JSON o FormData transparente
-      // eslint-disable-next-line no-undef
       const { default: UserService } = await import('./services/user.service');
       await UserService.updateUserProfile(userId, formData);
       handleCloseProfileModal();
