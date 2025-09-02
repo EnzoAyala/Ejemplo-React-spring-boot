@@ -1,16 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChatSidebar from './chatSidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
+import MessageService from '../../services/message.service';
+import AuthService from '../../services/auth.service';
 
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const [nowTick, setNowTick] = useState(Date.now());
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [loading, setLoading] = useState(false);
+    const scrollRef = useRef(null);
+    const currentUser = AuthService.getCurrentUser();
 
     useEffect(() => {
         const interval = setInterval(() => setNowTick(Date.now()), 60000);
         return () => clearInterval(interval);
     }, []);
+
+    // Cargar conversación al seleccionar usuario
+    useEffect(() => {
+        const fetchConversation = async () => {
+            if (!selectedUser || !currentUser?.id) {
+                setMessages([]);
+                return;
+            }
+            try {
+                const { data } = await MessageService.getConversation(currentUser.id, selectedUser.id);
+                setMessages(Array.isArray(data) ? data : []);
+                // marcar como leídos los mensajes recibidos por el usuario actual
+                await MessageService.markAsRead(currentUser.id, selectedUser.id, currentUser.id);
+            } catch (e) {
+                console.error('Error al cargar la conversación:', e);
+                setMessages([]);
+            }
+        };
+        fetchConversation();
+    }, [selectedUser]);
 
     function tiempoDesde(fechaISO) {
         const fecha = new Date(fechaISO);
@@ -41,6 +68,33 @@ const Chat = () => {
         const diffAnios = Math.floor(diffDias / 365);
         return diffAnios === 1 ? "Hace 1 año" : `Hace ${diffAnios} años`;
     }
+
+    const handleSend = async (e) => {
+        e.preventDefault();
+        if (!input.trim() || !selectedUser || !currentUser?.id) return;
+        try {
+            setLoading(true);
+            const payload = {
+                emisorId: currentUser.id,
+                receptorId: selectedUser.id,
+                contenido: input.trim(),
+            };
+            const { data } = await MessageService.sendMessage(payload);
+            setMessages((prev) => [...prev, data]);
+            setInput('');
+        } catch (err) {
+            console.error('Error al enviar el mensaje:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Auto scroll al final cuando cambian los mensajes
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     return (
         <div className="flex items-center justify-center max-h-screen bg-light-background dark:bg-dark-background p-4">
@@ -94,26 +148,50 @@ const Chat = () => {
                             </header>
 
                             {/* Historial */}
-                            <div className="flex-1 p-4 overflow-y-auto flex items-center justify-center">
-                                <div className="text-center text-light-text-secondary dark:text-dark-text-secondary">
-                                    Historial de chat con {selectedUser.name}...
-                                </div>
+                            <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto">
+                                {messages.length === 0 ? (
+                                    <div className="h-full flex items-center justify-center text-center text-light-text-secondary dark:text-dark-text-secondary">
+                                        Historial de chat con {selectedUser.name}...
+                                    </div>
+                                ) : (
+                                    <ul className="space-y-2">
+                                        {messages.map((m) => {
+                                            const isMine = m.emisorId === currentUser?.id;
+                                            return (
+                                                <li key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`max-w-xs md:max-w-md px-3 py-2 rounded-lg shadow text-sm ${isMine ? 'bg-blue-500 text-white' : 'bg-light-hover dark:bg-dark-hover text-light-text dark:text-dark-text'}`}>
+                                                        <div>{m.contenido}</div>
+                                                        <div className="text-[10px] opacity-70 mt-1 text-right">{tiempoDesde(m.fecha)}</div>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                )}
                             </div>
 
                             {/* Input de mensaje */}
-                            <footer className="p-4 border-t border-light-divider dark:border-dark-divider flex justify-center">
-                                <input
-                                    type="text"
-                                    placeholder="Escribe un mensaje..."
-                                    className="w-full max-w-2xl p-2 rounded-lg bg-light-hover dark:bg-dark-hover border border-light-divider dark:border-dark-divider focus:outline-none focus:ring-2 text-ligth-text dark:text-dark-text bg-light-bg dark:bg-dark-bg"
-                                />
-                                <button type='submit' className="ml-4 text-light-text dark:text-dark-text">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                        <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
-                                    </svg>
-
-                                </button>
-
+                            <footer className="p-4 border-t border-light-divider dark:border-dark-divider">
+                                <form onSubmit={handleSend} className="flex justify-center items-center">
+                                    <input
+                                        type="text"
+                                        placeholder="Escribe un mensaje..."
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        className="w-full max-w-2xl p-2 rounded-lg bg-light-hover dark:bg-dark-hover border border-light-divider dark:border-dark-divider focus:outline-none focus:ring-2 text-ligth-text dark:text-dark-text bg-light-bg dark:bg-dark-bg"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={loading || !input.trim()}
+                                        className="ml-4 text-light-text dark:text-dark-text disabled:opacity-50"
+                                        aria-label="Enviar"
+                                        title="Enviar"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                                            <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                                        </svg>
+                                    </button>
+                                </form>
                             </footer>
                         </div>
                     ) : (
