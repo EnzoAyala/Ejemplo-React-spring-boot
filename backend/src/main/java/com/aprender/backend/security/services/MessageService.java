@@ -1,4 +1,4 @@
-package com.aprender.backend.service;
+package com.aprender.backend.security.services;
 
 import com.aprender.backend.model.Message;
 import com.aprender.backend.model.User;
