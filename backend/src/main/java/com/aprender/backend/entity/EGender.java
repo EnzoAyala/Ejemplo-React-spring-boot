@@ -1,4 +1,4 @@
-package com.aprender.backend.model;
+package com.aprender.backend.entity;
 
 public enum EGender {
     MALE,

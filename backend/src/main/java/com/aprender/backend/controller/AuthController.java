@@ -1,12 +1,12 @@
 package com.aprender.backend.controller;
 
-import com.aprender.backend.model.EGender;
 import com.aprender.backend.socketconfig.OnNewUserRegisteredEvent;
-import com.aprender.backend.model.ERole;
-import com.aprender.backend.model.Role;
-import com.aprender.backend.model.User;
-import com.aprender.backend.model.PasswordResetCode;
 import com.aprender.backend.repository.PasswordReserCodeRepository;
+import com.aprender.backend.entity.EGender;
+import com.aprender.backend.entity.ERole;
+import com.aprender.backend.entity.PasswordResetCode;
+import com.aprender.backend.entity.Role;
+import com.aprender.backend.entity.User;
 import com.aprender.backend.payload.request.LoginRequest;
 import com.aprender.backend.payload.request.SignupRequest;
 import com.aprender.backend.payload.response.JwtResponse;

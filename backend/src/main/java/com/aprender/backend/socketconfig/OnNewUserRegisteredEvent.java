@@ -1,7 +1,8 @@
 package com.aprender.backend.socketconfig;
 
-import com.aprender.backend.model.User;
 import org.springframework.context.ApplicationEvent;
+
+import com.aprender.backend.entity.User;
 
 public class OnNewUserRegisteredEvent extends ApplicationEvent {
     private final User newUser;

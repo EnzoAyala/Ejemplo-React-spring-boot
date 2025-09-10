@@ -1,6 +1,6 @@
 package com.aprender.backend.security.services.impl;
 
-import com.aprender.backend.model.User;
+import com.aprender.backend.entity.User;
 import com.aprender.backend.repository.UserRepository;
 import com.aprender.backend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;

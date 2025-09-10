@@ -1,6 +1,6 @@
 package com.aprender.backend.socketconfig;
 
-import com.aprender.backend.model.User;
+import com.aprender.backend.entity.User;
 import com.aprender.backend.payload.response.UserResponseAdmin;
 import com.aprender.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

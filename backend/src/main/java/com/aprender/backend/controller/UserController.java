@@ -1,6 +1,6 @@
 package com.aprender.backend.controller;
 
-import com.aprender.backend.model.User;
+import com.aprender.backend.entity.User;
 import com.aprender.backend.payload.request.ProfileUpdateRequest;
 import com.aprender.backend.payload.response.MessageResponse;
 import com.aprender.backend.payload.response.UserResponseUser;

@@ -17,7 +17,7 @@ public class UserWebSocketEventListener {
 
     @EventListener
     public void handleNewUserRegistration(OnNewUserRegisteredEvent event) {
-        com.aprender.backend.model.User newUser = event.getNewUser();
+        com.aprender.backend.entity.User newUser = event.getNewUser();
 
         // Converir el objeto a User a UserResponse para enviar solo datos relevantes y
         // reducir la carga

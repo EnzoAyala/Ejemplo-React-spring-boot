@@ -3,7 +3,7 @@ package com.aprender.backend.repository;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.aprender.backend.model.PasswordResetCode;
+import com.aprender.backend.entity.PasswordResetCode;
 
 public interface PasswordReserCodeRepository extends JpaRepository<PasswordResetCode, Long>{
     Optional<PasswordResetCode> findByEmailAndCode(String email, String code);

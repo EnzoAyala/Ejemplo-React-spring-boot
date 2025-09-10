@@ -1,10 +1,11 @@
 package com.aprender.backend.repository;
 
-import com.aprender.backend.model.Message;
-import com.aprender.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.aprender.backend.entity.Message;
+import com.aprender.backend.entity.User;
 
 import java.util.List;
 

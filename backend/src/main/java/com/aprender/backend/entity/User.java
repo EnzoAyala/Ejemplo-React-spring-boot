@@ -1,4 +1,4 @@
-package com.aprender.backend.model;
+package com.aprender.backend.entity;
 
 import jakarta.persistence.*; // Importa anotaciones JPA para mapeo de entidades
 import jakarta.validation.constraints.*; // Importa anotaciones de validación de Jakarta

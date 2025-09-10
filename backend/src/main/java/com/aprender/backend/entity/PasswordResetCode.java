@@ -1,4 +1,4 @@
-package com.aprender.backend.model;
+package com.aprender.backend.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

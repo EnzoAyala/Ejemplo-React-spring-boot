@@ -1,8 +1,8 @@
 package com.aprender.backend.controller;
 
-import com.aprender.backend.model.ERole;
-import com.aprender.backend.model.Role;
-import com.aprender.backend.model.User;
+import com.aprender.backend.entity.ERole;
+import com.aprender.backend.entity.Role;
+import com.aprender.backend.entity.User;
 import com.aprender.backend.payload.request.RoleUpdateRequest;
 import com.aprender.backend.payload.response.MessageResponse;
 import com.aprender.backend.payload.response.UserResponseAdmin;

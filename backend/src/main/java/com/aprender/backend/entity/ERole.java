@@ -1,4 +1,4 @@
-package com.aprender.backend.model;
+package com.aprender.backend.entity;
 
 // Enumeración para definir los roles disponibles en la aplicacion
 public enum ERole {

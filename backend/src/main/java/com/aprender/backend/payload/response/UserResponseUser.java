@@ -1,11 +1,12 @@
 package com.aprender.backend.payload.response;
 
-import com.aprender.backend.model.EGender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+import com.aprender.backend.entity.EGender;
 
 @Data
 @AllArgsConstructor

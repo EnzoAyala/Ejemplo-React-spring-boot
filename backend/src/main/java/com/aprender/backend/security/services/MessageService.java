@@ -1,7 +1,7 @@
 package com.aprender.backend.security.services;
 
-import com.aprender.backend.model.Message;
-import com.aprender.backend.model.User;
+import com.aprender.backend.entity.Message;
+import com.aprender.backend.entity.User;
 import com.aprender.backend.repository.MessageRepository;
 import com.aprender.backend.repository.UserRepository;
 import jakarta.annotation.PostConstruct;

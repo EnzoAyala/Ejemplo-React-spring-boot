@@ -1,6 +1,6 @@
 package com.aprender.backend.security.services;
 
-import com.aprender.backend.model.User;
+import com.aprender.backend.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import org.springframework.security.core.GrantedAuthority;

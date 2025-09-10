@@ -1,6 +1,6 @@
 package com.aprender.backend.controller;
 
-import com.aprender.backend.model.Message;
+import com.aprender.backend.entity.Message;
 import com.aprender.backend.payload.request.MessageRequest;
 import com.aprender.backend.payload.response.ChatMessageResponse;
 import com.aprender.backend.security.services.MessageService;
