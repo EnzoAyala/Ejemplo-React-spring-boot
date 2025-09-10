@@ -1,8 +1,9 @@
 package com.aprender.backend.util;
 
-import com.aprender.backend.entity.ERole;
-import com.aprender.backend.entity.Role;
-import com.aprender.backend.repository.RoleRepository;
+import com.aprender.backend.domain.repository.RoleRepository;
+import com.aprender.backend.persistence.entity.ERole;
+import com.aprender.backend.persistence.entity.Role;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
