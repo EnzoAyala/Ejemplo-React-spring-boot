@@ -80,7 +80,7 @@ const Header = ({
                     {isUser && <NavLink to="/user" className={getNavLinkClasses}>Usuario</NavLink>}
                     {isAdmin && (
                         <>
-                            <NavLink to="/user" className={getNavLinkClasses}>Usuarios en Línea</NavLink>
+                            <NavLink to="/chat" className={getNavLinkClasses}>Chat</NavLink>
                             <NavLink to="/gestion-usuarios" className={getNavLinkClasses}>Gestión de Usuarios</NavLink>
                         </>
                     )}

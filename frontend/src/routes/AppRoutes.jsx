@@ -53,7 +53,7 @@ const AppRoutes = () => (
 
         {/* Rutas de paneles de usuario/admin (protegidas por rol) */}
         <Route
-            path="/user"
+            path="/chat"
             element={
                 <ProtectedRoute requiredRole="ROLE_USER" >
                     <Chat />
