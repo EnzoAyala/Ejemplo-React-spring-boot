@@ -136,7 +136,6 @@ public class AuthController {
                 userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));
-
     }
 
     // Endpoint para el registro de usuarios

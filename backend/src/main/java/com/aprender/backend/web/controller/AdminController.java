@@ -80,20 +80,19 @@ public class AdminController {
         strRoles.forEach(roleName -> {
 
             try {
-                // Busca el Role en la base de datos por el ERole
+                // Busca el Rol en la base de datos
                 Role foundRole = roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Error: Role " + roleName + " is not found."));
-
+                        .orElseThrow(() -> new RuntimeException("Error: El rol " + roleName + " no se encuentra."));
                 roles.add(foundRole);
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException ("Error: Role " + roleName + "is invalid or not permitted for assignment. ", e);
+                throw new RuntimeException ("Error: El rol " + roleName + " es invalido o no esta permitido para la asignacion. ", e);
             }
         });
 
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User roles updated successfully!"));
+        return ResponseEntity.ok(new MessageResponse("Roles de usuario actualizados con éxito!"));
     }
 
     // Nuevo EndPoint para eliminar un usuario por ID
