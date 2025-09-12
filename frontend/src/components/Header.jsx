@@ -77,7 +77,7 @@ const Header = ({
                 </>
             ) : (
                 <>
-                    {isUser && <NavLink to="/user" className={getNavLinkClasses}>Usuario</NavLink>}
+                    {isUser && <NavLink to="/chat" className={getNavLinkClasses}>Chat</NavLink>}
                     {isAdmin && (
                         <>
                             <NavLink to="/chat" className={getNavLinkClasses}>Chat</NavLink>

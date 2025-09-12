@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import com.aprender.backend.persistence.entity.EGender;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +18,7 @@ public class UserResponseUser {
     private String phone;
     private Boolean isOnline;
     private LocalDateTime lastActive;
-    private EGender gender;
+    private String gender;
     private String profilePictureUrl;
 
 }

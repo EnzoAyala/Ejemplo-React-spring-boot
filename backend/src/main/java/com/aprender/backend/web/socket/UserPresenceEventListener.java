@@ -52,7 +52,7 @@ public class UserPresenceEventListener {
         userRepository.save(user);
 
         List<String> roles = user.getRoles().stream()
-                .map(role -> role.getName().name())
+                .map(role -> role.getName())
                 .collect(Collectors.toList());
 
         UserResponseAdmin payload = new UserResponseAdmin(
@@ -96,7 +96,7 @@ public class UserPresenceEventListener {
                 userRepository.save(user);
 
                 List<String> roles = user.getRoles().stream()
-                        .map(role -> role.getName().name())
+                        .map(role -> role.getName())
                         .collect(Collectors.toList());
 
                 UserResponseAdmin payload = new UserResponseAdmin(

@@ -5,7 +5,6 @@ import com.aprender.backend.domain.dto.response.MessageResponse;
 import com.aprender.backend.domain.dto.response.UserResponseAdmin;
 import com.aprender.backend.domain.repository.RoleRepository;
 import com.aprender.backend.domain.repository.UserRepository;
-import com.aprender.backend.persistence.entity.ERole;
 import com.aprender.backend.persistence.entity.Role;
 import com.aprender.backend.persistence.entity.User;
 
@@ -52,7 +51,7 @@ public class AdminController {
                         user.getDni(),
                         user.getPhone(),
                         user.getRoles().stream()
-                                .map(role -> role.getName().name()) // Convierte ERole a String (ej. "ROLE_USER")
+                                .map(role -> role.getName()) // Convierte ERole a String (ej. "ROLE_USER")
                                 .collect(Collectors.toList()),
                         user.isOnline(), 
                         user.getLastActive()
@@ -81,10 +80,8 @@ public class AdminController {
         strRoles.forEach(roleName -> {
 
             try {
-                ERole eRole = ERole.valueOf(roleName); // Intenta convertir "ROLE_ADMIN" a ERole.ROLE_ADMIN
-
                 // Busca el Role en la base de datos por el ERole
-                Role foundRole = roleRepository.findByName(eRole)
+                Role foundRole = roleRepository.findByName(roleName)
                         .orElseThrow(() -> new RuntimeException("Error: Role " + roleName + " is not found."));
 
                 roles.add(foundRole);
@@ -105,7 +102,7 @@ public class AdminController {
         Optional<User> userOptional = userRepository.findById(id);
 
         if(userOptional.isEmpty()){
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Usuario no encontrado!"));
         }
 
         userRepository.deleteById(id);

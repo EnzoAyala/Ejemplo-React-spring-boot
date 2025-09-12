@@ -16,8 +16,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING) // Mapea la enumeracion a una cadena de texto en la BD
     @Column(length = 20) // Limita la longitud de la columna a 20 caracteres
-    private ERole name;
+    private String name;
 
 }

@@ -14,8 +14,6 @@ import com.aprender.backend.domain.repository.RoleRepository;
 import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.domain.services.PasswordResetService;
 import com.aprender.backend.domain.services.UserDetailsImpl;
-import com.aprender.backend.persistence.entity.EGender;
-import com.aprender.backend.persistence.entity.ERole;
 import com.aprender.backend.persistence.entity.PasswordResetCode;
 import com.aprender.backend.persistence.entity.Role;
 import com.aprender.backend.persistence.entity.User;
@@ -170,12 +168,7 @@ public class AuthController {
 
         if (signupRequest.getGender() != null) {
             String genderStr = signupRequest.getGender().toUpperCase();
-            try {
-                EGender gender = EGender.valueOf(genderStr);
-                user.setGender(gender);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(new MessageResponse("Error: Género inválido."));
-            }
+            user.setGender(genderStr);
         }
 
         Set<String> strRoles = signupRequest.getRoles();
@@ -184,19 +177,19 @@ public class AuthController {
         // Asigna roles al usuario. Por defecto, siempre será ROLE_USER para el
         // registro.
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+            Role userRole = roleRepository.findByName("ROLE_USER")
                     .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
                                 .orElseThrow(() -> new RuntimeException("Error: El rol ADMIN no se encuentra."));
                         roles.add(adminRole);
                         break;
                     default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                        Role userRole = roleRepository.findByName("ROLE_USER")
                                 .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
                         roles.add(userRole);
                 }
@@ -232,7 +225,7 @@ public class AuthController {
 
                 // Emitir actualización de estado via WebSocket (offline)
                 List<String> roles = user.getRoles().stream()
-                        .map(role -> role.getName().name())
+                        .map(role -> role.getName())
                         .collect(Collectors.toList());
                 UserResponseAdmin userResponse = new UserResponseAdmin(
                         user.getId(),

@@ -1,7 +1,6 @@
 package com.aprender.backend.util;
 
 import com.aprender.backend.domain.repository.RoleRepository;
-import com.aprender.backend.persistence.entity.ERole;
 import com.aprender.backend.persistence.entity.Role;
 
 import org.springframework.boot.CommandLineRunner;
@@ -18,16 +17,16 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Verifica si el rol ROLE_USER ya existe en la base de datos
-        if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
+        if (roleRepository.findByName("ROLE_USER").isEmpty()) {
             // Si no existe, lo crea y lo guarda
-            roleRepository.save(new Role(null, ERole.ROLE_USER)); // null para que el ID sea autogenerado
+            roleRepository.save(new Role(null, "ROLE_USER")); // null para que el ID sea autogenerado
             System.out.println("Role ROLE_USER created.");
         }
 
         // Verifica si el rol ROLE_ADMIN ya existe en la base de datos
-        if (roleRepository.findByName(ERole.ROLE_ADMIN).isEmpty()) {
+        if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
             // Si no existe, lo crea y lo guarda
-            roleRepository.save(new Role(null, ERole.ROLE_ADMIN));
+            roleRepository.save(new Role(null, "ROLE_ADMIN"));
             System.out.println("Role ROLE_ADMIN created.");
         }
     }

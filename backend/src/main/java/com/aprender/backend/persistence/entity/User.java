@@ -75,9 +75,8 @@ public class User {
     @Column(name = "last_active")
     private LocalDateTime lastActive;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    private EGender gender;
+    private String gender;
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;

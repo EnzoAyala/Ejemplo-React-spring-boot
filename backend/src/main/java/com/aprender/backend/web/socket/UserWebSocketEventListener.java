@@ -30,7 +30,7 @@ public class UserWebSocketEventListener {
                 newUser.getDni(),
                 newUser.getPhone(),
                 newUser.getRoles().stream()
-                        .map(role -> role.getName().name()) // convierte ERoles a String (ej. "ROLE_USER")
+                        .map(role -> role.getName()) // convierte ERoles a String (ej. "ROLE_USER")
                         .collect(Collectors.toList()),
                 newUser.isOnline(),
                 newUser.getLastActive());

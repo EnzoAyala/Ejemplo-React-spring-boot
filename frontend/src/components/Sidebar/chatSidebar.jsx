@@ -122,7 +122,7 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
                                         <img
-                                            src={user.profilePictureUrl ? `http://localhost:8080/uploads/${user.profilePictureUrl}` : (user.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
+                                            src={user.profilePictureUrl ? `${window.location.protocol}//${window.location.hostname}:8080/uploads/${user.profilePictureUrl}` : (user.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
                                             alt={user.name}
                                             className="w-10 h-10 rounded-full"
                                         />
