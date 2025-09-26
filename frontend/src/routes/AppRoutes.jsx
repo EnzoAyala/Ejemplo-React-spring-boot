@@ -6,7 +6,7 @@ import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import ForgotPassword from '../pages/Auth/ForgotPassword';
 import ResetPassword from '../pages/Auth/ResetPassword';
-import Chat from '../components/Sidebar/chat';
+import Chat from '../components/Sidebar/Chat';
 import AdminBoard from '../pages/Admin/AdminBoard';
 // ¡Importa el componente ProtectedRoute!
 import ProtectedRoute from '../components/ProtectedRoute';

@@ -51,9 +51,7 @@ const useWebSocket = (setUsers, setError, setLoading) => {
                         const newUser = {
                             ...incoming,
                             isOnline: incoming.isOnline !== undefined ? incoming.isOnline : false,
-                        };
-
-                        console.log("WebSocket: Actualización de usuario recibida:", newUser);
+                        };                        
 
                         // Agrega o actualiza el usuario en la lista (fusiona con el previo para no perder campos)
                         setUsers(prev => {

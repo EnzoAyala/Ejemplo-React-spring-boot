@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ChatSidebar from './chatSidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import MessageService from '../../services/message.service';
 import AuthService from '../../services/auth.service';
+import useChatWebSocket from '../../hooks/useChatWebSocket';
 
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState(null);
@@ -13,6 +14,26 @@ const Chat = () => {
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef(null);
     const currentUser = AuthService.getCurrentUser();
+
+    const computeChatId = (id1, id2) => {
+        if (!id1 || !id2) return null;
+        return id1 < id2 ? `chat_${id1}_${id2}` : `chat_${id2}_${id1}`;
+    };
+
+    const chatId = computeChatId(currentUser?.id, selectedUser?.id);
+
+    const handleNewMessage = useCallback((newMessage) => {
+        setMessages((prevMessages) => {
+            // Evitar duplicados
+            if (prevMessages.some((msg) => msg.id === newMessage.id)) {
+                return prevMessages;
+            }
+            return [...prevMessages, newMessage];
+        });
+    }, []);
+
+    const { sendMessage } = useChatWebSocket(chatId, handleNewMessage);
+
 
     useEffect(() => {
         const interval = setInterval(() => setNowTick(Date.now()), 60000);
@@ -37,7 +58,7 @@ const Chat = () => {
             }
         };
         fetchConversation();
-    }, [selectedUser]);
+    }, [selectedUser, currentUser?.id]);
 
     function tiempoDesde(fechaISO) {
         const fecha = new Date(fechaISO);
@@ -69,24 +90,19 @@ const Chat = () => {
         return diffAnios === 1 ? "Hace 1 año" : `Hace ${diffAnios} años`;
     }
 
-    const handleSend = async (e) => {
+    const handleSend = (e) => {
         e.preventDefault();
         if (!input.trim() || !selectedUser || !currentUser?.id) return;
-        try {
-            setLoading(true);
-            const payload = {
-                emisorId: currentUser.id,
-                receptorId: selectedUser.id,
-                contenido: input.trim(),
-            };
-            const { data } = await MessageService.sendMessage(payload);
-            setMessages((prev) => [...prev, data]);
-            setInput('');
-        } catch (err) {
-            console.error('Error al enviar el mensaje:', err);
-        } finally {
-            setLoading(false);
-        }
+        
+        const payload = {
+            emisorId: currentUser.id,
+            receptorId: selectedUser.id,
+            contenido: input.trim(),
+            chatId: chatId,
+        };
+        
+        sendMessage(payload);
+        setInput('');
     };
 
     // Auto scroll al final cuando cambian los mensajes

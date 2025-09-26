@@ -22,21 +22,6 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-    // Enviar mensaje (cifra y guarda)
-    @PostMapping
-    public ResponseEntity<ChatMessageResponse> sendMessage(@Valid @RequestBody MessageRequest req) {
-        Message saved = messageService.saveMessage(req.getEmisorId(), req.getReceptorId(), req.getContenido(), req.getChatId());
-        ChatMessageResponse res = new ChatMessageResponse(
-                saved.getId(),
-                messageService.decrypt(saved.getContenido()),
-                saved.getFecha(),
-                saved.getEmisor().getId(),
-                saved.getReceptor().getId(),
-                saved.isStatus(),
-                saved.getChatId()
-        );
-        return ResponseEntity.ok(res);
-    }
 
     // Obtener historial de conversación (devuelve ya descifrado)
     @GetMapping("/conversation")
