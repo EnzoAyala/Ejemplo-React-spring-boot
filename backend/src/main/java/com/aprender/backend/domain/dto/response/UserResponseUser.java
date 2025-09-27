@@ -20,5 +20,6 @@ public class UserResponseUser {
     private LocalDateTime lastActive;
     private String gender;
     private String profilePictureUrl;
+    private String description;
 
 }

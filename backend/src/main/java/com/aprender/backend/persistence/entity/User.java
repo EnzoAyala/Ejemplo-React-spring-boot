@@ -81,10 +81,11 @@ public class User {
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
 
-    // Constructor para registro simplificado (sin ID, usado al crear un nuevo
-    // usuario)
-    public User(String name, String lastname, String dni, String username, String email, String phone,
-            String password) {
+    @Column(name = "description")
+    private String description;
+
+    // Constructor para registro simplificado (sin ID, usado al crear un nuevo usuario)
+    public User(String name, String lastname, String dni, String username, String email, String phone, String password) {
         this.name = name;
         this.lastname = lastname; // Asegúrate de que coincida con el campo de la clase
         this.dni = dni;

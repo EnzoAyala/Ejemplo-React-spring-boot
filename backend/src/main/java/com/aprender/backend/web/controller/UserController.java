@@ -44,7 +44,8 @@ public class UserController {
                         user.isOnline(),
                         user.getLastActive(),
                         user.getGender(),
-                        user.getProfilePictureUrl()
+                        user.getProfilePictureUrl(),
+                        user.getDescription()
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
@@ -61,6 +62,7 @@ public class UserController {
         user.setName(profileUpdateRequest.getName());
         user.setLastname(profileUpdateRequest.getLastname());
         user.setPhone(profileUpdateRequest.getPhone());
+        user.setDescription(profileUpdateRequest.getDescription());
 
         userRepository.save(user);
 
@@ -77,6 +79,7 @@ public class UserController {
 
         user.setName(profileUpdateRequest.getName());
         user.setLastname(profileUpdateRequest.getLastname());
+        user.setDescription(profileUpdateRequest.getDescription());
         user.setPhone(profileUpdateRequest.getPhone());
 
         if (file != null && !file.isEmpty()) {

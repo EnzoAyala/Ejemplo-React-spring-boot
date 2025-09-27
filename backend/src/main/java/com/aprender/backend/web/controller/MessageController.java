@@ -1,11 +1,8 @@
 package com.aprender.backend.web.controller;
 
-import com.aprender.backend.domain.dto.request.MessageRequest;
 import com.aprender.backend.domain.dto.response.ChatMessageResponse;
 import com.aprender.backend.domain.services.MessageService;
-import com.aprender.backend.persistence.entity.Message;
 
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

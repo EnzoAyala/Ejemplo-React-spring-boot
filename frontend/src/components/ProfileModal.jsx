@@ -12,6 +12,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
     // Campos de perfil editables
     const [name, setName] = useState(user?.name || '');
     const [lastname, setLastname] = useState(user?.lastname || '');
+    const [description, setDescription] = useState(user?.description || '');
     const [phone, setPhone] = useState(user?.phone || '');
 
     // Imagen de perfil
@@ -38,6 +39,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
         setName(user?.name || '');
         setLastname(user?.lastname || '');
         setPhone(user?.phone || '');
+        setDescription(user?.description || '');
         setProfilePictureUrl(user?.profilePictureUrl || '');
         // Al cambiar de usuario, limpiar selección previa de imagen
         if (previewUrl) {
@@ -50,7 +52,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
 
     // Cargar datos completos del usuario si no están presentes (ej: currentUser desde localStorage suele traer solo username/roles)
     useEffect(() => {
-        const needsFetch = (!user?.name && !user?.lastname && !user?.phone) || (name === '' && lastname === '' && phone === '');
+        const needsFetch = (!user?.name && !user?.lastname && !user?.phone && !user?.description) || (name === '' && lastname === '' && phone === '' && description === '');
         if (!user?.id || !needsFetch) return;
 
         UserService.getAllUsers()
@@ -60,6 +62,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                 if (full) {
                     setName(full.name || '');
                     setLastname(full.lastname || '');
+                    setDescription(full.description || '');
                     setPhone(full.phone || '');
                     setProfilePictureUrl(full.profilePictureUrl || '');
                 }
@@ -161,6 +164,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
         const profile = {
             name: name?.trim() || '',
             lastname: lastname?.trim() || '',
+            description: description?.trim() || '',
             phone: phone?.toString().trim() || '',
         };
 
@@ -256,7 +260,7 @@ const ProfileModal = ({ user, onClose, onSave }) => {
         setTimeout(() => {
             onClose && onClose();
             setIsClosing(false);
-        }, 200);
+        }, 400);
     };
 
     const effectiveAvatarUrl = previewUrl
@@ -349,6 +353,16 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                                         className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
                                     />
                                 </div>
+                                <div className='col-span-2'>
+                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                        Descripcion <span className="relative text-sm text-gray-700"> (Ingrese una breve descricion sobre ti) </span>
+                                    </label>
+                                    <textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm resize-none"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Teléfono</label>
@@ -366,7 +380,6 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                                     pattern="[9][0-9]{8}"
                                     className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
                                 />
-
                             </div>
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-4 sm:mt-6">
                                 <button type="button" onClick={handleCloseProfileModal} className="px-4 py-2 sm:px-6 sm:py-2 bg-gray-200 dark:bg-gray-700 text-light-text dark:text-dark-text font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancelar</button>
@@ -410,6 +423,11 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                                 />
                                 {confirmPasswordError && <p className="text-sm text-red-500 mt-1">{confirmPasswordError}</p>}
                             </div>
+                            {message && (
+                                <div className={`mt-4 sm:mt-6 p-3 sm:p-4 text-center rounded-md font-medium ${successful ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}>
+                                    {message}
+                                </div>
+                            )}
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-4 sm:mt-6">
                                 <button type="button" onClick={handleCloseProfileModal} className="px-4 py-2 sm:px-6 sm:py-2 bg-gray-200 dark:bg-gray-700 text-light-text dark:text-dark-text font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancelar</button>
                                 <button type="submit" className="px-4 py-2 sm:px-6 sm:py-2 bg-light-primary dark:bg-dark-primary text-white font-semibold rounded-md hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 transition">Actualizar Contraseña</button>
@@ -417,12 +435,6 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                         </form>
                     </section>
 
-                    {/* Mensaje de Respuesta */}
-                    {message && (
-                        <div className={`mt-4 sm:mt-6 p-3 sm:p-4 text-center rounded-md font-medium ${successful ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}>
-                            {message}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
