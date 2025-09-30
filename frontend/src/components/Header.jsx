@@ -147,7 +147,7 @@ const Header = ({
                     className="text-2xl font-bold text-light-primary dark:text-dark-primary tracking-tight"
                     onClick={handleCloseMobileMenu}
                 >
-                    App React & Spring
+                    WorkSync
                 </Link>
 
                 <nav className="hidden md:flex items-center space-x-6">
