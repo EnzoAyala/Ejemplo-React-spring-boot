@@ -10,40 +10,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        /* Light Theme - Paleta Más Viva */
-        'light-bg': '#ffffff',           /* Blanco puro */
-        'light-surface': '#b0b8c0',      /* Gris claro, casi negro */
-        'light-elevated': '#a3c1ff',     /* Azul claro pero con intensidad */
-        'light-primary': '#ff005c',      /* Rojo vibrante y neón */
-        'light-accent': '#0099ff',       /* Azul eléctrico brillante */
-        'light-danger': '#ff1c36',       /* Rojo neón más intenso */
-        'light-text': '#0f0f0f',         /* Gris oscuro para máximo contraste */
-        'light-text-secondary': '#383d47', /* Gris más oscuro pero saturado */
-        'light-success': '#00ff19',      /* Verde fluorescente brillante */
-        'light-info': '#0064ff',         /* Azul más brillante, casi cian */
-        'light-warning': '#ffdb00',      /* Amarillo intenso, similar a oro */
+        /* Light Theme */
+        'light-bg': '#ffffff',
+        'light-surface': '#f4f4f9',
+        'light-elevated': '#dbeafe',
+        'light-primary': '#ff005c',
+        'light-accent': '#007bff',
+        'light-danger': '#ef4444',
+        'light-text': '#111827',
+        'light-text-secondary': '#374151',
+        'light-success': '#22c55e',
+        'light-info': '#0ea5e9',
+        'light-warning': '#facc15',
 
-        /* Dark Theme - Paleta Más Viva */
-        'dark-bg': '#000000',            /* Negro puro para mayor contraste */
-        'dark-surface': '#1d1f25',       /* Azul muy oscuro, casi negro, con toques de morado */
-        'dark-elevated': '#2d3547',      /* Azul intenso con morado vibrante */
-        'dark-primary': '#e1001a',       /* Rojo neón aún más saturado */
-        'dark-accent': '#00f4ff',        /* Azul cian muy brillante */
-        'dark-danger': '#ff2048',        /* Rojo eléctrico e intenso */
-        'dark-text': '#ffffff',          /* Blanco puro para máxima claridad */
-        'dark-text-secondary': '#b0b8c0', /* Gris pálido y frío */
-        'dark-success': '#00ff66',       /* Verde muy brillante y saturado */
-        'dark-info': '#0099ff',          /* Azul eléctrico fuerte */
-        'dark-warning': '#ff4f00',       /* Naranja vibrante y neón */
-      },
+        /* Dark Theme */
+        'dark-bg': '#0a0a0a',
+        'dark-surface': '#1e293b',
+        'dark-elevated': '#334155',
+        'dark-primary': '#ff005c',
+        'dark-accent': '#38bdf8',
+        'dark-danger': '#f43f5e',
+        'dark-text': '#f9fafb',
+        'dark-text-secondary': '#94a3b8',
+        'dark-success': '#22c55e',
+        'dark-info': '#0ea5e9',
+        'dark-warning': '#f97316',
+      }
+      ,
       keyframes: {
         'fade-in': {
           from: { opacity: '0', transform: 'translateX(-100%)' },
           to: { opacity: '1', transform: 'translateX(0)' },
         },
         'gradient-pulse': {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
+          '0%': { opacity: '0', backgroundPosition: '0%' },
+          '100%': { opacity: '1', backgroundPosition: '100%' },
         },
         'button-glow': {
           '0%, 100%': { boxShadow: '0 0 5px var(--tw-shadow-color)' },
@@ -58,18 +59,23 @@ export default {
           '0%': { transform: 'scale(1)', opacity: '1' },
           '100%': { transform: 'scale(0.95)', opacity: '0' }
         },
-        'float': {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' }
+        'left-to-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' }
+        },
+        'right-to-left': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(100%)' },
         }
       },
       animation: {
-        'fade-in': 'fade-in 0.7s ease-out forwards',
-        'gradient-pulse': 'gradient-pulse 6s ease infinite',
+        'fade-in': 'fade-in 0.7s ease-out backwards',
+        'gradient-pulse': 'gradient-pulse 0.5s ease forwards',
         'button-glow': 'button-glow 1.5s ease-in-out infinite alternate',
         'scale-in': 'scale-in 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
         'scale-out': 'scale-out 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards',
-        'float': 'float 2s ease-in-out infinite'
+        'left-to-right': 'left-to-right 1s ease-in-out forwards',
+        'right-to-left': 'right-to-left 1s ease-in-out forwards',
       },
     },
   },

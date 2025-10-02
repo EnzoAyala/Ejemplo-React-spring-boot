@@ -4,6 +4,7 @@ import { Bars3Icon } from '@heroicons/react/24/outline';
 import MessageService from '../../services/message.service';
 import AuthService from '../../services/auth.service';
 import useChatWebSocket from '../../hooks/useChatWebSocket';
+import { NavLink } from 'react-router-dom';
 
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState(null);
@@ -11,7 +12,7 @@ const Chat = () => {
     const [nowTick, setNowTick] = useState(Date.now());
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const scrollRef = useRef(null);
     const currentUser = AuthService.getCurrentUser();
 
@@ -93,14 +94,14 @@ const Chat = () => {
     const handleSend = (e) => {
         e.preventDefault();
         if (!input.trim() || !selectedUser || !currentUser?.id) return;
-        
+
         const payload = {
             emisorId: currentUser.id,
             receptorId: selectedUser.id,
             contenido: input.trim(),
             chatId: chatId,
         };
-        
+
         sendMessage(payload);
         setInput('');
     };
@@ -113,10 +114,10 @@ const Chat = () => {
     }, [messages]);
 
     return (
-        <div className="flex items-center justify-center max-h-screen bg-light-background dark:bg-dark-background p-4">
-            <div className="relative flex h-[calc(80vh-2rem)] w-full max-w-6xl rounded-lg shadow-lg overflow-hidden bg-light-surface dark:bg-dark-surface">                
+        <div className="flex items-center justify-center max-h-screen bg-light-background dark:bg-dark-background p-4 animate-gradient-pulse" >
+            <div className="relative flex h-[calc(80vh-2rem)] w-full max-w-6xl rounded-lg shadow-lg overflow-hidden bg-light-surface dark:bg-dark-surface">
                 {/* Sidebar */}
-                <aside 
+                <aside
                     className={`absolute top-0 left-0 z-20 w-80 h-full bg-light-surface dark:bg-dark-surface shadow-lg transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <div className="h-full overflow-y-auto">
                         <ChatSidebar
@@ -143,23 +144,33 @@ const Chat = () => {
                     {selectedUser ? (
                         <div className="flex flex-col h-full bg-light-background dark:bg-dark-background">
                             {/* Header del chat */}
-                            <header className="p-4 border-b border-light-divider dark:border-dark-divider shadow-sm flex justify-center">
-                                <div className="flex flex-col items-center">
-                                    <span className="font-semibold text-light-text dark:text-dark-text">
-                                        {selectedUser.name}
-                                    </span>
-                                    <p
-                                        className={`text-sm ${selectedUser.isOnline
-                                                ? 'text-green-600 dark:text-green-400'
-                                                : 'text-gray-500 dark:text-gray-400'
-                                            }`}
+                            <header className="p-4 border-b border-light-divider dark:border-dark-divider shadow-sm flex justify-between items-center">
+                                <div className="flex-1"></div>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <img
+                                            src={selectedUser.profilePictureUrl ? `${window.location.protocol}//${window.location.hostname}:8080/uploads/${selectedUser.profilePictureUrl}` : (selectedUser.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
+                                            alt={selectedUser.name}
+                                            className="w-10 h-10 rounded-full"
+                                        />
+                                        {selectedUser.isOnline && (
+                                            <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-light-surface dark:border-dark-surface" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold text-light-text dark:text-dark-text">{selectedUser.name}</span>
+                                        <p className={`text-sm ${selectedUser.isOnline ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                            {selectedUser.isOnline ? "En línea" : (selectedUser.lastActive ? tiempoDesde(selectedUser.lastActive) : "Desconectado")}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className='flex-1 flex justify-end'>
+                                    <NavLink
+                                        to="/user_perfil"
+                                        className='px-4 py-2 sm:px-6 sm:py-2 bg-blue-400 dark:bg-blue-800 text-white font-medium rounded-md hover:bg-blue-500 dark:hover:bg-blue-900 transition'
                                     >
-                                        {selectedUser.isOnline
-                                            ? "En línea"
-                                            : (selectedUser.lastActive
-                                                ? tiempoDesde(selectedUser.lastActive)
-                                                : "Desconectado")}
-                                    </p>
+                                        Ir a Perfil
+                                    </NavLink>
                                 </div>
                             </header>
 

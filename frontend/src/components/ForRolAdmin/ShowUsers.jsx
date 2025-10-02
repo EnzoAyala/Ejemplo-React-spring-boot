@@ -56,7 +56,7 @@ const ShowUsers = ({ users, onOpenModal, onDeleteUser }) => {
             {users.map((user) => (
                 <tr
                     key={user.id}
-                    className="bg-light-surface dark:bg-dark-surface hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
+                    className="bg-light-surface dark:bg-dark-surface hover:bg-gray-50 dark:hover:bg-gray-700 animate-gradient-pulse"
                 >
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100 font-medium">
                         {user.id}

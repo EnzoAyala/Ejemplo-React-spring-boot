@@ -147,7 +147,7 @@ const Header = ({
                     className="text-2xl font-bold text-light-primary dark:text-dark-primary tracking-tight"
                     onClick={handleCloseMobileMenu}
                 >
-                    App React & Spring
+                    WorkSync
                 </Link>
 
                 <nav className="hidden md:flex items-center space-x-6">
@@ -182,10 +182,10 @@ const Header = ({
                                 </>
                             ) : (
                                 <>
-                                    {isUser && <NavLink to="/user" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Usuario</NavLink>}
+                                    {isUser && <NavLink to="/chat" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Chat</NavLink>}
                                     {isAdmin && (
                                         <>
-                                            <NavLink to="/user" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Usuarios en Línea</NavLink>
+                                            <NavLink to="/chat" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Chat</NavLink>
                                             <NavLink to="/gestion-usuarios" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Gestión de Usuarios</NavLink>
                                         </>
                                     )}
