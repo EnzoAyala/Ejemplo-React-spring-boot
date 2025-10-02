@@ -8,7 +8,7 @@ import AuthService from './services/auth.service';
 import useTheme from './hooks/useTheme';
 import Header from './components/Header';
 import ProfileModal from './components/ProfileModal';
-import Chat from './components/Sidebar/chat';
+import Chat from './components/Sidebar/Chat';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -18,6 +18,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isChatOpen, setChatOpen] = useState(false);
+  const [isChatClosing, setChatClosing] = useState(false);
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
@@ -42,8 +43,17 @@ function App() {
   const handleOpenProfileModal = () => setProfileModalOpen(true);
   const handleCloseProfileModal = () => setProfileModalOpen(false);
 
-  const handleOpenChat = () => setChatOpen(true);
-  const handleCloseChat = () => setChatOpen(false);
+  const handleOpenChat = () => {
+    setChatClosing(false);
+    setChatOpen(true);
+  };
+  const handleCloseChat = () => {
+    setChatClosing(true);
+    setTimeout(() => {
+      setChatOpen(false);
+      setChatClosing(false);
+    }, 1000); // Corresponde a la duración de la animación
+  };
 
   const handleSaveProfile = async (formData) => {
     try {
@@ -84,7 +94,7 @@ function App() {
         />
         <main className="w-full max-w-full mx-auto py-6 mt-16 transition-colors duration-300">
           <AppRoutes />
-          {currentUser && (
+          {currentUser && ( // Solo se ve si estas logueado
             <button type="button" onClick={handleOpenChat} aria-label="Abrir chat">
               {/* Botón para abrir el chat a la derecha */}
               <div className="fixed bottom-4 right-4 z-30 bg-green-500 p-3 rounded-full text-white hover:bg-green-600">
@@ -106,9 +116,9 @@ function App() {
             </button>
           )}
         </main>
-
-
       </div>
+
+      {/* Modal de perfil */}
       {isProfileModalOpen && (
         <ProfileModal
           user={currentUser}
@@ -124,7 +134,7 @@ function App() {
             className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
             onClick={handleCloseChat}
           />
-          <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-screen-md bg-light-surface dark:bg-dark-surface shadow-xl flex flex-col">
+          <aside className={`fixed inset-y-0 right-0 z-50 w-full max-w-screen-md bg-light-surface dark:bg-dark-surface shadow-xl flex flex-col ${isChatClosing ? 'animate-right-to-left' : 'animate-left-to-right'}`}>
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary">Chat</h2>
               <button

@@ -1,5 +1,5 @@
 import React from 'react'; // Importa hooks de React
-import BoardAdmin from '../../components/BoardAdmin'; // Importa el componente del panel de administrador
+import BoardAdmin from '../../components/ForRolAdmin/BoardAdmin'; // Importa el componente del panel de administrador
 
 const AdminBoard = () => {
 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import ShowUsers from '../components/ForRolAdmin/ShowUsers';
-import UserDetailsModal from '../components/ForRolAdmin/UserDetailsModal';
+import ShowUsers from './ShowUsers';
+import UserDetailsModal from './UserDetailsModal';
 import { useSearchParams } from 'react-router-dom';
-import useFetchUsers from '../hooks/useFetchUsers';
-import useWebSocket from '../hooks/useWebSocket';
-import useUserSync from '../hooks/useUserSync';
-import AdminService from '../services/admin.service';
-import AuthService from '../services/auth.service';
+import useFetchUsers from '../../hooks/useFetchUsers';
+import useWebSocket from '../../hooks/useWebSocket';
+import useUserSync from '../../hooks/useUserSync';
+import AdminService from '../../services/admin.service';
+import AuthService from '../../services/auth.service';
 
 const BoardAdmin = () => {
     // --- Estados del componente ---
@@ -122,7 +122,7 @@ const BoardAdmin = () => {
 
             {/* Tabla de usuarios */}
             <div className="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg">
-                <div className="relative overflow-x-auto shadow-xl rounded-lg animate-fade-in">
+                <div className="relative overflow-x-auto shadow-xl rounded-lg animate-gradient-pulse">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                         <thead className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white animate-gradient-pulse">
                             <tr>

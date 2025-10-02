@@ -182,10 +182,10 @@ const Header = ({
                                 </>
                             ) : (
                                 <>
-                                    {isUser && <NavLink to="/user" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Usuario</NavLink>}
+                                    {isUser && <NavLink to="/chat" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Chat</NavLink>}
                                     {isAdmin && (
                                         <>
-                                            <NavLink to="/user" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Usuarios en Línea</NavLink>
+                                            <NavLink to="/chat" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Chat</NavLink>
                                             <NavLink to="/gestion-usuarios" className={(navData) => getNavLinkClasses(navData) + ' block'} onClick={handleCloseMobileMenu}>Gestión de Usuarios</NavLink>
                                         </>
                                     )}

@@ -305,17 +305,17 @@ const Home = () => {
         </button>
       </section>
 
-            {/* Footer */}
+      {/* Footer */}
       <footer className="bg-light-surface dark:bg-dark-surface py-14 px-6 md:px-20 mt-20">
         <div className="grid md:grid-cols-4 gap-12 text-center md:text-left">
-          
+
           {/* Logo y descripción */}
           <div>
             <h3 className="text-2xl font-bold text-light-text dark:text-dark-text mb-4">
               Worksync
             </h3>
             <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-              Conectamos equipos en todo el mundo   
+              Conectamos equipos en todo el mundo
               Trabajo remoto y colaborativo al alcance de todos.
             </p>
           </div>
@@ -345,7 +345,7 @@ const Home = () => {
               <li><a href="#" className="hover:underline">Política de privacidad</a></li>
             </ul>
           </div>
-                    {/* Redes sociales */}
+          {/* Redes sociales */}
           <div>
             <h4 className="font-bold mb-3 text-light-text dark:text-dark-text">
               Síguenos
