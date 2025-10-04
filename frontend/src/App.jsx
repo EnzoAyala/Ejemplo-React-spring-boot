@@ -20,6 +20,8 @@ function App() {
   const [isChatOpen, setChatOpen] = useState(false);
   const [isChatClosing, setChatClosing] = useState(false);
 
+  
+
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user) {
@@ -34,6 +36,7 @@ function App() {
     setCurrentUser(undefined);
     setIsAdmin(false);
     setIsUser(false);
+    window.location.reload();
   };
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');

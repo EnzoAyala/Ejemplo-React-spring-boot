@@ -1,11 +1,16 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
+import authService from "../../services/auth.service";
 import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { NavLink } from "react-router-dom";
 
 
 const Home = () => {
+
+  const [user, setUser] = useState(undefined);
+
   useEffect(() => {
     const observerOptions = { root: null, rootMargin: "0px", threshold: 0.4 };
     const scrollElements = document.querySelectorAll("[data-scroll-fade-in]");
@@ -30,11 +35,19 @@ const Home = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+
+    if (user) {
+      setUser(user);
+    }
+  }, []);
+
   return (
     <main className="w-full">
       {/* Hero */}
       <section className="py-24 px-6 bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger text-white">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-12 items-center" id="principal">
           {/* Texto */}
           <div className="text-center md:text-left">
             <h1
@@ -57,12 +70,20 @@ const Home = () => {
               data-scroll-fade-in
               data-animation-delay="500"
             >
-              <button className="px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition">
-                Regístrate
-              </button>
-              <button className="px-6 py-3 border border-white rounded-lg hover:bg-white hover:text-dark-surface transition">
-                Iniciar sesión
-              </button>
+              {!user ? (
+                <>
+                  <NavLink to="/login" className="px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition">
+                    Iniciar Sesión
+                  </NavLink>
+                  <NavLink to="/register" className="px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition">
+                    Registrarse
+                  </NavLink>
+                </>
+              ) : (
+                <NavLink to='/proyectos' className='px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition'>
+                  Empezar proyectos
+                </NavLink>
+              )}
             </div>
           </div>
 
@@ -300,7 +321,15 @@ const Home = () => {
         <p className="text-lg mb-6">
           Únete a miles de personas que ya confían en Worksync.
         </p>
-        <button className="px-8 py-4 bg-white text-dark-surface rounded-lg font-bold shadow hover:scale-105 transition">
+        <button
+          className="px-8 py-4 bg-white text-dark-surface rounded-lg font-bold shadow hover:scale-105 transition"
+          onClick={() => {
+            const principalSection = document.getElementById("principal");
+            if (principalSection) {
+              principalSection.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+        >
           Comenzar Ahora
         </button>
       </section>
