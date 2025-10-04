@@ -113,7 +113,7 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
                         filteredUsers.map((user) => (
                             <li
                                 key={user.id}
-                                onClick={() => onSelectUser(user)}
+                                onClick={() => { onSelectUser(user); setSidebarOpen(false); }}
                                 className={`flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition-colors
                                     ${selectedUser && selectedUser.id === user.id
                                         ? 'bg-light-primary/20 dark:bg-dark-primary/30'
