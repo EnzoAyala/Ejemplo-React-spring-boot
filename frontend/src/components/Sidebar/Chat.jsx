@@ -8,13 +8,25 @@ import { NavLink } from 'react-router-dom';
 
 const Chat = () => {
     const [selectedUser, setSelectedUser] = useState(null);
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [nowTick, setNowTick] = useState(Date.now());
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading] = useState(false);
     const scrollRef = useRef(null);
+    const inputRef = useRef(null);
     const currentUser = AuthService.getCurrentUser();
+
+    useEffect(() => {
+        // Focus input when a user is selected and sidebar is closed
+        if (!isSidebarOpen && selectedUser) {
+            // Timeout to wait for sidebar closing animation
+            const timer = setTimeout(() => {
+                inputRef.current?.focus();
+            }, 300); // Match animation duration
+            return () => clearTimeout(timer);
+        }
+    }, [isSidebarOpen, selectedUser]);
 
     const computeChatId = (id1, id2) => {
         if (!id1 || !id2) return null;
@@ -201,6 +213,7 @@ const Chat = () => {
                             <footer className="p-4 border-t border-light-divider dark:border-dark-divider">
                                 <form onSubmit={handleSend} className="flex justify-center items-center">
                                     <input
+                                        ref={inputRef}
                                         type="text"
                                         placeholder="Escribe un mensaje..."
                                         value={input}
