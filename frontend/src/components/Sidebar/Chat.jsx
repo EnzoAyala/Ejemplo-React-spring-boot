@@ -18,12 +18,12 @@ const Chat = () => {
     const currentUser = AuthService.getCurrentUser();
 
     useEffect(() => {
-        // Focus input when a user is selected and sidebar is closed
+        // Entrada de foco cuando se selecciona un usuario y se cierra la barra lateral
         if (!isSidebarOpen && selectedUser) {
-            // Timeout to wait for sidebar closing animation
+            // Tiempo de espera para esperar la animación de cierre de la barra lateral
             const timer = setTimeout(() => {
                 inputRef.current?.focus();
-            }, 300); // Match animation duration
+            }, 300); // Duración de la animación del partido
             return () => clearTimeout(timer);
         }
     }, [isSidebarOpen, selectedUser]);
