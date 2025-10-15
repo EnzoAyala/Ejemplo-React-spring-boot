@@ -9,21 +9,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "proyecto_usuario")
-public class Proyecto_usuario {
+@Table(name = "user_roles")
+public class UserRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_proyecto", nullable = false)
-    private Proyecto proyecto;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private User usuario;
-
-    @Column(name = "rol_en_proyecto", length = 50)
-    private String rolEnProyecto; // Ejemplo: "Líder", "Colaborador", "Observador"
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 }
