@@ -1,11 +1,16 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
+import authService from "../../services/auth.service";
 import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { NavLink } from "react-router-dom";
 
 
 const Home = () => {
+
+  const [user, setUser] = useState(undefined);
+
   useEffect(() => {
     const observerOptions = { root: null, rootMargin: "0px", threshold: 0.4 };
     const scrollElements = document.querySelectorAll("[data-scroll-fade-in]");
@@ -30,22 +35,30 @@ const Home = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+
+    if (user) {
+      setUser(user);
+    }
+  }, []);
+
   return (
     <main className="w-full">
       {/* Hero */}
-      <section className="py-24 px-6 bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger text-white">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger text-white">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center" id="principal">
           {/* Texto */}
           <div className="text-center md:text-left">
             <h1
-              className="text-5xl md:text-7xl font-extrabold mb-6 opacity-0"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 opacity-0"
               data-scroll-fade-in
               data-animation-delay="100"
             >
               Worksync: El Futuro del Trabajo Colaborativo
             </h1>
             <p
-              className="text-xl md:text-2xl max-w-xl mb-8 opacity-0"
+              className="text-lg sm:text-xl md:text-2xl max-w-2xl mx-auto md:mx-0 mb-8 opacity-0"
               data-scroll-fade-in
               data-animation-delay="300"
             >
@@ -57,12 +70,20 @@ const Home = () => {
               data-scroll-fade-in
               data-animation-delay="500"
             >
-              <button className="px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition">
-                Regístrate
-              </button>
-              <button className="px-6 py-3 border border-white rounded-lg hover:bg-white hover:text-dark-surface transition">
-                Iniciar sesión
-              </button>
+              {!user ? (
+                <>
+                  <NavLink to="/login" className="px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition">
+                    Iniciar Sesión
+                  </NavLink>
+                  <NavLink to="/register" className="px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition">
+                    Registrarse
+                  </NavLink>
+                </>
+              ) : (
+                <NavLink to='/proyectos' className='px-6 py-3 bg-white text-dark-surface font-bold rounded-lg shadow hover:scale-105 transition'>
+                  Empezar proyectos
+                </NavLink>
+              )}
             </div>
           </div>
 
@@ -71,7 +92,7 @@ const Home = () => {
             <img
               src="/img/TrabajoRem.png"
               alt="Equipo remoto trabajando"
-              className="w-full max-w-md md:max-w-lg lg:max-w-xl mx-auto mb-6 rounded-lg shadow-md object-contain"
+              className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl rounded-lg shadow-md object-contain"
               data-scroll-fade-in
               data-animation-delay="700"
             />
@@ -80,243 +101,264 @@ const Home = () => {
       </section>
 
       {/* Beneficios */}
-      <section className="py-20 px-6 md:px-20 grid md:grid-cols-3 gap-10 text-center">
-        <div
-          className="p-8 bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg opacity-0"
-          data-scroll-fade-in
-          data-animation-delay="100"
-        >
-          <img src="/img/chat.png" alt="Chat" className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain" />
-          <h2 className="text-2xl font-bold mb-3">Comunicación Clara</h2>
-          <p>
-            Chats en tiempo real, videollamadas y canales temáticos para que
-            todos estén alineados.
-          </p>
-        </div>
-        <div
-          className="p-8 bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg opacity-0"
-          data-scroll-fade-in
-          data-animation-delay="300"
-        >
-          <img
-            src="/img/kanban.png"
-            alt="Kanban"
-            className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-          />
-          <h2 className="text-2xl font-bold mb-3">Organización Inteligente</h2>
-          <p>
-            Tableros Kanban, gestión de tareas y recordatorios para mantener tus
-            proyectos en orden.
-          </p>
-        </div>
-        <div
-          className="p-8 bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg opacity-0"
-          data-scroll-fade-in
-          data-animation-delay="500"
-        >
-          <img
-            src="/img/productividad.png"
-            alt="Productividad"
-            className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-          />
-          <h2 className="text-2xl font-bold mb-3">Productividad Real</h2>
-          <p>
-            Centraliza herramientas, documentos y reportes en un solo espacio de
-            trabajo.
-          </p>
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 text-center">
+          <div
+            className="p-8 bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg opacity-0"
+            data-scroll-fade-in
+            data-animation-delay="100"
+          >
+            <img src="/img/chat.png" alt="Chat" className="max-w-[200px] mx-auto mb-6 rounded-lg shadow-md object-contain" />
+            <h2 className="text-2xl font-bold mb-3">Comunicación Clara</h2>
+            <p>
+              Chats en tiempo real, videollamadas y canales temáticos para que
+              todos estén alineados.
+            </p>
+          </div>
+          <div
+            className="p-8 bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg opacity-0"
+            data-scroll-fade-in
+            data-animation-delay="300"
+          >
+            <img
+              src="/img/kanban.png"
+              alt="Kanban"
+              className="max-w-[200px] mx-auto mb-6 rounded-lg shadow-md object-contain"
+            />
+            <h2 className="text-2xl font-bold mb-3">Organización Inteligente</h2>
+            <p>
+              Tableros Kanban, gestión de tareas y recordatorios para mantener tus
+              proyectos en orden.
+            </p>
+          </div>
+          <div
+            className="p-8 bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg opacity-0"
+            data-scroll-fade-in
+            data-animation-delay="500"
+          >
+            <img
+              src="/img/productividad.png"
+              alt="Productividad"
+              className="max-w-[200px] mx-auto mb-6 rounded-lg shadow-md object-contain"
+            />
+            <h2 className="text-2xl font-bold mb-3">Productividad Real</h2>
+            <p>
+              Centraliza herramientas, documentos y reportes en un solo espacio de
+              trabajo.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Cómo funciona */}
-      <section className="py-20 px-6 md:px-20 grid md:grid-cols-2 gap-12 items-center">
-        <div className="flex justify-center">
-          <img
-            src="/img/flujodetrabajo.png"
-            alt="Flujo de trabajo"
-            className="max-w-xl md:max-w-xl mx-auto mb-6 rounded-lg shadow-md object-contain"
-            data-scroll-fade-in
-            data-animation-delay="100"
-          />
-        </div>
-        <div className="text-center md:text-left">
-          <h2
-            className="text-4xl font-bold mb-8 opacity-0"
-            data-scroll-fade-in
-            data-animation-delay="200"
-          >
-            ¿Cómo funciona Worksync?
-          </h2>
-          <ul className="space-y-6">
-            <li
-              className="opacity-0"
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="flex justify-center md:order-last">
+            <img
+              src="/img/flujodetrabajo.png"
+              alt="Flujo de trabajo"
+              className="w-full max-w-sm sm:max-w-md md:max-w-lg rounded-lg shadow-md object-contain"
               data-scroll-fade-in
-              data-animation-delay="300"
-            >
-              <h3 className="text-xl font-bold">1. Crea tu espacio</h3>
-              <p>
-                Registra tu equipo y configura tu espacio de trabajo en minutos.
-              </p>
-            </li>
-            <li
-              className="opacity-0"
+              data-animation-delay="100"
+            />
+          </div>
+          <div className="text-center md:text-left">
+            <h2
+              className="text-3xl sm:text-4xl font-bold mb-8 opacity-0"
               data-scroll-fade-in
-              data-animation-delay="400"
+              data-animation-delay="200"
             >
-              <h3 className="text-xl font-bold">2. Organiza proyectos</h3>
-              <p>
-                Asigna tareas, establece plazos y haz seguimiento del progreso.
-              </p>
-            </li>
-            <li
-              className="opacity-0"
-              data-scroll-fade-in
-              data-animation-delay="500"
-            >
-              <h3 className="text-xl font-bold">3. Colabora en tiempo real</h3>
-              <p>
-                Comparte ideas, edita documentos y mantente conectado con tu
-                equipo.
-              </p>
-            </li>
-          </ul>
+              ¿Cómo funciona Worksync?
+            </h2>
+            <ul className="space-y-6 max-w-md mx-auto md:mx-0">
+              <li
+                className="opacity-0"
+                data-scroll-fade-in
+                data-animation-delay="300"
+              >
+                <h3 className="text-xl font-bold">1. Crea tu espacio</h3>
+                <p>
+                  Registra tu equipo y configura tu espacio de trabajo en minutos.
+                </p>
+              </li>
+              <li
+                className="opacity-0"
+                data-scroll-fade-in
+                data-animation-delay="400"
+              >
+                <h3 className="text-xl font-bold">2. Organiza proyectos</h3>
+                <p>
+                  Asigna tareas, establece plazos y haz seguimiento del progreso.
+                </p>
+              </li>
+              <li
+                className="opacity-0"
+                data-scroll-fade-in
+                data-animation-delay="500"
+              >
+                <h3 className="text-xl font-bold">3. Colabora en tiempo real</h3>
+                <p>
+                  Comparte ideas, edita documentos y mantente conectado con tu
+                  equipo.
+                </p>
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
 
       {/* Casos de uso */}
-      <section className="py-20 px-6 md:px-20 bg-light-surface dark:bg-dark-surface">
-        <h2
-          className="text-4xl font-bold mb-12 text-center opacity-0"
-          data-scroll-fade-in
-          data-animation-delay="100"
-        >
-          Diseñado para todos los equipos
-        </h2>
-        <div className="grid md:grid-cols-3 gap-12 text-center">
-          <div
-            className="opacity-0"
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-light-surface dark:bg-dark-surface">
+        <div className="max-w-7xl mx-auto">
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-12 text-center opacity-0"
             data-scroll-fade-in
-            data-animation-delay="200"
+            data-animation-delay="100"
           >
-            <img
-              src="/img/empresas.png"
-              alt="Empresas"
-              className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-            />
-            <h3 className="text-2xl font-bold mb-3">Empresas</h3>
-            <p>
-              Coordina equipos globales, proyectos complejos y mantén el control
-              de tus procesos.
-            </p>
-          </div>
-          <div
-            className="opacity-0"
-            data-scroll-fade-in
-            data-animation-delay="400"
-          >
-            <img
-              src="/img/estudiantes.png"
-              alt="Estudiantes"
-              className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-            />
-            <h3 className="text-2xl font-bold mb-3">Equipos de estudio</h3>
-            <p>
-              Estudiantes y grupos académicos pueden organizar tareas y trabajos
-              en equipo fácilmente.
-            </p>
-          </div>
-          <div
-            className="opacity-0"
-            data-scroll-fade-in
-            data-animation-delay="600"
-          >
-            <img
-              src="/img/freelancer.png"
-              alt="Freelancers"
-              className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-            />
-            <h3 className="text-2xl font-bold mb-3">Freelancers</h3>
-            <p>
-              Colabora con clientes y gestiona múltiples proyectos desde una
-              misma plataforma.
-            </p>
+            Diseñado para todos los equipos
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
+            <div
+              className="opacity-0"
+              data-scroll-fade-in
+              data-animation-delay="200"
+            >
+              <img
+                src="/img/empresas.png"
+                alt="Empresas"
+                className="max-w-[200px] mx-auto mb-6 rounded-lg shadow-md object-contain"
+              />
+              <h3 className="text-2xl font-bold mb-3">Empresas</h3>
+              <p>
+                Coordina equipos globales, proyectos complejos y mantén el control
+                de tus procesos.
+              </p>
+            </div>
+            <div
+              className="opacity-0"
+              data-scroll-fade-in
+              data-animation-delay="400"
+            >
+              <img
+                src="/img/estudiantes.png"
+                alt="Estudiantes"
+                className="max-w-[200px] mx-auto mb-6 rounded-lg shadow-md object-contain"
+              />
+              <h3 className="text-2xl font-bold mb-3">Equipos de estudio</h3>
+              <p>
+                Estudiantes y grupos académicos pueden organizar tareas y trabajos
+                en equipo fácilmente.
+              </p>
+            </div>
+            <div
+              className="opacity-0"
+              data-scroll-fade-in
+              data-animation-delay="600"
+            >
+              <img
+                src="/img/freelancer.png"
+                alt="Freelancers"
+                className="max-w-[200px] mx-auto mb-6 rounded-lg shadow-md object-contain"
+              />
+              <h3 className="text-2xl font-bold mb-3">Freelancers</h3>
+              <p>
+                Colabora con clientes y gestiona múltiples proyectos desde una
+                misma plataforma.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonios */}
-      <section className="py-20 px-6 md:px-20 text-center">
-        <h2
-          className="text-4xl font-bold mb-12 opacity-0"
-          data-scroll-fade-in
-          data-animation-delay="100"
-        >
-          Lo que dicen nuestros usuarios
-        </h2>
-        <div className="grid md:grid-cols-2 gap-10">
-          <blockquote
-            className="p-6 bg-light-surface dark:bg-dark-surface rounded-lg shadow opacity-0"
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2
+            className="text-3xl sm:text-4xl font-bold mb-12 opacity-0"
             data-scroll-fade-in
-            data-animation-delay="200"
+            data-animation-delay="100"
           >
-            <img
-              src="/img/usuaria.png"
-              alt="Usuario 1"
-              className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-            />
-            “Worksync transformó la forma en que gestionamos proyectos. Ahora
-            todo fluye con más claridad.”
-            <footer className="mt-3 text-sm text-light-text-secondary dark:text-dark-text-secondary">
-              — Laura, Project Manager
-            </footer>
-          </blockquote>
-          <blockquote
-            className="p-6 bg-light-surface dark:bg-dark-surface rounded-lg shadow opacity-0"
-            data-scroll-fade-in
-            data-animation-delay="400"
-          >
-            <img
-              src="/img/usuario.png"
-              alt="Usuario 2"
-              className="max-w-xs md:max-w-sm mx-auto mb-6 rounded-lg shadow-md object-contain"
-            />
-            “Como freelancer, me facilita trabajar con distintos clientes sin
-            perder el control de mis entregas.”
-            <footer className="mt-3 text-sm text-light-text-secondary dark:text-dark-text-secondary">
-              — Carlos, Diseñador UX
-            </footer>
-          </blockquote>
+            Lo que dicen nuestros usuarios
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+            <blockquote
+              className="p-6 bg-light-surface dark:bg-dark-surface rounded-lg shadow opacity-0"
+              data-scroll-fade-in
+              data-animation-delay="200"
+            >
+              <img
+                src="/img/usuaria.png"
+                alt="Usuario 1"
+                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+              />
+              <p className="italic">
+                “Worksync transformó la forma en que gestionamos proyectos. Ahora
+                todo fluye con más claridad.”
+              </p>
+              <footer className="mt-3 text-sm font-bold text-light-text-secondary dark:text-dark-text-secondary">
+                — Laura, Project Manager
+              </footer>
+            </blockquote>
+            <blockquote
+              className="p-6 bg-light-surface dark:bg-dark-surface rounded-lg shadow opacity-0"
+              data-scroll-fade-in
+              data-animation-delay="400"
+            >
+              <img
+                src="/img/usuario.png"
+                alt="Usuario 2"
+                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+              />
+              <p className="italic">
+                “Como freelancer, me facilita trabajar con distintos clientes sin
+                perder el control de mis entregas.”
+              </p>
+              <footer className="mt-3 text-sm font-bold text-light-text-secondary dark:text-dark-text-secondary">
+                — Carlos, Diseñador UX
+              </footer>
+            </blockquote>
+          </div>
         </div>
       </section>
 
       {/* CTA Final */}
       <section
-        className="py-20 text-center bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger text-white opacity-0"
+        className="py-20 px-4 sm:px-6 text-center bg-gradient-to-r from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger text-white opacity-0"
         data-scroll-fade-in
         data-animation-delay="200"
       >
-        <h2 className="text-4xl font-bold mb-4">
-          ¿Listo para transformar tu equipo?
-        </h2>
-        <p className="text-lg mb-6">
-          Únete a miles de personas que ya confían en Worksync.
-        </p>
-        <button className="px-8 py-4 bg-white text-dark-surface rounded-lg font-bold shadow hover:scale-105 transition">
-          Comenzar Ahora
-        </button>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            ¿Listo para transformar tu equipo?
+          </h2>
+          <p className="text-lg sm:text-xl mb-8">
+            Únete a miles de personas que ya confían en Worksync.
+          </p>
+          <button
+            className="px-8 py-4 bg-white text-dark-surface rounded-lg font-bold shadow hover:scale-105 transition"
+            onClick={() => {
+              const principalSection = document.getElementById("principal");
+              if (principalSection) {
+                principalSection.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          >
+            Comenzar Ahora
+          </button>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-light-surface dark:bg-dark-surface py-14 px-6 md:px-20 mt-20">
-        <div className="grid md:grid-cols-4 gap-12 text-center md:text-left">
+      <footer className="bg-light-surface dark:bg-dark-surface py-14 px-4 sm:px-6 lg:px-8 mt-20">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center sm:text-left">
 
           {/* Logo y descripción */}
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <h3 className="text-2xl font-bold text-light-text dark:text-dark-text mb-4">
               Worksync
             </h3>
             <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-              Conectamos equipos en todo el mundo
-              Trabajo remoto y colaborativo al alcance de todos.
+              Conectamos equipos en todo el mundo. Trabajo remoto y colaborativo al alcance de todos.
             </p>
           </div>
 
@@ -350,7 +392,7 @@ const Home = () => {
             <h4 className="font-bold mb-3 text-light-text dark:text-dark-text">
               Síguenos
             </h4>
-            <div className="flex justify-center md:justify-start gap-4 text-2xl">
+            <div className="flex justify-center sm:justify-start gap-4 text-2xl">
               <a href="#" aria-label="Facebook" className="hover:text-light-primary dark:hover:text-dark-accent transition">
                 <FaFacebookF />
               </a>
