@@ -27,13 +27,13 @@ public class Tarea {
     private String descripcion;
 
     @Column(nullable = false)
-    private String estado; // Podrías usar un enum si lo prefieres
+    private String estado;
 
     @Column(name = "fecha_entrega")
     private LocalDate fechaEntrega;
 
     @Column
-    private String prioridad; // También podrías mapearlo con Enum
+    private String prioridad;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_proyecto", nullable = false)
