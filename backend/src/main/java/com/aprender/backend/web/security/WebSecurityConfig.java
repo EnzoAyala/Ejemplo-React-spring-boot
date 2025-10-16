@@ -1,6 +1,6 @@
 // src/main/java/com/aprender/backend/security/WebSecurityConfig.java
 
-package com.aprender.backend.web.security; // Corrección del paquete a 'aprender'
+package com.aprender.backend.web.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +30,8 @@ import com.aprender.backend.web.security.jwt.AuthTokenFilter;
 import java.util.Arrays;
 
 @Configuration
-@EnableWebSecurity // Habilita la seguridad web de Spring
-@EnableMethodSecurity // Habilita la seguridad a nivel de método (ej. @PreAuthorize)
+@EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     @Autowired
@@ -64,22 +64,13 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
-        // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
-        // En producción, DEBE ser el dominio específico de tu frontend.
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        // Permite los métodos HTTP que vas a usar
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Permite todas las cabeceras (incluyendo Authorization)
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        // Permite el envío de credenciales (cookies, encabezados de autorización, etc.)
         configuration.setAllowCredentials(true);
-        // Define el tiempo máximo que el navegador puede almacenar en caché la
-        // respuesta de preflight
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Aplica esta configuración CORS a todas las rutas (/**)
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
@@ -97,18 +88,26 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF para APIs sin estado (JWT)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/forgot-password").permitAll() // Permitir explícitamente forgot-password
-                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**", "/uploads/**").permitAll() // Login, Register, etc.
+                        // Rutas públicas
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**", "/uploads/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        // Configuración estricta de roles:
-                        .requestMatchers("/api/user/**", "/api/messages/**").hasAnyRole("USER", "ADMIN") // Solo ROLE_USER puede acceder a /api/user/**
-                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
-                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está mapeada arriba)
+
+                        // 🔹 NUEVAS RUTAS PARA PROYECTOS Y TAREAS
+                        .requestMatchers("/api/proyectos/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/tareas/**").hasAnyRole("USER", "ADMIN")
+
+                        // Rutas existentes
+                        .requestMatchers("/api/user/**", "/api/messages/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")
+
+                        // Cualquier otra petición requiere autenticación
+                        .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());
@@ -116,5 +115,5 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-
 }
+
