@@ -115,8 +115,8 @@ const Header = ({
                   avatarUrl
                     ? avatarUrl
                     : headerUser?.gender === "MALE"
-                    ? "https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7"
-                    : "https://logowik.com/content/uploads/images/woman4906.jpg"
+                      ? "https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7"
+                      : "https://logowik.com/content/uploads/images/woman4906.jpg"
                 }
                 alt="Foto de perfil"
                 className="w-6 h-6 rounded-full object-cover border border-light-divider dark:border-dark-divider"
@@ -273,8 +273,8 @@ const Header = ({
                         avatarUrl
                           ? avatarUrl
                           : headerUser?.gender === "MALE"
-                          ? "https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7"
-                          : "https://logowik.com/content/uploads/images/woman4906.jpg"
+                            ? "https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7"
+                            : "https://logowik.com/content/uploads/images/woman4906.jpg"
                       }
                       alt="Foto de perfil"
                       className="w-6 h-6 justify-self-center rounded-full object-cover border border-light-divider dark:border-dark-divider"
