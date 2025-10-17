@@ -31,7 +31,7 @@ const AppRoutes = () => (
       }
     />
     <Route path="/proyectos/:proyectoId/tareas" element={<TareasPage />} />
-   <Route
+    <Route
       path="/proyectos"
       element={
         <ProtectedRoute requiredRole="ROLE_USER">
