@@ -1,20 +1,28 @@
-# Archivos de configuración de VS Code (excluye si no quieres que se versionen)
+# Node modules
+frontend/node_modules/
+
+# Archivos de configuración locales
+backend/src/main/resources/application.properties
+
+# Archivos de construcción de Java/Gradle/Maven
+backend/target/
+backend/build/
+dist/
+dist-ssr/
+
+# IDEs
 .vscode/
-.qodo/
-
-# Archivos de sistema operativo
-.DS_Store
-Thumbs.db
-
-# Directorios de proyectos de IDEs comunes
 .idea/
 *.iml
 .project
 .classpath
 .settings/
-.cache/
 
-# Archivos de logs generales
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
 log/
 tmp/

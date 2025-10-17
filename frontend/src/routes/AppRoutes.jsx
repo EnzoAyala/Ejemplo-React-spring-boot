@@ -8,6 +8,8 @@ import ForgotPassword from '../pages/Auth/ForgotPassword';
 import ResetPassword from '../pages/Auth/ResetPassword';
 import Chat from '../components/Sidebar/Chat';
 import AdminBoard from '../pages/Admin/AdminBoard';
+import TareasPage from '../pages/Proyectos/TareasPage';
+import ProyectoPage from '../pages/Proyectos/ProyectoPage';
 // ¡Importa el componente ProtectedRoute!
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -26,6 +28,15 @@ const AppRoutes = () => (
                 </ProtectedRoute>
             }
         />
+         <Route path="/proyectos/:proyectoId/tareas" element={<TareasPage />} />
+   <Route
+      path="/proyectos"
+      element={
+        <ProtectedRoute requiredRole="ROLE_USER">
+          <ProyectoPage />
+        </ProtectedRoute>
+      }
+    />
         <Route
             path="/register"
             element={
