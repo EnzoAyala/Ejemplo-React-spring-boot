@@ -1,27 +1,16 @@
-
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useParams } from "react-router-dom";
 import {
   PlusCircle, Edit3, Trash2, ChevronDown, ChevronRight,
   Search, Filter, ArrowLeft, Calendar
 } from "lucide-react";
+import TareaService from "../../services/tarea.service";
+import ProyectoService from "../../services/proyecto.service";
 
 const TareasPage = () => {
-  const [proyecto] = useState({
-    id: 1,
-    nombre: "Desarrollo de Plataforma Web",
-    descripcion: "Sistema de gestión empresarial",
-    estado: "activo"
-  });
-
-  const [tareas, setTareas] = useState([
-    { id: 1, titulo: "Diseñar base de datos", descripcion: "Crear diagrama ER y esquema de tablas", estado: "completada", prioridad: "alta", fechaEntrega: "2025-10-10" },
-    { id: 2, titulo: "Implementar API REST", descripcion: "Desarrollar endpoints para usuarios y proyectos", estado: "en_progreso", prioridad: "alta", fechaEntrega: "2025-10-20" },
-    { id: 3, titulo: "Crear interfaz de login", descripcion: "Pantalla de autenticación con validaciones", estado: "en_progreso", prioridad: "media", fechaEntrega: "2025-10-18" },
-    { id: 4, titulo: "Configurar CI/CD", descripcion: "Pipeline de despliegue automático", estado: "pendiente", prioridad: "baja", fechaEntrega: "2025-10-25" },
-    { id: 5, titulo: "Pruebas de integración", descripcion: "Testing end-to-end de funcionalidades", estado: "en_revision", prioridad: "media", fechaEntrega: "2025-10-22" }
-  ]);
-
+  const { proyectoId } = useParams();
+  const [proyecto, setProyecto] = useState(null);
+  const [tareas, setTareas] = useState([]);
   const [newTarea, setNewTarea] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
   const [expandedGroups, setExpandedGroups] = useState({ pendiente: true, en_progreso: true, en_revision: true, completada: true });
   const [showNewForm, setShowNewForm] = useState(false);
@@ -29,20 +18,74 @@ const TareasPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
 
-  const handleAdd = () => {
-    if (!newTarea.titulo.trim()) return;
-    const nueva = { id: Date.now(), ...newTarea, estado: "pendiente" };
-    setTareas([...tareas, nueva]);
-    setNewTarea({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
-    setShowNewForm(false);
+  useEffect(() => {
+    fetchProyecto();
+    fetchTareas();
+  }, [proyectoId]);
+
+  const fetchProyecto = () => {
+    ProyectoService.getProyecto(proyectoId)
+      .then(response => setProyecto(response.data))
+      .catch(error => console.error("Error fetching project:", error));
   };
 
-  const handleDelete = (id) => window.confirm("¿Eliminar tarea?") && setTareas(tareas.filter(t => t.id !== id));
-  const handleEdit = (t) => { setEditingId(t.id); setEditForm(t); };
-  const handleSaveEdit = (id) => { setTareas(tareas.map(t => t.id === id ? editForm : t)); setEditingId(null); };
-  const handleCancelEdit = () => { setEditingId(null); };
-  const handleDragStart = (e, t) => { setDraggedTarea(t); e.dataTransfer.effectAllowed = "move"; };
-  const handleDrop = (e, nuevoEstado) => { e.preventDefault(); if (draggedTarea) setTareas(tareas.map(t => t.id === draggedTarea.id ? { ...t, estado: nuevoEstado } : t)); };
+  const fetchTareas = () => {
+    TareaService.getTareasByProyectoId(proyectoId)
+      .then(response => setTareas(response.data))
+      .catch(error => console.error("Error fetching tasks:", error));
+  };
+
+  const handleAdd = () => {
+    if (!newTarea.titulo.trim()) return;
+    TareaService.createTarea({ ...newTarea, proyectoId })
+      .then(() => {
+        fetchTareas();
+        setNewTarea({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
+        setShowNewForm(false);
+      })
+      .catch(error => console.error("Error creating task:", error));
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm("¿Eliminar tarea?")) {
+      TareaService.deleteTarea(id)
+        .then(() => fetchTareas())
+        .catch(error => console.error("Error deleting task:", error));
+    }
+  };
+
+  const handleEdit = (t) => {
+    setEditingId(t.id);
+    setEditForm(t);
+  };
+
+  const handleSaveEdit = (id) => {
+    TareaService.updateTarea(id, editForm)
+      .then(() => {
+        fetchTareas();
+        setEditingId(null);
+      })
+      .catch(error => console.error("Error updating task:", error));
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+  };
+
+  const handleDragStart = (e, t) => {
+    setDraggedTarea(t);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDrop = (e, nuevoEstado) => {
+    e.preventDefault();
+    if (draggedTarea) {
+      TareaService.updateEstado(draggedTarea.id, nuevoEstado)
+        .then(() => fetchTareas())
+        .catch(error => console.error("Error updating task state:", error));
+    }
+  };
+
   const toggleGroup = (estado) => setExpandedGroups(prev => ({ ...prev, [estado]: !prev[estado] }));
 
   const estados = ["pendiente", "en_progreso", "en_revision", "completada"];
@@ -87,6 +130,9 @@ const TareasPage = () => {
     return <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${map[estado]}`}>{label[estado]}</span>;
   };
 
+  if (!proyecto) {
+    return <div>Cargando...</div>;
+  }
   return (
     <div className="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text transition-colors duration-300">
       {/* Header */}

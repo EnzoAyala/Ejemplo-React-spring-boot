@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PlusCircle,
@@ -9,32 +9,12 @@ import {
   Search,
   Filter,
 } from "lucide-react";
+import ProyectoService from "../../services/proyecto.service";
 
 const ProyectosPage = () => {
   const navigate = useNavigate();
 
-  // 🔹 Datos locales simulando la BD
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      nombre: "Plataforma Web",
-      descripcion: "Sistema para gestión de tareas colaborativas.",
-      estado: "activo",
-    },
-    {
-      id: 2,
-      nombre: "App Móvil",
-      descripcion: "Aplicación para seguimiento de proyectos.",
-      estado: "pausado",
-    },
-    {
-      id: 3,
-      nombre: "Rediseño UI",
-      descripcion: "Mejorar experiencia visual del panel.",
-      estado: "finalizado",
-    },
-  ]);
-
+  const [projects, setProjects] = useState([]);
   const [newProject, setNewProject] = useState({ nombre: "", descripcion: "" });
   const [expandedGroups, setExpandedGroups] = useState({
     activo: true,
@@ -46,40 +26,59 @@ const ProyectosPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ nombre: "", descripcion: "" });
 
-  // ➕ Agregar proyecto localmente
-  const handleAdd = () => {
-    if (!newProject.nombre.trim()) return;
-    const nuevo = {
-      id: Date.now(),
-      nombre: newProject.nombre,
-      descripcion: newProject.descripcion || "Sin descripción",
-      estado: "activo",
-    };
-    setProjects([...projects, nuevo]);
-    setNewProject({ nombre: "", descripcion: "" });
-    setShowNewForm(false);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = () => {
+    ProyectoService.getAllProyectos()
+      .then((response) => {
+        setProjects(response.data);
+      })
+      .catch((error) => {
+        console.error("Error al obtener proyectos:", error);
+      });
   };
 
-  // 🗑️ Eliminar proyecto
+  const handleAdd = () => {
+    if (!newProject.nombre.trim()) return;
+    ProyectoService.createProyecto(newProject)
+      .then(() => {
+        fetchProjects();
+        setNewProject({ nombre: "", descripcion: "" });
+        setShowNewForm(false);
+      })
+      .catch((error) => {
+        console.error("Error al crear proyecto:", error);
+      });
+  };
+
   const handleDelete = (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este proyecto?")) {
-      setProjects(projects.filter((p) => p.id !== id));
+      ProyectoService.deleteProyecto(id)
+        .then(() => {
+          fetchProjects();
+        })
+        .catch((error) => {
+          console.error("Error al eliminar proyecto:", error);
+        });
     }
   };
 
-  // ✏️ Editar proyecto
   const handleEdit = (project) => {
     setEditingId(project.id);
     setEditForm({ nombre: project.nombre, descripcion: project.descripcion });
   };
 
   const handleSaveEdit = (id) => {
-    setProjects(
-      projects.map((p) =>
-        p.id === id ? { ...p, ...editForm } : p
-      )
-    );
-    setEditingId(null);
+    ProyectoService.updateProyecto(id, editForm)
+      .then(() => {
+        fetchProjects();
+        setEditingId(null);
+      })
+      .catch((error) => {
+        console.error("Error updating project:", error);
+      });
   };
 
   const handleCancelEdit = () => {
@@ -87,7 +86,6 @@ const ProyectosPage = () => {
     setEditForm({ nombre: "", descripcion: "" });
   };
 
-  // 🔄 Drag & drop entre estados
   const handleDragStart = (e, project) => {
     setDraggedProject(project);
     e.dataTransfer.effectAllowed = "move";
@@ -98,26 +96,25 @@ const ProyectosPage = () => {
   const handleDrop = (e, newEstado) => {
     e.preventDefault();
     if (draggedProject && draggedProject.estado !== newEstado) {
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === draggedProject.id ? { ...p, estado: newEstado } : p
-        )
-      );
+      ProyectoService.updateEstado(draggedProject.id, newEstado)
+        .then(() => {
+          fetchProjects();
+        })
+        .catch((error) => {
+          console.error("Error updating project state:", error);
+        });
     }
     setDraggedProject(null);
   };
 
-  // 🔽 Colapsar grupos
   const toggleGroup = (estado) => {
     setExpandedGroups((prev) => ({ ...prev, [estado]: !prev[estado] }));
   };
 
-  // 📄 Ir a tareas del proyecto
   const handleProjectClick = (project) => {
     navigate(`/proyectos/${project.id}/tareas`);
   };
 
-  // 🎨 Colores / etiquetas
   const getEstadoBadge = (estado) => {
     const configs = {
       activo: {
@@ -167,7 +164,7 @@ const ProyectosPage = () => {
     return nombres[estado];
   };
 
-  const estados = ["activo", "pausado", "finalizado"];
+  // const estados = ["activo", "pausado", "finalizado"];
 
   return (
     <div className="min-h-screen bg-light-background dark:bg-dark-background">

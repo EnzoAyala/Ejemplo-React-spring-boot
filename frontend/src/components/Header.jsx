@@ -228,15 +228,26 @@ const Header = ({
               ) : (
                 <>
                   {isUser && (
-                    <NavLink
-                      to="/chat"
-                      className={(navData) =>
-                        getNavLinkClasses(navData) + " block"
-                      }
-                      onClick={handleCloseMobileMenu}
-                    >
-                      Chat
-                    </NavLink>
+                    <>
+                      <NavLink
+                        to="/chat"
+                        className={(navData) =>
+                          getNavLinkClasses(navData) + " block"
+                        }
+                        onClick={handleCloseMobileMenu}
+                      >
+                        Chat
+                      </NavLink>
+                      <NavLink
+                        to="/proyectos"
+                        className={(navData) =>
+                          getNavLinkClasses(navData) + " block"
+                        }
+                        onClick={handleCloseMobileMenu}
+                      >
+                        Mis Proyectos
+                      </NavLink>
+                    </>
                   )}
                   {isAdmin && (
                     <>
@@ -248,6 +259,15 @@ const Header = ({
                         onClick={handleCloseMobileMenu}
                       >
                         Chat
+                      </NavLink>
+                      <NavLink
+                        to="/proyectos"
+                        className={(navData) =>
+                          getNavLinkClasses(navData) + " block"
+                        }
+                        onClick={handleCloseMobileMenu}
+                      >
+                        Mis Proyectos
                       </NavLink>
                       <NavLink
                         to="/gestion-usuarios"

@@ -18,7 +18,7 @@ public class Tarea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tarea")
-    private Integer idTarea;
+    private Long idTarea;
 
     @Column(length = 150, nullable = false)
     private String titulo;

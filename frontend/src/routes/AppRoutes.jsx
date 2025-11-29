@@ -28,7 +28,14 @@ const AppRoutes = () => (
                 </ProtectedRoute>
             }
         />
-         <Route path="/proyectos/:proyectoId/tareas" element={<TareasPage />} />
+        <Route
+            path="/proyectos/:proyectoId/tareas"
+            element={
+                <ProtectedRoute requiredRole="ROLE_USER">
+                    <TareasPage />
+                </ProtectedRoute>
+            }
+        />
    <Route
       path="/proyectos"
       element={
