@@ -1,5 +1,6 @@
 package com.aprender.backend.web.controller;
 
+import com.aprender.backend.domain.mappers.MessageMapper;
 import com.aprender.backend.domain.dto.request.MessageRequest;
 import com.aprender.backend.domain.dto.response.ChatMessageResponse;
 import com.aprender.backend.domain.services.MessageService;
@@ -19,11 +20,13 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
     private final UserRepository userRepository;
+    private final MessageMapper messageMapper;
 
-    public ChatController(SimpMessagingTemplate messagingTemplate, MessageService messageService, UserRepository userRepository) {
+    public ChatController(SimpMessagingTemplate messagingTemplate, MessageService messageService, UserRepository userRepository, MessageMapper messageMapper) {
         this.messagingTemplate = messagingTemplate;
         this.messageService = messageService;
         this.userRepository = userRepository;
+        this.messageMapper = messageMapper;
     }
 
     @MessageMapping("/chat.sendMessage")
@@ -46,15 +49,7 @@ public class ChatController {
             chatMessage.getChatId()
         );
 
-        ChatMessageResponse response = new ChatMessageResponse(
-            saved.getId(),
-            messageService.decrypt(saved.getContenido()),
-            saved.getFecha(),
-            saved.getEmisor().getId(),
-            saved.getReceptor().getId(),
-            saved.isStatus(),
-            saved.getChatId()
-        );
+        ChatMessageResponse response = messageMapper.toChatMessageResponse(saved);
 
         String destination = "/topic/chat/" + saved.getChatId();
         messagingTemplate.convertAndSend(destination, response);

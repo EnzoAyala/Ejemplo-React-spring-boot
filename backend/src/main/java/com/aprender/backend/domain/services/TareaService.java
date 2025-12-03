@@ -9,6 +9,7 @@ import com.aprender.backend.persistence.entity.Proyecto;
 import com.aprender.backend.persistence.entity.Tarea;
 import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.User;
+import com.aprender.backend.domain.mappers.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,6 +30,9 @@ public class TareaService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserMapper userMapper;
 
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
@@ -99,7 +103,7 @@ public class TareaService {
 
     private TareaResponse mapToTareaResponse(Tarea tarea) {
         String fechaEntrega = tarea.getFechaEntrega() != null ? tarea.getFechaEntrega().toString() : null;
-        UserResponseUser responsable = mapToUserResponseUser(tarea.getResponsable());
+        UserResponseUser responsable = userMapper.toUserResponseUser(tarea.getResponsable());
         return new TareaResponse(
                 tarea.getIdTarea(),
                 tarea.getTitulo(),
@@ -108,24 +112,6 @@ public class TareaService {
                 tarea.getPrioridad(),
                 fechaEntrega,
                 responsable
-        );
-    }
-
-    private UserResponseUser mapToUserResponseUser(User user) {
-        if (user == null) {
-            return null;
-        }
-        return new UserResponseUser(
-                user.getId(),
-                user.getUsername(),
-                user.getName(),
-                user.getLastname(),
-                user.getPhone(),
-                user.isOnline(),
-                user.getLastActive(),
-                user.getGender(),
-                user.getProfilePictureUrl(),
-                user.getDescription()
         );
     }
 }

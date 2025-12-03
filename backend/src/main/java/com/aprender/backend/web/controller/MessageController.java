@@ -1,8 +1,8 @@
 package com.aprender.backend.web.controller;
 
 import com.aprender.backend.domain.dto.response.ChatMessageResponse;
+import com.aprender.backend.domain.mappers.MessageMapper;
 import com.aprender.backend.domain.services.MessageService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 public class MessageController {
 
     private final MessageService messageService;
+    private final MessageMapper messageMapper;
 
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, MessageMapper messageMapper) {
         this.messageService = messageService;
+        this.messageMapper = messageMapper;
     }
 
 
@@ -25,15 +27,7 @@ public class MessageController {
     public ResponseEntity<List<ChatMessageResponse>> getConversation(@RequestParam("user1") Long user1,
                                                                  @RequestParam("user2") Long user2) {
         List<ChatMessageResponse> list = messageService.getConversation(user1, user2).stream()
-                .map(m -> new ChatMessageResponse(
-                        m.getId(),
-                        messageService.decrypt(m.getContenido()),
-                        m.getFecha(),
-                        m.getEmisor().getId(),
-                        m.getReceptor().getId(),
-                        m.isStatus(),
-                        m.getChatId()
-                ))
+                .map(messageMapper::toChatMessageResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
