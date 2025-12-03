@@ -26,13 +26,14 @@ const TareasPage = () => {
   const fetchProyecto = () => {
     ProyectoService.getProyecto(proyectoId)
       .then(response => setProyecto(response.data))
-      .catch(error => console.error("Error fetching project:", error));
+      .catch(error => console.error("Error al obtener proyecto:", error));
   };
 
   const fetchTareas = () => {
+    console.log("Obtiendo tareas...");
     TareaService.getTareasByProyectoId(proyectoId)
       .then(response => setTareas(response.data))
-      .catch(error => console.error("Error fetching tasks:", error));
+      .catch(error => console.error("Error al obtener tareas:", error));
   };
 
   const handleAdd = () => {
@@ -43,14 +44,14 @@ const TareasPage = () => {
         setNewTarea({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
         setShowNewForm(false);
       })
-      .catch(error => console.error("Error creating task:", error));
+      .catch(error => console.error("Error al crear tarea:", error));
   };
 
   const handleDelete = (id) => {
     if (window.confirm("¿Eliminar tarea?")) {
       TareaService.deleteTarea(id)
         .then(() => fetchTareas())
-        .catch(error => console.error("Error deleting task:", error));
+        .catch(error => console.error("Error al eliminar tarea:", error));
     }
   };
 
@@ -65,7 +66,7 @@ const TareasPage = () => {
         fetchTareas();
         setEditingId(null);
       })
-      .catch(error => console.error("Error updating task:", error));
+      .catch(error => console.error("Error al actualizar tarea:", error));
   };
 
   const handleCancelEdit = () => {

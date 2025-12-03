@@ -1,6 +1,6 @@
 import api from './api';
 
-const TAREA_BASE = 'tareas/';
+const TAREA_BASE = 'tarea/';
 
 const TareaService = {
 
@@ -9,7 +9,7 @@ const TareaService = {
   },
 
   createTarea(tareaData) {
-    return api.post(TAREA_BASE, tareaData);
+    return api.post(TAREA_BASE + 'nuevo', tareaData);
   },
 
   updateTarea(id, tareaData) {

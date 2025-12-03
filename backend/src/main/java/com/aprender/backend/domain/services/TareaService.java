@@ -4,9 +4,14 @@ import com.aprender.backend.domain.dto.request.TareaRequest;
 import com.aprender.backend.domain.dto.response.TareaResponse;
 import com.aprender.backend.domain.repository.ProyectoRepository;
 import com.aprender.backend.domain.repository.TareaRepository;
+import com.aprender.backend.domain.dto.response.UserResponseUser;
 import com.aprender.backend.persistence.entity.Proyecto;
 import com.aprender.backend.persistence.entity.Tarea;
+import com.aprender.backend.domain.repository.UserRepository;
+import com.aprender.backend.persistence.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,6 +27,9 @@ public class TareaService {
     @Autowired
     private ProyectoRepository proyectoRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
                 .map(this::mapToTareaResponse)
@@ -31,6 +39,18 @@ public class TareaService {
     public TareaResponse createTarea(TareaRequest tareaRequest) {
         Proyecto proyecto = proyectoRepository.findById(tareaRequest.getProyectoId())
                 .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+
+        User responsable;
+        if (tareaRequest.getResponsableId() != null) {
+            responsable = userRepository.findById(tareaRequest.getResponsableId())
+                    .orElseThrow(() -> new RuntimeException("Usuario responsable no encontrado"));
+        } else {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username = userDetails.getUsername();
+            responsable = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        }
+
         Tarea tarea = new Tarea();
         tarea.setTitulo(tareaRequest.getTitulo());
         tarea.setDescripcion(tareaRequest.getDescripcion());
@@ -40,6 +60,7 @@ public class TareaService {
         tarea.setPrioridad(tareaRequest.getPrioridad());
         tarea.setEstado("pendiente"); // Default state
         tarea.setProyecto(proyecto);
+        tarea.setResponsable(responsable);
         Tarea nuevaTarea = tareaRepository.save(tarea);
         return mapToTareaResponse(nuevaTarea);
     }
@@ -47,6 +68,13 @@ public class TareaService {
     public TareaResponse updateTarea(Long id, TareaRequest tareaRequest) {
         Tarea tarea = tareaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+
+        if (tareaRequest.getResponsableId() != null) {
+            User responsable = userRepository.findById(tareaRequest.getResponsableId())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            tarea.setResponsable(responsable);
+        }
+
         tarea.setTitulo(tareaRequest.getTitulo());
         tarea.setDescripcion(tareaRequest.getDescripcion());
         if (tareaRequest.getFechaEntrega() != null && !tareaRequest.getFechaEntrega().isEmpty()) {
@@ -71,13 +99,33 @@ public class TareaService {
 
     private TareaResponse mapToTareaResponse(Tarea tarea) {
         String fechaEntrega = tarea.getFechaEntrega() != null ? tarea.getFechaEntrega().toString() : null;
+        UserResponseUser responsable = mapToUserResponseUser(tarea.getResponsable());
         return new TareaResponse(
                 tarea.getIdTarea(),
                 tarea.getTitulo(),
                 tarea.getDescripcion(),
                 tarea.getEstado(),
                 tarea.getPrioridad(),
-                fechaEntrega
+                fechaEntrega,
+                responsable
+        );
+    }
+
+    private UserResponseUser mapToUserResponseUser(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserResponseUser(
+                user.getId(),
+                user.getUsername(),
+                user.getName(),
+                user.getLastname(),
+                user.getPhone(),
+                user.isOnline(),
+                user.getLastActive(),
+                user.getGender(),
+                user.getProfilePictureUrl(),
+                user.getDescription()
         );
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/tareas")
+@RequestMapping("/api/tarea/")
 @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class TareaController {
 
@@ -24,7 +24,7 @@ public class TareaController {
         return ResponseEntity.ok(tareaService.getTareasByProyectoId(proyectoId));
     }
 
-    @PostMapping
+    @PostMapping("/nuevo") // Crear nueva tarea
     public ResponseEntity<TareaResponse> createTarea(@RequestBody TareaRequest tareaRequest) {
         return ResponseEntity.ok(tareaService.createTarea(tareaRequest));
     }

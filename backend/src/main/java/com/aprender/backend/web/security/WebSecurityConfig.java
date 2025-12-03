@@ -102,14 +102,18 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/forgot-password").permitAll() // Permitir explícitamente forgot-password
-                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**", "/uploads/**").permitAll() // Login, Register, etc.
+                        // 1. Accesos públicos consolidados
+                        .requestMatchers("/api/auth/**", "/ws/**", "/uploads/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        // Configuración estricta de roles:
-                        .requestMatchers("/api/user/**", "/api/messages/**", "/api/proyectos/**", "/api/proyectos", "/api/proyectos/nuevo", "/api/tareas/**").hasAnyRole("USER", "ADMIN") // Solo ROLE_USER puede acceder a /api/user/**
-                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
-                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está mapeada arriba)
-                );
+
+                        // 2. Roles USER y ADMIN 
+                        .requestMatchers("/api/user/**", "/api/messages/**", "/api/proyectos/**", "/api/tarea/**")
+                        .hasAnyRole("USER", "ADMIN")
+
+                        // 3. Solo ADMIN (Uso de hasRole para un solo rol)
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

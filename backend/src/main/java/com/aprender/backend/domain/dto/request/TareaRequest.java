@@ -16,4 +16,6 @@ public class TareaRequest {
     private String prioridad;
 
     private Long proyectoId;
+
+    private Long responsableId;
 }
