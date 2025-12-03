@@ -21,6 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Verificar si existe un usuario con el correo electronico dado
     boolean existsByEmail(String email);
     
+    // Metodos personalizados para buscar usuarios
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.username = :username")
     Optional<User> findByUsernameWithRoles(@Param("username") String username);
 
