@@ -6,6 +6,8 @@ import com.aprender.backend.domain.repository.ProyectoRepository;
 import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.Proyecto;
 import com.aprender.backend.persistence.entity.User;
+import com.aprender.backend.domain.repository.ProyectoUsuarioRepository;
+import com.aprender.backend.persistence.entity.Proyecto_usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,8 +26,17 @@ public class ProyectoService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProyectoUsuarioRepository proyectoUsuarioRepository;
+
     public List<ProyectoResponse> getAllProyectos() {
-        return proyectoRepository.findAll().stream()
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return proyectoUsuarioRepository.findByUsuario(user).stream()
+                .map(Proyecto_usuario::getProyecto)
                 .map(this::mapToProyectoResponse)
                 .collect(Collectors.toList());
     }
@@ -43,6 +54,13 @@ public class ProyectoService {
         proyecto.setFechaCreacion(LocalDateTime.now());
         proyecto.setAdmin(user);
         Proyecto nuevoProyecto = proyectoRepository.save(proyecto);
+
+        Proyecto_usuario proyectoUsuario = new Proyecto_usuario();
+        proyectoUsuario.setProyecto(nuevoProyecto);
+        proyectoUsuario.setUsuario(user);
+        proyectoUsuario.setRolEnProyecto("Administrador");
+        proyectoUsuarioRepository.save(proyectoUsuario);
+
         return mapToProyectoResponse(nuevoProyecto);
     }
 

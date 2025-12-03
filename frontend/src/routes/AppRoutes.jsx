@@ -36,14 +36,14 @@ const AppRoutes = () => (
                 </ProtectedRoute>
             }
         />
-   <Route
-      path="/proyectos"
-      element={
-        <ProtectedRoute requiredRole="ROLE_USER">
-          <ProyectoPage />
-        </ProtectedRoute>
-      }
-    />
+        <Route
+            path="/proyectos"
+            element={
+                <ProtectedRoute requiredRole="ROLE_USER">
+                    <ProyectoPage />
+                </ProtectedRoute>
+            }
+        />
         <Route
             path="/register"
             element={
