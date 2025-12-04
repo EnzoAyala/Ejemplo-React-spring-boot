@@ -369,7 +369,7 @@ const ProyectosPage = () => {
                         <div
                           className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-12 gap-3 sm:gap-4 p-4 items-center"
                         >
-                          <div className="sm:col-span-1 md:col-span-5 flex items-center gap-2 cursor-pointer"  onClick={() => handleProjectClick(project)}>
+                          <div className="sm:col-span-1 md:col-span-4 flex items-center gap-2 cursor-pointer"  onClick={() => handleProjectClick(project)}>
                             <span>📁</span>
                             <span className="text-sm font-semibold">
                               {project.nombre}
@@ -378,6 +378,18 @@ const ProyectosPage = () => {
                           <div className="sm:col-span-1 md:col-span-3 truncate" onClick={() => handleProjectClick(project)}>
                             <span className="text-sm text-gray-600">
                               {project.descripcion}
+                            </span>
+                          </div>
+                          {/* Progress Bar */}
+                          <div className="sm:col-span-1 md:col-span-2 flex items-center" onClick={() => handleProjectClick(project)}>
+                            <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full"
+                                style={{ width: `${project.progreso}%` }}
+                              ></div>
+                            </div>
+                            <span className="ml-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                              {project.progreso?.toFixed(0)}%
                             </span>
                           </div>
                            <div className="sm:col-span-1 md:col-span-1" onClick={() => handleProjectClick(project)}>
@@ -398,7 +410,7 @@ const ProyectosPage = () => {
                             {getEstadoBadge(project.estado)}
                           </div>
                           <div
-                            className="sm:col-span-2 md:col-span-2 flex gap-2 justify-start sm:justify-end"
+                            className="sm:col-span-2 md:col-span-1 flex gap-2 justify-start sm:justify-end"
                             onClick={(e) => e.stopPropagation()}
                           >
                              <button

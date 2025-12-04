@@ -34,6 +34,9 @@ public class TareaService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private ProyectoService proyectoService; // Inject ProyectoService
+
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
                 .map(this::mapToTareaResponse)
@@ -66,12 +69,15 @@ public class TareaService {
         tarea.setProyecto(proyecto);
         tarea.setResponsable(responsable);
         Tarea nuevaTarea = tareaRepository.save(tarea);
+        proyectoService.recalculateAndSetProjectState(proyecto.getIdProyecto()); // Recalculate project state
         return mapToTareaResponse(nuevaTarea);
     }
 
     public TareaResponse updateTarea(Long id, TareaRequest tareaRequest) {
         Tarea tarea = tareaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+
+        Long proyectoId = tarea.getProyecto().getIdProyecto(); // Get project ID before potential update
 
         if (tareaRequest.getResponsableId() != null) {
             User responsable = userRepository.findById(tareaRequest.getResponsableId())
@@ -86,11 +92,16 @@ public class TareaService {
         }
         tarea.setPrioridad(tareaRequest.getPrioridad());
         Tarea tareaActualizada = tareaRepository.save(tarea);
+        proyectoService.recalculateAndSetProjectState(proyectoId); // Recalculate project state
         return mapToTareaResponse(tareaActualizada);
     }
 
     public void deleteTarea(Long id) {
+        Tarea tarea = tareaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+        Long proyectoId = tarea.getProyecto().getIdProyecto(); // Get project ID before deletion
         tareaRepository.deleteById(id);
+        proyectoService.recalculateAndSetProjectState(proyectoId); // Recalculate project state
     }
 
     public TareaResponse updateEstado(Long id, String estado) {
@@ -98,6 +109,7 @@ public class TareaService {
                 .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
         tarea.setEstado(estado);
         Tarea tareaActualizada = tareaRepository.save(tarea);
+        proyectoService.recalculateAndSetProjectState(tareaActualizada.getProyecto().getIdProyecto()); // Recalculate project state
         return mapToTareaResponse(tareaActualizada);
     }
 

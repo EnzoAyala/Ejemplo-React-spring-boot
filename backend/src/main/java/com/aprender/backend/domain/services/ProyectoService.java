@@ -10,6 +10,8 @@ import com.aprender.backend.persistence.entity.Proyecto;
 import com.aprender.backend.persistence.entity.User;
 import com.aprender.backend.domain.repository.ProyectoUsuarioRepository;
 import com.aprender.backend.persistence.entity.Proyecto_usuario;
+import com.aprender.backend.persistence.entity.Tarea; // Added import
+import com.aprender.backend.domain.repository.TareaRepository; // Added import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,6 +34,9 @@ public class ProyectoService {
 
     @Autowired
     private ProyectoUsuarioRepository proyectoUsuarioRepository;
+
+    @Autowired
+    private TareaRepository tareaRepository; // Inject TareaRepository
 
     public List<ProyectoResponse> getAllProyectos() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -95,14 +100,49 @@ public class ProyectoService {
         return mapToProyectoResponse(proyecto);
     }
 
+    @Transactional
+    public void recalculateAndSetProjectState(Long proyectoId) {
+        Proyecto proyecto = proyectoRepository.findById(proyectoId)
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+
+        List<Tarea> tasks = tareaRepository.findByProyectoIdProyecto(proyectoId);
+        long totalTasks = tasks.size();
+        long completedTasks = tasks.stream()
+                .filter(tarea -> "completada".equals(tarea.getEstado()))
+                .count();
+
+        Double currentProgress = totalTasks > 0 ? (double) completedTasks / totalTasks * 100.0 : 0.0;
+
+        if (currentProgress >= 100.0 && !"finalizado".equals(proyecto.getEstado())) {
+            proyecto.setEstado("finalizado");
+            proyectoRepository.save(proyecto);
+        } else if (currentProgress < 100.0 && "finalizado".equals(proyecto.getEstado())) {
+            // If the project was finalizado but now has incomplete tasks
+            // For simplicity, let's revert to "activo" if it was "finalizado"
+            proyecto.setEstado("activo");
+            proyectoRepository.save(proyecto);
+        }
+    }
+
     private ProyectoResponse mapToProyectoResponse(Proyecto proyecto) {
         List<ColaboradorResponse> colaboradores = getColaboradores(proyecto.getIdProyecto());
+
+        // Calculate progress
+        List<Tarea> tasks = tareaRepository.findByProyectoIdProyecto(proyecto.getIdProyecto());
+        long totalTasks = tasks.size();
+        long completedTasks = tasks.stream()
+                .filter(tarea -> "completada".equals(tarea.getEstado()))
+                .count();
+
+        Double progreso = totalTasks > 0 ? (double) completedTasks / totalTasks * 100.0 : 0.0;
+
         return new ProyectoResponse(
                 proyecto.getIdProyecto(),
                 proyecto.getNombre(),
                 proyecto.getDescripcion(),
                 proyecto.getEstado(),
-                colaboradores
+                colaboradores,
+                progreso // Pass progress to the constructor
         );
     }
 
