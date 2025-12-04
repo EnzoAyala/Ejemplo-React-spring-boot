@@ -8,8 +8,10 @@ import {
   ChevronRight,
   Search,
   Filter,
+  Users
 } from "lucide-react";
 import ProyectoService from "../../services/proyecto.service";
+import CollaboratorsModal from "../../components/Proyectos/CollaboratorsModal";
 
 const ProyectosPage = () => {
   const navigate = useNavigate();
@@ -25,6 +27,10 @@ const ProyectosPage = () => {
   const [draggedProject, setDraggedProject] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ nombre: "", descripcion: "" });
+  
+  // State for collaborators modal
+  const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   useEffect(() => {
     fetchProjects();
@@ -114,6 +120,21 @@ const ProyectosPage = () => {
   const handleProjectClick = (project) => {
     navigate(`/proyectos/${project.id}/tareas`);
   };
+  
+  // Handlers for collaborators modal
+  const handleOpenCollaboratorsModal = (project) => {
+    setSelectedProject(project);
+    setIsCollaboratorsModalOpen(true);
+  };
+
+  const handleCloseCollaboratorsModal = () => {
+    setIsCollaboratorsModalOpen(false);
+    setSelectedProject(null);
+  };
+
+  const handleCollaboratorUpdate = () => {
+    fetchProjects(); // Refetch projects to update collaborator list everywhere
+  };
 
   const getEstadoBadge = (estado) => {
     const configs = {
@@ -164,14 +185,12 @@ const ProyectosPage = () => {
     return nombres[estado];
   };
 
-  // const estados = ["activo", "pausado", "finalizado"];
-
   return (
     <div className="min-h-screen bg-light-background dark:bg-dark-background">
       {/* Header */}
       <div className="sticky top-0 z-40 backdrop-blur-md bg-light-surface/80 dark:bg-dark-surface/80 border-b border-light-divider dark:border-dark-divider shadow-sm">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="px-4 sm:px-6 md:px-8 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-y-3 sm:gap-y-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-light-primary to-light-danger dark:from-dark-primary dark:to-dark-danger rounded-lg flex items-center justify-center text-white text-lg shadow-md">
                 📋
@@ -196,11 +215,11 @@ const ProyectosPage = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="sticky top-[105px] z-30 bg-light-surface dark:bg-dark-surface border-b border-light-divider dark:border-dark-divider px-6 py-3">
-        <div className="flex items-center justify-between">
+      <div className="sticky top-[105px] z-30 bg-light-surface dark:bg-dark-surface border-b border-light-divider dark:border-dark-divider px-4 sm:px-6 md:px-8 py-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-y-3 sm:gap-y-0 w-full">
           <button
             onClick={() => setShowNewForm(!showNewForm)}
-            className="px-3 py-2 border border-light-divider dark:border-dark-divider rounded-lg hover:bg-light-background dark:hover:bg-dark-background flex items-center gap-2 text-sm font-medium text-light-text dark:text-dark-text transition-colors"
+            className="w-full sm:w-auto px-3 py-2 border border-light-divider dark:border-dark-divider rounded-lg hover:bg-light-background dark:hover:bg-dark-background flex items-center justify-center gap-2 text-sm font-medium text-light-text dark:text-dark-text transition-colors"
           >
             <PlusCircle size={16} />
             <span>Agregar Proyecto</span>
@@ -220,7 +239,7 @@ const ProyectosPage = () => {
 
       {/* Formulario nuevo proyecto */}
       {showNewForm && (
-        <div className="bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30 px-6 py-4">
+        <div className="bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30 px-4 sm:px-6 md:px-8 py-4">
           <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border border-light-divider dark:border-dark-divider p-4">
             <div className="flex flex-col md:flex-row gap-3">
               <input
@@ -244,15 +263,14 @@ const ProyectosPage = () => {
                 }
                 className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2 flex-1 text-sm"
               />
-              <button
-                onClick={handleAdd}
-                className="bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 text-white px-6 py-2 rounded-lg text-sm font-medium"
-              >
-                Agregar
+                              <button
+                                onClick={handleAdd}
+                                className="w-full md:w-auto bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 text-white px-6 py-2 rounded-lg text-sm font-medium"
+                              >                Agregar
               </button>
               <button
                 onClick={() => setShowNewForm(false)}
-                className="border border-light-divider px-6 py-2 rounded-lg hover:bg-light-background text-sm"
+                className="w-full md:w-auto border border-light-divider px-6 py-2 rounded-lg hover:bg-light-background text-sm"
               >
                 Cancelar
               </button>
@@ -262,7 +280,7 @@ const ProyectosPage = () => {
       )}
 
       {/* Lista de proyectos */}
-      <div className="px-6 py-4">
+      <div className="px-4 sm:px-6 md:px-8 py-4">
         {["activo", "pausado", "finalizado"].map((estado) => (
           <div
             key={estado}
@@ -305,8 +323,8 @@ const ProyectosPage = () => {
                       className="bg-white dark:bg-dark-surface border rounded-lg hover:shadow-md transition-all duration-200"
                     >
                       {editingId === project.id ? (
-                        <div className="grid grid-cols-12 gap-4 px-4 py-3 items-center">
-                          <div className="col-span-5">
+                        <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-12 gap-3 sm:gap-4 p-4 items-center">
+                          <div className="sm:col-span-2 md:col-span-5">
                             <input
                               type="text"
                               value={editForm.nombre}
@@ -319,7 +337,7 @@ const ProyectosPage = () => {
                               className="w-full border rounded px-3 py-1.5 text-sm"
                             />
                           </div>
-                          <div className="col-span-4">
+                          <div className="sm:col-span-2 md:col-span-4">
                             <input
                               type="text"
                               value={editForm.descripcion}
@@ -332,7 +350,7 @@ const ProyectosPage = () => {
                               className="w-full border rounded px-3 py-1.5 text-sm"
                             />
                           </div>
-                          <div className="col-span-3 flex gap-2 justify-end">
+                          <div className="sm:col-span-2 md:col-span-3 flex flex-row gap-2 justify-start sm:justify-end">
                             <button
                               onClick={() => handleSaveEdit(project.id)}
                               className="px-3 py-1.5 bg-light-primary text-white rounded text-xs"
@@ -349,38 +367,58 @@ const ProyectosPage = () => {
                         </div>
                       ) : (
                         <div
-                          className="grid grid-cols-12 gap-4 px-4 py-3 items-center cursor-pointer"
-                          onClick={() => handleProjectClick(project)}
+                          className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-12 gap-3 sm:gap-4 p-4 items-center"
                         >
-                          <div className="col-span-5 flex items-center gap-2">
+                          <div className="sm:col-span-1 md:col-span-5 flex items-center gap-2 cursor-pointer"  onClick={() => handleProjectClick(project)}>
                             <span>📁</span>
                             <span className="text-sm font-semibold">
                               {project.nombre}
                             </span>
                           </div>
-                          <div className="col-span-4">
+                          <div className="sm:col-span-1 md:col-span-3 truncate" onClick={() => handleProjectClick(project)}>
                             <span className="text-sm text-gray-600">
                               {project.descripcion}
                             </span>
                           </div>
-                          <div className="col-span-2">
+                           <div className="sm:col-span-1 md:col-span-1" onClick={() => handleProjectClick(project)}>
+                             <div className="flex -space-x-2 overflow-hidden">
+                                {project.colaboradores?.slice(0, 3).map(c => (
+                                    <span key={c.id} title={c.username} className="inline-block h-6 w-6 md:h-7 md:w-7 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 flex items-center justify-center text-xs md:text-sm">
+                                        {c.username.charAt(0).toUpperCase()}
+                                    </span>
+                                ))}
+                                {project.colaboradores?.length > 3 && (
+                                    <span className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-300 text-xs md:text-sm">
+                                        +{project.colaboradores.length - 3}
+                                    </span>
+                                )}
+                            </div>
+                          </div>
+                          <div className="sm:col-span-1 md:col-span-1" onClick={() => handleProjectClick(project)}>
                             {getEstadoBadge(project.estado)}
                           </div>
                           <div
-                            className="col-span-1 flex gap-2 justify-end"
+                            className="sm:col-span-2 md:col-span-2 flex gap-2 justify-start sm:justify-end"
                             onClick={(e) => e.stopPropagation()}
                           >
+                             <button
+                              onClick={() => handleOpenCollaboratorsModal(project)}
+                              className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-accent dark:hover:text-dark-accent transition-colors"
+                              title="Gestionar Colaboradores"
+                            >
+                              <Users size={16} className="md:size-[18px]" />
+                            </button>
                             <button
                               onClick={() => handleEdit(project)}
-                              className="text-blue-500 hover:text-blue-700"
+                              className="text-light-accent dark:text-dark-accent hover:opacity-80 transition-opacity"
                             >
-                              <Edit3 size={16} />
+                              <Edit3 size={16} className="md:size-[18px]" />
                             </button>
                             <button
                               onClick={() => handleDelete(project.id)}
-                              className="text-red-500 hover:text-red-700"
+                              className="text-light-danger dark:text-dark-danger hover:opacity-80 transition-opacity"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={16} className="md:size-[18px]" />
                             </button>
                           </div>
                         </div>
@@ -392,6 +430,16 @@ const ProyectosPage = () => {
           </div>
         ))}
       </div>
+      
+      {/* Collaborators Modal */}
+      {selectedProject && (
+        <CollaboratorsModal
+          isOpen={isCollaboratorsModalOpen}
+          onClose={handleCloseCollaboratorsModal}
+          project={selectedProject}
+          onCollaboratorUpdate={handleCollaboratorUpdate}
+        />
+      )}
     </div>
   );
 };

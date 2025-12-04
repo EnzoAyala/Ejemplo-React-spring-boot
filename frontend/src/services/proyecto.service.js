@@ -26,6 +26,19 @@ const ProyectoService = {
 
   updateEstado(id, estado) {
     return api.put(PROYECTO_BASE + id + '/estado', { estado });
+  },
+
+  // Métodos para Colaboradores
+  getColaboradores(id) {
+    return api.get(PROYECTO_BASE + id + '/colaboradores');
+  },
+
+  agregarColaborador(id, colaboradorData) {
+    return api.post(PROYECTO_BASE + id + '/colaboradores', colaboradorData);
+  },
+
+  eliminarColaborador(id, usuarioId) {
+    return api.delete(PROYECTO_BASE + id + '/colaboradores/' + usuarioId);
   }
 };
 
