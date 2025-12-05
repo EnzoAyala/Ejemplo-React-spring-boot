@@ -22,7 +22,7 @@ const NotificationPanel = ({ notifications, onClose, onNotificationRead }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40" onClick={onClose}>
+    <div className="fixed top-[60px] inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40" onClick={onClose}>
       <div
         className="fixed top-0 right-0 h-full w-full max-w-sm 
                bg-light-surface dark:bg-dark-surface 

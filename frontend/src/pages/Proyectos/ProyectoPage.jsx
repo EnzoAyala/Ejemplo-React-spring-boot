@@ -7,7 +7,6 @@ import {
   ChevronDown,
   ChevronRight,
   Search,
-  Filter,
   Users
 } from "lucide-react";
 import ProyectoService from "../../services/proyecto.service";
@@ -219,7 +218,7 @@ const ProyectosPage = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="sticky top-[105px] z-30 bg-light-surface dark:bg-dark-surface border-b border-light-divider dark:border-dark-divider px-4 sm:px-6 md:px-8 py-3">
+      <div className="sticky bg-light-surface dark:bg-dark-surface border-b border-light-divider dark:border-dark-divider px-4 sm:px-6 md:px-8 py-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-y-3 sm:gap-y-0 w-full">
           <button
             onClick={() => setShowNewForm(!showNewForm)}
@@ -230,10 +229,6 @@ const ProyectosPage = () => {
           </button>
 
           <div className="flex items-center gap-2">
-            <button className="px-3 py-2 border border-light-divider dark:border-dark-divider rounded-lg flex items-center gap-2 text-sm text-light-text dark:text-dark-text transition-colors">
-              <Filter size={14} />
-              <span>Filtros</span>
-            </button>
             <button className="p-2 border border-light-divider dark:border-dark-divider rounded-lg text-light-text dark:text-dark-text transition-colors">
               <Search size={16} />
             </button>
@@ -245,7 +240,7 @@ const ProyectosPage = () => {
       {showNewForm && (
         <div className="bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30 px-4 sm:px-6 md:px-8 py-4">
           <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border border-light-divider dark:border-dark-divider p-4">
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               <input
                 type="text"
                 placeholder="Nombre del proyecto"
@@ -253,7 +248,7 @@ const ProyectosPage = () => {
                 onChange={(e) =>
                   setNewProject({ ...newProject, nombre: e.target.value })
                 }
-                className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2 flex-1 text-sm"
+                className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2 text-sm"
               />
               <input
                 type="text"
@@ -265,19 +260,22 @@ const ProyectosPage = () => {
                     descripcion: e.target.value,
                   })
                 }
-                className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2 flex-1 text-sm"
+                className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2 text-sm"
               />
-                              <button
-                                onClick={handleAdd}
-                                className="w-full md:w-auto bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 text-white px-6 py-2 rounded-lg text-sm font-medium"
-                              >                Agregar
-              </button>
-              <button
-                onClick={() => setShowNewForm(false)}
-                className="w-full md:w-auto border border-light-divider px-6 py-2 rounded-lg hover:bg-light-background text-sm"
-              >
-                Cancelar
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAdd}
+                  className="bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 text-white px-6 py-2 rounded-lg text-sm font-medium"
+                >
+                  Agregar
+                </button>
+                <button
+                  onClick={() => setShowNewForm(false)}
+                  className="border border-light-divider px-6 py-2 rounded-lg hover:bg-light-background dark:hover:bg-dark-background text-sm"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -285,169 +283,173 @@ const ProyectosPage = () => {
 
       {/* Lista de proyectos */}
       <div className="px-4 sm:px-6 md:px-8 py-4">
-        {["activo", "pausado", "finalizado"].map((estado) => (
-          <div
-            key={estado}
-            className="mb-6"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, estado)}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <button
-                onClick={() => toggleGroup(estado)}
-                className="hover:bg-light-background dark:hover:bg-dark-background rounded p-1"
-              >
-                {expandedGroups[estado] ? (
-                  <ChevronDown size={16} />
-                ) : (
-                  <ChevronRight size={16} />
-                )}
-              </button>
-              <span
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${getGrupoColor(
-                  estado
-                )}`}
-              >
-                {getGrupoNombre(estado)}
-              </span>
-              <span className="text-xs font-medium text-gray-500">
-                ({projects.filter((p) => p.estado === estado).length})
-              </span>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {["activo", "pausado", "finalizado"].map((estado) => (
+            <div
+              key={estado}
+              className="mb-6"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, estado)}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  onClick={() => toggleGroup(estado)}
+                  className="hover:bg-light-background dark:hover:bg-dark-background rounded p-1"
+                >
+                  {expandedGroups[estado] ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+                <span
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${getGrupoColor(
+                    estado
+                  )}`}
+                >
+                  {getGrupoNombre(estado)}
+                </span>
+                <span className="text-xs font-medium text-gray-500">
+                  ({projects.filter((p) => p.estado === estado).length})
+                </span>
+              </div>
 
-            {expandedGroups[estado] && (
-              <div className="ml-6 space-y-2">
-                {projects
-                  .filter((p) => p.estado === estado)
-                  .map((project) => (
-                    <div
-                      key={project.id}
-                      draggable={editingId !== project.id}
-                      onDragStart={(e) => handleDragStart(e, project)}
-                      className="bg-white dark:bg-dark-surface border rounded-lg hover:shadow-md transition-all duration-200"
-                    >
-                      {editingId === project.id ? (
-                        <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-12 gap-3 sm:gap-4 p-4 items-center">
-                          <div className="sm:col-span-2 md:col-span-5">
-                            <input
-                              type="text"
-                              value={editForm.nombre}
-                              onChange={(e) =>
-                                setEditForm({
-                                  ...editForm,
-                                  nombre: e.target.value,
-                                })
-                              }
-                              className="w-full border rounded px-3 py-1.5 text-sm"
-                            />
-                          </div>
-                          <div className="sm:col-span-2 md:col-span-4">
-                            <input
-                              type="text"
-                              value={editForm.descripcion}
-                              onChange={(e) =>
-                                setEditForm({
-                                  ...editForm,
-                                  descripcion: e.target.value,
-                                })
-                              }
-                              className="w-full border rounded px-3 py-1.5 text-sm"
-                            />
-                          </div>
-                          <div className="sm:col-span-2 md:col-span-3 flex flex-row gap-2 justify-start sm:justify-end">
-                            <button
-                              onClick={() => handleSaveEdit(project.id)}
-                              className="px-3 py-1.5 bg-light-primary text-white rounded text-xs"
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="px-3 py-1.5 border rounded text-xs"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-12 gap-3 sm:gap-4 p-4 items-center"
-                        >
-                          <div className="sm:col-span-1 md:col-span-4 flex items-center gap-2 cursor-pointer"  onClick={() => handleProjectClick(project)}>
-                            <span>📁</span>
-                            <span className="text-sm font-semibold">
-                              {project.nombre}
-                            </span>
-                          </div>
-                          <div className="sm:col-span-1 md:col-span-3 truncate" onClick={() => handleProjectClick(project)}>
-                            <span className="text-sm text-gray-600">
-                              {project.descripcion}
-                            </span>
-                          </div>
-                          {/* Progress Bar */}
-                          <div className="sm:col-span-1 md:col-span-2 flex items-center" onClick={() => handleProjectClick(project)}>
-                            <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${project.progreso}%` }}
-                              ></div>
+              {expandedGroups[estado] && (
+                <div className="ml-6 space-y-2">
+                  {projects
+                    .filter((p) => p.estado === estado)
+                    .map((project) => (
+                      <div
+                        key={project.id}
+                        draggable={editingId !== project.id}
+                        onDragStart={(e) => handleDragStart(e, project)}
+                        className="bg-white dark:bg-dark-surface border rounded-lg hover:shadow-md transition-all duration-200"
+                      >
+                        {/* Project display logic */}
+                        {editingId === project.id ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4">
+                            <div className="col-span-2 md:col-span-2">
+                              <input
+                                type="text"
+                                value={editForm.nombre}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    nombre: e.target.value,
+                                  })
+                                }
+                                className="w-full border rounded px-3 py-1.5 text-sm"
+                              />
                             </div>
-                            <span className="ml-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                              {project.progreso?.toFixed(0)}%
-                            </span>
+                            <div className="col-span-2 md:col-span-2">
+                              <input
+                                type="text"
+                                value={editForm.descripcion}
+                                onChange={(e) =>
+                                  setEditForm({
+                                    ...editForm,
+                                    descripcion: e.target.value,
+                                  })
+                                }
+                                className="w-full border rounded px-3 py-1.5 text-sm"
+                              />
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => handleSaveEdit(project.id)}
+                                className="px-3 py-1.5 bg-light-primary text-white rounded text-xs"
+                              >
+                                Guardar
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="px-3 py-1.5 border rounded text-xs"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
                           </div>
-                           <div className="sm:col-span-1 md:col-span-1" onClick={() => handleProjectClick(project)}>
-                             <div className="flex -space-x-2 overflow-hidden">
-                                {project.colaboradores?.slice(0, 3).map(c => (
-                                    <span key={c.id} title={c.username} className="inline-block h-6 w-6 md:h-7 md:w-7 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 flex items-center justify-center text-xs md:text-sm">
-                                        {c.username.charAt(0).toUpperCase()}
-                                    </span>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4" onClick={() => handleProjectClick(project)}>
+                            {/* Normal project display */}
+                            <div className="flex gap-2 items-center">
+                              <span>📁</span>
+                              <span className="font-semibold">{project.nombre}</span>
+                            </div>
+                            <div className="truncate">
+                              <span className="text-sm text-gray-600">
+                                {project.descripcion}
+                              </span>
+                            </div>
+                            {/* Barra de progreso */}
+                            <div className="flex items-center">
+                              <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{ width: `${project.progreso}%` }}
+                                ></div>
+                              </div>
+                              <span className="ml-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                {project.progreso?.toFixed(0)}%
+                              </span>
+                            </div>
+                            {/* Colaboradores */}
+                            <div>
+                              <div className="flex -space-x-2 overflow-hidden">
+                                {project.colaboradores?.slice(0, 3).map((c) => (
+                                  <span
+                                    key={c.id}
+                                    title={c.username}
+                                    className="inline-block h-6 w-6 md:h-7 md:w-7 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 flex items-center justify-center text-xs md:text-sm"
+                                  >
+                                    {c.username.charAt(0).toUpperCase()}
+                                  </span>
                                 ))}
                                 {project.colaboradores?.length > 3 && (
-                                    <span className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-300 text-xs md:text-sm">
-                                        +{project.colaboradores.length - 3}
-                                    </span>
+                                  <span className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-300 text-xs md:text-sm">
+                                    +{project.colaboradores.length - 3}
+                                  </span>
                                 )}
+                              </div>
+                            </div>
+                            {/* Estado del proyecto */}
+                            <div>
+                              {getEstadoBadge(project.estado)}
+                            </div>
+                            {/* Botones de acción */}
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => handleOpenCollaboratorsModal(project)}
+                                className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-accent dark:hover:text-dark-accent transition-colors"
+                                title="Gestionar Colaboradores"
+                              >
+                                <Users size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleEdit(project)}
+                                className="text-light-accent dark:text-dark-accent hover:opacity-80 transition-opacity"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(project.id)}
+                                className="text-light-danger dark:text-dark-danger hover:opacity-80 transition-opacity"
+                              >
+                                <Trash2 size={16} />
+                              </button>
                             </div>
                           </div>
-                          <div className="sm:col-span-1 md:col-span-1" onClick={() => handleProjectClick(project)}>
-                            {getEstadoBadge(project.estado)}
-                          </div>
-                          <div
-                            className="sm:col-span-2 md:col-span-1 flex gap-2 justify-start sm:justify-end"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                             <button
-                              onClick={() => handleOpenCollaboratorsModal(project)}
-                              className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-accent dark:hover:text-dark-accent transition-colors"
-                              title="Gestionar Colaboradores"
-                            >
-                              <Users size={16} className="md:size-[18px]" />
-                            </button>
-                            <button
-                              onClick={() => handleEdit(project)}
-                              className="text-light-accent dark:text-dark-accent hover:opacity-80 transition-opacity"
-                            >
-                              <Edit3 size={16} className="md:size-[18px]" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(project.id)}
-                              className="text-light-danger dark:text-dark-danger hover:opacity-80 transition-opacity"
-                            >
-                              <Trash2 size={16} className="md:size-[18px]" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        ))}
+                        )}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-      
-      {/* Collaborators Modal */}
+
+      {/* Modal de colaboradores */}
       {selectedProject && (
         <CollaboratorsModal
           isOpen={isCollaboratorsModalOpen}
