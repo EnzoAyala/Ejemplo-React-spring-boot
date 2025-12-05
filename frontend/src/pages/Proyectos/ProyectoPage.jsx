@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   PlusCircle,
   Edit3,
@@ -28,10 +28,29 @@ const ProyectosPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ nombre: "", descripcion: "" });
   const [currentUser, setCurrentUser] = useState(null);
+
+  // -- Busqueda en URL y campo --
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   
   // State for collaborators modal
   const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+
+  // Actualizar URL segun busqueda
+  useEffect(() => {
+    if (searchTerm && searchTerm.trim() !== "") {
+      setSearchParams({ search: searchTerm });
+    } else {
+      setSearchParams({});
+    }
+  }, [searchTerm, setSearchParams]);
+
+  // Sincronizar el campo de búsqueda cuando cambia la URL (e.g., navegación atrás/adelante)
+  useEffect(() => {
+    const termFromUrl = searchParams.get("search") || "";
+    setSearchTerm((prev) => (prev === termFromUrl ? prev : termFromUrl));
+  }, [searchParams]);
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
@@ -228,10 +247,28 @@ const ProyectosPage = () => {
             <span>Agregar Proyecto</span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <button className="p-2 border border-light-divider dark:border-dark-divider rounded-lg text-light-text dark:text-dark-text transition-colors">
-              <Search size={16} />
-            </button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Search size={16} />
+              </span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar proyectos..."
+                className="w-full pl-9 pr-8 py-2 border border-light-divider dark:border-dark-divider rounded-lg bg-white dark:bg-dark-surface text-sm text-light-text dark:text-dark-text placeholder-gray-400"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <Trash2 size={16} color="red"/>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -318,6 +355,18 @@ const ProyectosPage = () => {
                 <div className="ml-6 space-y-2">
                   {projects
                     .filter((p) => p.estado === estado)
+                    .filter((p) => {
+                      const term = (searchTerm || "").trim().toLowerCase();
+                      if (!term) return true;
+                      const nombre = (p.nombre || "").toLowerCase();
+                      const descripcion = (p.descripcion || "").toLowerCase();
+                      const colaboradores = Array.isArray(p.colaboradores) ? p.colaboradores : [];
+                      return (
+                        nombre.includes(term) ||
+                        descripcion.includes(term) ||
+                        colaboradores.some((c) => (c.username || "").toLowerCase().includes(term))
+                      );
+                    })
                     .map((project) => (
                       <div
                         key={project.id}
