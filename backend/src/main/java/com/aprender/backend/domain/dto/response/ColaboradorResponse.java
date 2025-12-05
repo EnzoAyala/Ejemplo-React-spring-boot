@@ -12,4 +12,5 @@ public class ColaboradorResponse {
     private String username;
     private String email;
     private String rolEnProyecto;
+    private String estadoInvitacion;
 }

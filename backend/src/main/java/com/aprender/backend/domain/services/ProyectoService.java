@@ -4,8 +4,10 @@ import com.aprender.backend.domain.dto.request.ColaboradorRequest;
 import com.aprender.backend.domain.dto.request.ProyectoRequest;
 import com.aprender.backend.domain.dto.response.ColaboradorResponse;
 import com.aprender.backend.domain.dto.response.ProyectoResponse;
+import com.aprender.backend.domain.mappers.NotificacionMapper;
 import com.aprender.backend.domain.repository.ProyectoRepository;
 import com.aprender.backend.domain.repository.UserRepository;
+import com.aprender.backend.persistence.entity.Notificacion;
 import com.aprender.backend.persistence.entity.Proyecto;
 import com.aprender.backend.persistence.entity.User;
 import com.aprender.backend.domain.repository.ProyectoUsuarioRepository;
@@ -13,6 +15,7 @@ import com.aprender.backend.persistence.entity.Proyecto_usuario;
 import com.aprender.backend.persistence.entity.Tarea; // Added import
 import com.aprender.backend.domain.repository.TareaRepository; // Added import
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,15 @@ public class ProyectoService {
 
     @Autowired
     private TareaRepository tareaRepository; // Inject TareaRepository
+
+    @Autowired
+    private NotificacionService notificacionService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private NotificacionMapper notificacionMapper;
 
     public List<ProyectoResponse> getAllProyectos() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -68,6 +80,7 @@ public class ProyectoService {
         proyectoUsuario.setProyecto(nuevoProyecto);
         proyectoUsuario.setUsuario(user);
         proyectoUsuario.setRolEnProyecto("Administrador");
+        proyectoUsuario.setEstadoInvitacion("aceptado");
         proyectoUsuarioRepository.save(proyectoUsuario);
 
         return mapToProyectoResponse(nuevoProyecto);
@@ -154,7 +167,8 @@ public class ProyectoService {
                         pu.getUsuario().getId(),
                         pu.getUsuario().getUsername(),
                         pu.getUsuario().getEmail(),
-                        pu.getRolEnProyecto()
+                        pu.getRolEnProyecto(),
+                        pu.getEstadoInvitacion()
                 ))
                 .collect(Collectors.toList());
     }
@@ -178,14 +192,59 @@ public class ProyectoService {
         nuevoColaborador.setProyecto(proyecto);
         nuevoColaborador.setUsuario(usuarioAAgregar);
         nuevoColaborador.setRolEnProyecto(request.getRol());
+        nuevoColaborador.setEstadoInvitacion("pendiente");
         proyectoUsuarioRepository.save(nuevoColaborador);
+
+        // Crear y enviar notificación de invitación
+        String mensaje = String.format("Has sido invitado al proyecto '%s' como %s.", proyecto.getNombre(), request.getRol());
+        Notificacion notificacion = new Notificacion(null, mensaje, "invitacion_proyecto", false, usuarioAAgregar, null, proyecto);
+        Notificacion savedNotificacion = notificacionService.create(notificacion);
+        messagingTemplate.convertAndSendToUser(usuarioAAgregar.getUsername(), "/topic/notifications", notificacionMapper.toNotificacionResponse(savedNotificacion));
 
         return new ColaboradorResponse(
                 usuarioAAgregar.getId(),
                 usuarioAAgregar.getUsername(),
                 usuarioAAgregar.getEmail(),
-                request.getRol()
+                request.getRol(),
+                "pendiente"
         );
+    }
+
+    @Transactional
+    public void responderInvitacion(Long proyectoId, String respuesta) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    
+        Proyecto_usuario proyectoUsuario = proyectoUsuarioRepository
+            .findByProyectoIdProyectoAndUsuarioId(proyectoId, user.getId())
+            .orElseThrow(() -> new RuntimeException("No se encontró la invitación al proyecto."));
+    
+        if (!"pendiente".equals(proyectoUsuario.getEstadoInvitacion())) {
+            throw new RuntimeException("Ya has respondido a esta invitación.");
+        }
+    
+        String mensajeNotificacionAdmin;
+        if ("aceptado".equals(respuesta)) {
+            proyectoUsuario.setEstadoInvitacion("aceptado");
+            mensajeNotificacionAdmin = String.format("%s ha aceptado la invitación al proyecto '%s'.", user.getUsername(), proyectoUsuario.getProyecto().getNombre());
+        } else if ("rechazado".equals(respuesta)) {
+            proyectoUsuario.setEstadoInvitacion("rechazado");
+            mensajeNotificacionAdmin = String.format("%s ha rechazado la invitación al proyecto '%s'.", user.getUsername(), proyectoUsuario.getProyecto().getNombre());
+            // Opcional: eliminar el registro si es rechazado
+            // proyectoUsuarioRepository.delete(proyectoUsuario);
+        } else {
+            throw new RuntimeException("Respuesta no válida. Use 'aceptado' or 'rechazado'.");
+        }
+        
+        proyectoUsuarioRepository.save(proyectoUsuario);
+    
+        // Notificar al admin del proyecto
+        User admin = proyectoUsuario.getProyecto().getAdmin();
+        Notificacion notificacionParaAdmin = new Notificacion(null, mensajeNotificacionAdmin, "respuesta_invitacion", false, admin, null, proyectoUsuario.getProyecto());
+        Notificacion savedNotificacion = notificacionService.create(notificacionParaAdmin);
+        messagingTemplate.convertAndSendToUser(admin.getUsername(), "/topic/notifications", notificacionMapper.toNotificacionResponse(savedNotificacion));
     }
 
     @Transactional
@@ -204,6 +263,12 @@ public class ProyectoService {
         }
 
         proyectoUsuarioRepository.deleteByProyectoIdProyectoAndUsuarioId(proyectoId, usuarioId);
+
+        // Crear y enviar notificación
+        String mensaje = String.format("Has sido eliminado del proyecto '%s'.", proyecto.getNombre());
+        Notificacion notificacion = new Notificacion(null, mensaje, "colaborador", false, usuarioAEliminar, null, proyecto);
+        Notificacion savedNotificacion = notificacionService.create(notificacion);
+        messagingTemplate.convertAndSendToUser(usuarioAEliminar.getUsername(), "/topic/notifications", notificacionMapper.toNotificacionResponse(savedNotificacion));
     }
     
     private void checkIsAdmin(Proyecto proyecto) throws AccessDeniedException {

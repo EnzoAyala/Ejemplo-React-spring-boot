@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, Trash2 } from 'lucide-react';
+import { X, UserPlus, Trash2, Check, AlertTriangle } from 'lucide-react';
 import UserService from '../../services/user.service';
 import ProyectoService from '../../services/proyecto.service';
 
-const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate }) => {
+const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate, currentUser }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [collaborators, setCollaborators] = useState(project?.colaboradores || []);
   const [selectedUserId, setSelectedUserId] = useState('');
@@ -67,6 +67,24 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate }) 
           setLoading(false);
         });
     }
+  };
+
+  const handleInvitationResponse = (response) => {
+    setLoading(true);
+    ProyectoService.responderInvitacion(project.id, response)
+      .then(() => {
+        const updatedCollaborators = collaborators.map(c => 
+          c.id === currentUser.id ? { ...c, estadoInvitacion: response } : c
+        );
+        setCollaborators(updatedCollaborators);
+        if (onCollaboratorUpdate) onCollaboratorUpdate();
+      })
+      .catch(err => {
+        setError(err.response?.data?.message || 'Error al responder a la invitación.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const availableUsers = allUsers.filter(user =>
@@ -154,9 +172,28 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate }) 
               </div>
 
               <div className="flex items-center gap-3">
+                <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${
+                  c.estadoInvitacion === 'aceptado' ? 'bg-green-500 text-white' :
+                  c.estadoInvitacion === 'pendiente' ? 'bg-yellow-500 text-black' :
+                  'bg-red-500 text-white'
+                }`}>
+                  {c.estadoInvitacion}
+                </span>
+
                 <span className="text-xs font-medium px-3 py-1.5 bg-light-primary text-white rounded-full">
                   {c.rolEnProyecto}
                 </span>
+
+                {currentUser && currentUser.id === c.id && c.estadoInvitacion === 'pendiente' && (
+                  <div className="flex gap-2">
+                    <button onClick={() => handleInvitationResponse('aceptado')} className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700">
+                      <Check size={16} />
+                    </button>
+                    <button onClick={() => handleInvitationResponse('rechazado')} className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700">
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
 
                 {c.rolEnProyecto !== 'Administrador' && ( // Assuming 'Administrador' cannot be removed by this modal
                   <button

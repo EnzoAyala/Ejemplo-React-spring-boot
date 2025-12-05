@@ -5,6 +5,7 @@ import './index.css';
 
 import AppRoutes from './routes/AppRoutes';
 import AuthService from './services/auth.service';
+import NotificacionService from './services/notificacion.service';
 import useTheme from './hooks/useTheme';
 import Header from './components/Header';
 import ProfileModal from './components/ProfileModal';
@@ -13,6 +14,7 @@ import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import UserService from './services/user.service';
 import MessageService from './services/message.service';
+import NotificationPanel from './components/NotificationPanel';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -32,12 +34,18 @@ function App() {
   const unreadSetRef = React.useRef(new Set());
   const [wsReady, setWsReady] = useState(false);
 
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user) {
       setCurrentUser(user);
       setIsAdmin(user.roles?.includes('ROLE_ADMIN'));
       setIsUser(user.roles?.includes('ROLE_USER'));
+      fetchNotifications(user.id);
     }
   }, []);
 
@@ -45,6 +53,16 @@ function App() {
   const computeChatId = (id1, id2) => {
     if (!id1 || !id2) return null;
     return id1 < id2 ? `chat_${id1}_${id2}` : `chat_${id2}_${id1}`;
+  };
+
+  const fetchNotifications = async (userId) => {
+    try {
+      const response = await NotificacionService.getNotificationsByUserId(userId);
+      setNotifications(response.data);
+      setUnreadNotificationsCount(response.data.filter(n => !n.leida).length);
+    } catch (error) {
+      console.error("Error al obtener las notificaciones:", error);
+    }
   };
 
   // Recalcular chats no leídos (por conversación) consultando al backend
@@ -94,6 +112,17 @@ function App() {
       setChatClosing(false);
     }, 1000); // Corresponde a la duración de la animación
   };
+
+  const handleOpenNotificationPanel = () => setNotificationPanelOpen(true);
+  const handleCloseNotificationPanel = () => setNotificationPanelOpen(false);
+
+  const handleNotificationRead = (notificationId) => {
+    setNotifications(prev =>
+      prev.map(n => (n.idNotificacion === notificationId ? { ...n, leida: true } : n))
+    );
+    setUnreadNotificationsCount(prev => (prev > 0 ? prev - 1 : 0));
+  };
+
 
   // Cargar usuarios para chats y mapa de usuarios cuando hay sesión
   useEffect(() => {
@@ -146,6 +175,20 @@ function App() {
   useEffect(() => {
     const client = stompRef.current;
     if (!client?.connected || !wsReady || !currentUser?.id) return;
+  
+    // Suscripción general de notificaciones
+    const notificationSub = client.subscribe(`/user/${currentUser.username}/topic/notifications`, (message) => {
+      try {
+        const newNotification = JSON.parse(message.body);
+        setNotifications(prev => [newNotification, ...prev]);
+        setUnreadNotificationsCount(prev => prev + 1);
+        setToast({ visible: true, text: newNotification.mensaje });
+        setTimeout(() => setToast({ visible: false, text: '' }), 3000);
+      } catch (e) {
+        console.warn('WS App notification parse error', e);
+      }
+    });
+    subsRef.current['notifications'] = notificationSub;
 
     const desired = new Set();
     (chatUsers || []).forEach(u => {
@@ -177,13 +220,13 @@ function App() {
     });
 
     // Desuscribir los que ya no correspondan
-    Object.keys(subsRef.current).forEach((chatId) => {
-      if (!desired.has(chatId)) {
-        try { subsRef.current[chatId].unsubscribe(); } catch (e) { /* ignore */ }
-        delete subsRef.current[chatId];
+    Object.keys(subsRef.current).forEach((key) => {
+      if (key !== 'notifications' && !desired.has(key)) {
+        try { subsRef.current[key].unsubscribe(); } catch (e) { /* ignore */ }
+        delete subsRef.current[key];
       }
     });
-  }, [wsReady, chatUsers, currentUser?.id]);
+  }, [wsReady, chatUsers, currentUser?.id, currentUser?.username]);
 
   // Al abrir el panel de chat, recomputar chats no leídos después de que el chat marque como leídos
   useEffect(() => {
@@ -233,30 +276,58 @@ function App() {
         <main className="w-full max-w-full mx-auto py-6 mt-16 transition-colors duration-300">
           <AppRoutes />
           {currentUser && ( // Solo se ve si estas logueado
-            <button type="button" onClick={handleOpenChat} aria-label="Abrir chat">
-              {/* Botón para abrir el chat a la derecha */}
-              <div className="fixed bottom-4 right-4 z-30 bg-green-500 p-3 rounded-full text-white hover:bg-green-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z"
-                  />
-                </svg>
-                {unreadChatsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs font-semibold w-5 h-5 flex items-center justify-center">
-                    {unreadChatsCount > 99 ? '99+' : unreadChatsCount}
-                  </span>
-                )}
-              </div>
-            </button>
+            <>
+              <button onClick={handleOpenNotificationPanel}>
+                {/* Botón para abrir las notificaciones a la derecha */}
+                <div className="fixed bottom-20 right-4 z-30 bg-blue-500 p-3 rounded-full text-white hover:bg-blue-600">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-8 h-8"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"
+                    />
+                  </svg>
+
+                  {unreadNotificationsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs font-semibold w-5 h-5 flex items-center justify-center">
+                      {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              <button type="button" onClick={handleOpenChat} aria-label="Abrir chat">
+                {/* Botón para abrir el chat a la derecha */}
+                <div className="fixed bottom-4 right-4 z-30 bg-green-500 p-3 rounded-full text-white hover:bg-green-600">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-8 h-8"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z"
+                    />
+                  </svg>
+                  {unreadChatsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs font-semibold w-5 h-5 flex items-center justify-center">
+                      {unreadChatsCount > 99 ? '99+' : unreadChatsCount}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </>
           )}
         </main>
         {toast.visible && (
@@ -274,6 +345,16 @@ function App() {
           onSave={handleSaveProfile}
         />
       )}
+
+      {/* Panel de notificaciones */}
+      {isNotificationPanelOpen && (
+        <NotificationPanel
+          notifications={notifications}
+          onClose={handleCloseNotificationPanel}
+          onNotificationRead={handleNotificationRead}
+        />
+      )}
+
 
       {/* Chat - panel lateral derecho */}
       {isChatOpen && (

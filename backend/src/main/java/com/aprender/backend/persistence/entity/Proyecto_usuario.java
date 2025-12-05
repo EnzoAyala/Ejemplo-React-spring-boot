@@ -26,4 +26,7 @@ public class Proyecto_usuario {
 
     @Column(name = "rol_en_proyecto", length = 50)
     private String rolEnProyecto; // Ejemplo: "Líder", "Colaborador", "Observador"
+
+    @Column(name = "estado_invitacion", length = 20)
+    private String estadoInvitacion; // "pendiente", "aceptado", "rechazado"
 }

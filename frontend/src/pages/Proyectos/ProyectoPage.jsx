@@ -11,6 +11,7 @@ import {
   Users
 } from "lucide-react";
 import ProyectoService from "../../services/proyecto.service";
+import AuthService from "../../services/auth.service";
 import CollaboratorsModal from "../../components/Proyectos/CollaboratorsModal";
 
 const ProyectosPage = () => {
@@ -27,12 +28,15 @@ const ProyectosPage = () => {
   const [draggedProject, setDraggedProject] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ nombre: "", descripcion: "" });
+  const [currentUser, setCurrentUser] = useState(null);
   
   // State for collaborators modal
   const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
 
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
+    setCurrentUser(user);
     fetchProjects();
   }, []);
 
@@ -450,6 +454,7 @@ const ProyectosPage = () => {
           onClose={handleCloseCollaboratorsModal}
           project={selectedProject}
           onCollaboratorUpdate={handleCollaboratorUpdate}
+          currentUser={currentUser}
         />
       )}
     </div>

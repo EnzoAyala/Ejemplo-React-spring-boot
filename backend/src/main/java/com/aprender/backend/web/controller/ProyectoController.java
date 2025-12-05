@@ -67,11 +67,20 @@ public class ProyectoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(proyectoService.agregarColaborador(id, request));
     }
 
+
     @DeleteMapping("/{id}/colaboradores/{usuarioId}")
     public ResponseEntity<Void> eliminarColaborador(@PathVariable Long id, @PathVariable Long usuarioId) throws AccessDeniedException {
         proyectoService.eliminarColaborador(id, usuarioId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/invitacion")
+    public ResponseEntity<Void> responderInvitacion(@PathVariable Long id, @RequestBody Map<String, String> respuestaRequest) {
+        String respuesta = respuestaRequest.get("respuesta");
+        proyectoService.responderInvitacion(id, respuesta);
+        return ResponseEntity.ok().build();
+    }
+
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {

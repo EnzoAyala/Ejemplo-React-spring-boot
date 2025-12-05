@@ -39,6 +39,10 @@ const ProyectoService = {
 
   eliminarColaborador(id, usuarioId) {
     return api.delete(PROYECTO_BASE + id + '/colaboradores/' + usuarioId);
+  },
+
+  responderInvitacion(id, respuesta) {
+    return api.post(PROYECTO_BASE + id + '/invitacion', { respuesta });
   }
 };
 

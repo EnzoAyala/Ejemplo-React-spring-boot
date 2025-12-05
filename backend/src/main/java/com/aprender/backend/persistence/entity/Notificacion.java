@@ -33,4 +33,8 @@ public class Notificacion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tarea")
     private Tarea tarea;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_proyecto")
+    private Proyecto proyecto;
 }
