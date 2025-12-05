@@ -236,9 +236,9 @@ const TareasPage = () => {
       )}
 
       {/* Lista de tareas */}
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
         {estados.map((estado) => (
-          <div key={estado} className="mb-6" onDrop={(e) => handleDrop(e, estado)} onDragOver={(e) => e.preventDefault()}>
+          <div key={estado} onDrop={(e) => handleDrop(e, estado)} onDragOver={(e) => e.preventDefault()}>
             <div className="flex items-center gap-2 mb-3">
               <button onClick={() => toggleGroup(estado)} className="hover:bg-light-primary/10 dark:hover:bg-dark-primary/20 rounded p-1">
                 {expandedGroups[estado] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}

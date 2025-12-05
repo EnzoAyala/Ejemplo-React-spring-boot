@@ -224,14 +224,6 @@ const ProyectosPage = () => {
                 ⭐
               </button>
             </div>
-            <div className="flex items-center gap-2">
-              <button className="px-4 py-2 bg-light-primary hover:bg-light-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 text-white rounded-lg text-sm font-medium shadow-sm transition-all duration-200">
-                Compartir
-              </button>
-              <button className="px-4 py-2 border border-light-divider dark:border-dark-divider rounded-lg hover:bg-light-surface dark:hover:bg-dark-surface text-light-text dark:text-dark-text text-sm font-medium transition-colors">
-                Personalizar
-              </button>
-            </div>
           </div>
         </div>
       </div>
