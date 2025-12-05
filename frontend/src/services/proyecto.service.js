@@ -43,6 +43,10 @@ const ProyectoService = {
 
   responderInvitacion(id, respuesta) {
     return api.post(PROYECTO_BASE + id + '/invitacion', { respuesta });
+  },
+
+  updateColaboradorRol(id, usuarioId, rol) {
+    return api.put(PROYECTO_BASE + id + '/colaboradores/' + usuarioId, { rol });
   }
 };
 

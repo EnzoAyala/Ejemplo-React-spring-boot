@@ -4,7 +4,7 @@ import com.aprender.backend.domain.dto.response.ProyectoResponse;
 import com.aprender.backend.persistence.entity.Proyecto;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
+
 
 @Component
 public class ProyectoMapper {
@@ -19,7 +19,8 @@ public class ProyectoMapper {
                 proyecto.getDescripcion(),
                 proyecto.getEstado(),
                 null, // Colaboradores se llena en el servicio
-                0.0 // Progreso se llena en el servicio
+                0.0, // Progreso se llena en el servicio
+                proyecto.getAdmin() != null ? proyecto.getAdmin().getId() : null
         );
     }
 }

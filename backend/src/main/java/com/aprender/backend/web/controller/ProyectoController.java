@@ -81,6 +81,13 @@ public class ProyectoController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{id}/colaboradores/{usuarioId}")
+    public ResponseEntity<Void> updateColaboradorRol(@PathVariable Long id, @PathVariable Long usuarioId, @RequestBody Map<String, String> rolRequest) throws AccessDeniedException {
+        String rol = rolRequest.get("rol");
+        proyectoService.updateColaboradorRol(id, usuarioId, rol);
+        return ResponseEntity.ok().build();
+    }
+
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e) {

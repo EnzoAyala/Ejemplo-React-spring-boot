@@ -22,49 +22,68 @@ const NotificationPanel = ({ notifications, onClose, onNotificationRead }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}>
-      <div 
-        className="fixed top-0 right-0 h-full w-full max-w-sm bg-light-surface dark:bg-dark-surface shadow-lg z-50 transform transition-transform duration-300 ease-in-out translate-x-0"
+    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40" onClick={onClose}>
+      <div
+        className="fixed top-0 right-0 h-full w-full max-w-sm 
+               bg-light-surface dark:bg-dark-surface 
+               shadow-2xl z-50 transform transition-transform duration-500 ease-in-out 
+               animate-left-to-right rounded-l-xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-light-divider dark:border-dark-divider">
-          <h3 className="text-xl font-semibold text-light-text dark:text-dark-text">Notificaciones</h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-light-hover dark:hover:bg-dark-hover">
-            <X size={24} className="text-light-text-secondary dark:text-dark-text-secondary" />
+          <h3 className="text-lg font-semibold text-light-text dark:text-dark-text tracking-tight">
+            Notificaciones
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-light-hover dark:hover:bg-dark-hover transition-colors duration-200"
+          >
+            <X size={22} className="text-light-text-secondary dark:text-dark-text-secondary" />
           </button>
         </div>
-        <div className="overflow-y-auto h-[calc(100%-5rem)]">
+
+        {/* Body */}
+        <div className="overflow-y-auto h-[calc(100%-4rem)]">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center text-light-text-secondary dark:text-dark-text-secondary">
-              <Bell size={48} className="mb-4" />
-              <p>No tienes notificaciones nuevas.</p>
+            <div className="flex flex-col items-center justify-center h-full text-center text-light-text-secondary dark:text-dark-text-secondary animate-fade-in">
+              <Bell size={48} className="mb-4 text-light-accent dark:text-dark-accent animate-pulse" />
+              <p className="text-sm">No tienes notificaciones nuevas.</p>
             </div>
           ) : (
             <ul className="divide-y divide-light-divider dark:divide-dark-divider">
               {notifications.map(notif => (
-                <li key={notif.idNotificacion} className={`p-4 ${!notif.leida ? 'bg-light-highlight dark:bg-dark-highlight' : ''}`}>
-                  <p className="text-sm text-light-text dark:text-dark-text">{notif.mensaje}</p>
-                  <div className="flex justify-end mt-2 space-x-2">
+                <li
+                  key={notif.idNotificacion}
+                  className={`p-4 transition-colors duration-300 rounded-md ${!notif.leida
+                    ? 'bg-light-elevated dark:bg-dark-elevated animate-scale-in'
+                    : 'hover:bg-light-hover dark:hover:bg-dark-hover'
+                    }`}
+                >
+                  <p className="text-sm text-light-text dark:text-dark-text leading-relaxed">
+                    {notif.mensaje}
+                  </p>
+                  <div className="flex justify-end mt-3 space-x-3">
                     {notif.tipo === 'invitacion_proyecto' && !notif.leida && (
                       <>
-                        <button 
-                          onClick={() => handleInvitationResponse(notif.proyecto.idProyecto, 'aceptado', notif.idNotificacion)}
-                          className="text-xs text-green-600 hover:underline flex items-center"
+                        <button
+                          onClick={() => handleInvitationResponse(notif.proyecto.id, 'aceptado', notif.idNotificacion)}
+                          className="text-xs font-medium text-light-success hover:underline flex items-center transition-transform hover:scale-105"
                         >
                           <Check size={14} className="mr-1" /> Aceptar
                         </button>
-                        <button 
-                          onClick={() => handleInvitationResponse(notif.proyecto.idProyecto, 'rechazado', notif.idNotificacion)}
-                          className="text-xs text-red-600 hover:underline flex items-center"
+                        <button
+                          onClick={() => handleInvitationResponse(notif.proyecto.id, 'rechazado', notif.idNotificacion)}
+                          className="text-xs font-medium text-light-danger hover:underline flex items-center transition-transform hover:scale-105"
                         >
                           <XCircle size={14} className="mr-1" /> Rechazar
                         </button>
                       </>
                     )}
                     {!notif.leida && notif.tipo !== 'invitacion_proyecto' && (
-                      <button 
+                      <button
                         onClick={() => handleMarkAsRead(notif.idNotificacion)}
-                        className="text-xs text-light-primary dark:text-dark-primary hover:underline"
+                        className="text-xs font-medium text-light-primary dark:text-dark-primary hover:underline transition-transform hover:scale-105"
                       >
                         Marcar como leída
                       </button>
@@ -77,6 +96,7 @@ const NotificationPanel = ({ notifications, onClose, onNotificationRead }) => {
         </div>
       </div>
     </div>
+
   );
 };
 

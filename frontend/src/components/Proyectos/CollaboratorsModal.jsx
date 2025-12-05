@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, Trash2, Check, AlertTriangle } from 'lucide-react';
+import { X, UserPlus, Trash2, Check } from 'lucide-react';
 import UserService from '../../services/user.service';
 import ProyectoService from '../../services/proyecto.service';
 
@@ -87,9 +87,29 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate, cu
       });
   };
 
+  const handleUpdateRole = (userId, newRole) => {
+    setLoading(true);
+    ProyectoService.updateColaboradorRol(project.id, userId, newRole)
+      .then(() => {
+        const updatedCollaborators = collaborators.map(c =>
+          c.id === userId ? { ...c, rolEnProyecto: newRole } : c
+        );
+        setCollaborators(updatedCollaborators);
+        if (onCollaboratorUpdate) onCollaboratorUpdate();
+      })
+      .catch(err => {
+        setError(err.response?.data?.message || 'Error al actualizar el rol.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   const availableUsers = allUsers.filter(user =>
     !collaborators.some(c => c.id === user.id)
   );
+
+  const isCurrentUserAdmin = currentUser && currentUser.id === project.adminId;
 
   return (
     <div
@@ -115,48 +135,45 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate, cu
         </div>
 
         {/* Add collaborator form */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
-          <select
-            value={selectedUserId}
-            onChange={e => setSelectedUserId(e.target.value)}
-            className="flex-grow border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2.5 text-base bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent outline-none transition-colors"
-          >
-            <option value="">Seleccionar usuario...</option>
-            {availableUsers.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.username} ({user.email})
-              </option>
-            ))}
-          </select>
+        {isCurrentUserAdmin && (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
+            <select
+              value={selectedUserId}
+              onChange={e => setSelectedUserId(e.target.value)}
+              className="flex-grow border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2.5 text-base bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent outline-none transition-colors"
+            >
+              <option value="">Seleccionar usuario...</option>
+              {availableUsers.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.username} ({user.email})
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={selectedRole}
-            onChange={e => setSelectedRole(e.target.value)}
-            className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2.5 text-base bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent outline-none transition-colors"
-          >
-            <option value="lector">Lector</option>
-            <option value="editor">Editor</option>
-          </select>
+            <select
+              value={selectedRole}
+              onChange={e => setSelectedRole(e.target.value)}
+              className="border border-light-divider dark:border-dark-divider rounded-lg px-4 py-2.5 text-base bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent outline-none transition-colors"
+            >
+              <option value="lector">Lector</option>
+              <option value="editor">Editor</option>
+            </select>
 
-          <button
-            onClick={handleAddCollaborator}
-            disabled={loading}
-            className="px-5 py-2.5 bg-light-primary text-white rounded-lg text-base font-semibold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <UserPlus size={20} /> Agregar
-          </button>
-        </div>
+            <button
+              onClick={handleAddCollaborator}
+              disabled={loading}
+              className="px-5 py-2.5 bg-light-primary text-white rounded-lg text-base font-semibold flex items-center justify-center gap-2 hover:bg-opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <UserPlus size={20} /> Agregar
+            </button>
+          </div>
+        )}
 
         {/* Error message */}
         {error && <p className="text-light-danger text-sm mb-5 font-medium">{error}</p>}
 
         {/* Collaborators list */}
         <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-          {collaborators.length === 0 && (
-            <p className="text-center text-light-text-secondary dark:text-dark-text-secondary py-4">
-              Aún no hay colaboradores en este proyecto.
-            </p>
-          )}
           {collaborators.map(c => (
             <div
               key={c.id}
@@ -180,9 +197,21 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate, cu
                   {c.estadoInvitacion}
                 </span>
 
-                <span className="text-xs font-medium px-3 py-1.5 bg-light-primary text-white rounded-full">
-                  {c.rolEnProyecto}
-                </span>
+                {isCurrentUserAdmin && c.rolEnProyecto !== 'Administrador' ? (
+                  <select
+                    value={c.rolEnProyecto}
+                    onChange={(e) => handleUpdateRole(c.id, e.target.value)}
+                    className="text-xs font-medium px-3 py-1.5 rounded-full bg-light-primary text-white border-transparent focus:border-light-accent focus:ring-0"
+                    disabled={loading}
+                  >
+                    <option value="lector">Lector</option>
+                    <option value="editor">Editor</option>
+                  </select>
+                ) : (
+                  <span className="text-xs font-medium px-3 py-1.5 bg-light-primary text-white rounded-full">
+                    {c.rolEnProyecto}
+                  </span>
+                )}
 
                 {currentUser && currentUser.id === c.id && c.estadoInvitacion === 'pendiente' && (
                   <div className="flex gap-2">
@@ -195,7 +224,7 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate, cu
                   </div>
                 )}
 
-                {c.rolEnProyecto !== 'Administrador' && ( // Assuming 'Administrador' cannot be removed by this modal
+                {isCurrentUserAdmin && c.rolEnProyecto !== 'Administrador' && (
                   <button
                     onClick={() => handleRemoveCollaborator(c.id)}
                     disabled={loading}

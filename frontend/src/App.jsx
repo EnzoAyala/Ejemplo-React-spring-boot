@@ -331,7 +331,7 @@ function App() {
           )}
         </main>
         {toast.visible && (
-          <div className="fixed bottom-20 right-4 z-50 bg-gray-900 text-white px-4 py-2 rounded-md shadow-lg">
+          <div className="fixed bottom-40 right-4 z-50 bg-gray-900 text-white px-4 py-2 rounded-md shadow-lg">
             {toast.text}
           </div>
         )}

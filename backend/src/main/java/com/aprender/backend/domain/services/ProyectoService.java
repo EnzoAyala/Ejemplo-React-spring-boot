@@ -155,7 +155,8 @@ public class ProyectoService {
                 proyecto.getDescripcion(),
                 proyecto.getEstado(),
                 colaboradores,
-                progreso // Pass progress to the constructor
+                progreso, // Pass progress to the constructor
+                proyecto.getAdmin().getId()
         );
     }
 
@@ -245,6 +246,27 @@ public class ProyectoService {
         Notificacion notificacionParaAdmin = new Notificacion(null, mensajeNotificacionAdmin, "respuesta_invitacion", false, admin, null, proyectoUsuario.getProyecto());
         Notificacion savedNotificacion = notificacionService.create(notificacionParaAdmin);
         messagingTemplate.convertAndSendToUser(admin.getUsername(), "/topic/notifications", notificacionMapper.toNotificacionResponse(savedNotificacion));
+    }
+
+    @Transactional
+    public void updateColaboradorRol(Long proyectoId, Long usuarioId, String rol) throws AccessDeniedException {
+        Proyecto proyecto = proyectoRepository.findById(proyectoId)
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+
+        // Auth check
+        checkIsAdmin(proyecto);
+
+        Proyecto_usuario proyectoUsuario = proyectoUsuarioRepository.findByProyectoIdProyectoAndUsuarioId(proyectoId, usuarioId)
+                .orElseThrow(() -> new RuntimeException("Colaborador no encontrado."));
+
+        proyectoUsuario.setRolEnProyecto(rol);
+        proyectoUsuarioRepository.save(proyectoUsuario);
+
+        // Notify user of role change
+        String mensaje = String.format("Tu rol en el proyecto '%s' ha sido cambiado a %s.", proyecto.getNombre(), rol);
+        Notificacion notificacion = new Notificacion(null, mensaje, "rol_actualizado", false, proyectoUsuario.getUsuario(), null, proyecto);
+        Notificacion savedNotificacion = notificacionService.create(notificacion);
+        messagingTemplate.convertAndSendToUser(proyectoUsuario.getUsuario().getUsername(), "/topic/notifications", notificacionMapper.toNotificacionResponse(savedNotificacion));
     }
 
     @Transactional
