@@ -12,6 +12,7 @@ import TareasPage from '../pages/Proyectos/TareasPage';
 import ProyectoPage from '../pages/Proyectos/ProyectoPage';
 // ¡Importa el componente ProtectedRoute!
 import ProtectedRoute from '../components/ProtectedRoute';
+import ErrorAutenticacion from '../components/error/error_authentificacion';
 
 const AppRoutes = () => (
     <Routes>
@@ -44,6 +45,7 @@ const AppRoutes = () => (
                 </ProtectedRoute>
             }
         />
+        {/* Paginas sin autenticación */}
         <Route
             path="/register"
             element={
@@ -65,6 +67,15 @@ const AppRoutes = () => (
             element={
                 <ProtectedRoute redirectIfAuthenticated={true}>
                     <ResetPassword />
+                </ProtectedRoute>
+            }
+        />
+
+        <Route 
+            path="/error_autentificacion"
+            element={
+                <ProtectedRoute redirectIfAuthenticated={true}>
+                    <ErrorAutenticacion />
                 </ProtectedRoute>
             }
         />
