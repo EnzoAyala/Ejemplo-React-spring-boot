@@ -32,7 +32,7 @@ const ProyectosPage = () => {
   // -- Busqueda en URL y campo --
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  
+
   // State for collaborators modal
   const [isCollaboratorsModalOpen, setIsCollaboratorsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -142,7 +142,7 @@ const ProyectosPage = () => {
   const handleProjectClick = (project) => {
     navigate(`/proyectos/${project.id}/tareas`);
   };
-  
+
   // Handlers for collaborators modal
   const handleOpenCollaboratorsModal = (project) => {
     setSelectedProject(project);
@@ -265,7 +265,7 @@ const ProyectosPage = () => {
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   aria-label="Limpiar búsqueda"
                 >
-                  <Trash2 size={16} color="red"/>
+                  <Trash2 size={16} color="red" />
                 </button>
               )}
             </div>
@@ -449,7 +449,7 @@ const ProyectosPage = () => {
                                   <span
                                     key={c.id}
                                     title={c.username}
-                                    className="inline-block h-6 w-6 md:h-7 md:w-7 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 flex items-center justify-center text-xs md:text-sm"
+                                    className="h-6 w-6 md:h-7 md:w-7 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 flex items-center justify-center text-xs md:text-sm"
                                   >
                                     {c.username.charAt(0).toUpperCase()}
                                   </span>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, Edit3, Trash2, ChevronDown, ChevronRight,
   Search, Filter, ArrowLeft, Calendar
@@ -18,10 +18,30 @@ const TareasPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
 
+  // -- Busqueda en URL y campo --
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+
+  // Actualizar URL segun busqueda
+  useEffect(() => {
+    if (searchTerm && searchTerm.trim() !== "") {
+      setSearchParams({ search: searchTerm });
+    } else {
+      setSearchParams({});
+    }
+  }, [searchTerm, setSearchParams]);
+
+  // Sincronizar el campo de búsqueda cuando cambia la URL (e.g., navegación atrás/adelante)
+  useEffect(() => {
+    const termFromUrl = searchParams.get("search") || "";
+    setSearchTerm((prev) => (prev === termFromUrl ? prev : termFromUrl));
+  }, [searchParams]);
+
   useEffect(() => {
     fetchProyecto();
     fetchTareas();
-  }, [proyectoId]);
+  }, [proyectoId]); // eslint-disable-line react-hooks/exhaustive-deps 
+  // *** el de arriba se ignora pero funciona normal aun con error ***
 
   const fetchProyecto = () => {
     ProyectoService.getProyecto(proyectoId)
@@ -154,7 +174,7 @@ const TareasPage = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="sticky top-[89px] z-30 bg-light-surface dark:bg-dark-surface border-b border-light-divider dark:border-dark-divider px-6 py-3">
+      <div className="sticky bg-light-surface dark:bg-dark-surface border-b border-light-divider dark:border-dark-divider px-6 py-3">
         <div className="flex items-center justify-between">
           <button
             onClick={() => setShowNewForm(!showNewForm)}
@@ -163,14 +183,28 @@ const TareasPage = () => {
             <PlusCircle size={16} />
             <span>Agregar Tarea</span>
           </button>
-          <div className="flex items-center gap-2">
-            <button className="px-3 py-2 border border-light-divider dark:border-dark-divider rounded-lg hover:bg-light-primary/10 dark:hover:bg-dark-primary/20 text-sm font-medium flex items-center gap-2">
-              <Filter size={14} />
-              <span>Filtros</span>
-            </button>
-            <button className="p-2 border border-light-divider dark:border-dark-divider rounded-lg hover:bg-light-primary/10 dark:hover:bg-dark-primary/20">
-              <Search size={16} />
-            </button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Search size={16} />
+              </span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar tareas..."
+                className="w-full pl-9 pr-8 py-2 border border-light-divider dark:border-dark-divider rounded-lg bg-white dark:bg-dark-surface text-sm text-light-text dark:text-dark-text placeholder-gray-400"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <Trash2 size={16} color="red" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -219,62 +253,76 @@ const TareasPage = () => {
 
             {expandedGroups[estado] && (
               <div className="ml-6 space-y-2">
-                {tareas.filter(t => t.estado === estado).map((tarea) => (
-                  <div key={tarea.id} draggable={!editingId} onDragStart={(e) => handleDragStart(e, tarea)}
-                    className="bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-lg hover:shadow-md transition-all duration-200 cursor-move">
-                    {editingId === tarea.id ? (
-                      <div className="p-4 space-y-3">
-                        <input type="text" value={editForm.titulo} onChange={(e) => setEditForm({ ...editForm, titulo: e.target.value })}
-                          className="w-full border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary" />
-                        <input type="text" value={editForm.descripcion} onChange={(e) => setEditForm({ ...editForm, descripcion: e.target.value })}
-                          className="w-full border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary" />
-                        <div className="grid grid-cols-2 gap-3">
-                          <input type="date" value={editForm.fechaEntrega} onChange={(e) => setEditForm({ ...editForm, fechaEntrega: e.target.value })}
-                            className="border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary" />
-                          <select value={editForm.prioridad} onChange={(e) => setEditForm({ ...editForm, prioridad: e.target.value })}
-                            className="border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary">
-                            <option value="baja">Baja</option>
-                            <option value="media">Media</option>
-                            <option value="alta">Alta</option>
-                          </select>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => handleSaveEdit(tarea.id)} className="px-4 py-2 bg-light-primary dark:bg-dark-primary hover:opacity-90 text-white rounded text-sm">Guardar</button>
-                          <button onClick={handleCancelEdit} className="px-4 py-2 border border-light-divider dark:border-dark-divider rounded hover:bg-light-primary/10 dark:hover:bg-dark-primary/20 text-sm">Cancelar</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-start gap-2 flex-1">
-                            <span className="text-gray-400 dark:text-gray-500 mt-1">⋮⋮</span>
-                            <div className="flex-1">
-                              <h3 className="text-sm font-semibold">{tarea.titulo}</h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">{tarea.descripcion || "Sin descripción"}</p>
-                            </div>
+                {tareas
+                  .filter(t => t.estado === estado)
+                  .filter((t) => {
+                    const term = (searchTerm || "").trim().toLowerCase();
+                    if (!term) return true;
+
+                    const nombre = (t.titulo || "").toLowerCase();
+                    const descripcion = (t.descripcion || "").toLowerCase();
+                    return (
+                      nombre.includes(term) ||
+                      descripcion.includes(term)
+                    );
+                  })
+
+                  .map((tarea) => (
+                    <div key={tarea.id} draggable={!editingId} onDragStart={(e) => handleDragStart(e, tarea)}
+                      className="bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-lg hover:shadow-md transition-all duration-200 cursor-move">
+                      {editingId === tarea.id ? (
+                        <div className="p-4 space-y-3">
+                          <input type="text" value={editForm.titulo} onChange={(e) => setEditForm({ ...editForm, titulo: e.target.value })}
+                            className="w-full border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary" />
+                          <input type="text" value={editForm.descripcion} onChange={(e) => setEditForm({ ...editForm, descripcion: e.target.value })}
+                            className="w-full border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary" />
+                          <div className="grid grid-cols-2 gap-3">
+                            <input type="date" value={editForm.fechaEntrega} onChange={(e) => setEditForm({ ...editForm, fechaEntrega: e.target.value })}
+                              className="border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary" />
+                            <select value={editForm.prioridad} onChange={(e) => setEditForm({ ...editForm, prioridad: e.target.value })}
+                              className="border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary">
+                              <option value="baja">Baja</option>
+                              <option value="media">Media</option>
+                              <option value="alta">Alta</option>
+                            </select>
                           </div>
                           <div className="flex gap-2">
-                            <button onClick={() => handleEdit(tarea)} className="text-light-primary dark:text-dark-primary hover:opacity-80 p-1.5 rounded">
-                              <Edit3 size={16} />
-                            </button>
-                            <button onClick={() => handleDelete(tarea.id)} className="text-red-500 hover:text-red-600 p-1.5 rounded">
-                              <Trash2 size={16} />
-                            </button>
+                            <button onClick={() => handleSaveEdit(tarea.id)} className="px-4 py-2 bg-light-primary dark:bg-dark-primary hover:opacity-90 text-white rounded text-sm">Guardar</button>
+                            <button onClick={handleCancelEdit} className="px-4 py-2 border border-light-divider dark:border-dark-divider rounded hover:bg-light-primary/10 dark:hover:bg-dark-primary/20 text-sm">Cancelar</button>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 mt-3">
-                          {getPrioridadBadge(tarea.prioridad)}
-                          {tarea.fechaEntrega && (
-                            <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-                              <Calendar size={14} />
-                              <span>{tarea.fechaEntrega}</span>
+                      ) : (
+                        <div className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-start gap-2 flex-1">
+                              <span className="text-gray-400 dark:text-gray-500 mt-1">⋮⋮</span>
+                              <div className="flex-1">
+                                <h3 className="text-sm font-semibold">{tarea.titulo}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{tarea.descripcion || "Sin descripción"}</p>
+                              </div>
                             </div>
-                          )}
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEdit(tarea)} className="text-light-primary dark:text-dark-primary hover:opacity-80 p-1.5 rounded">
+                                <Edit3 size={16} />
+                              </button>
+                              <button onClick={() => handleDelete(tarea.id)} className="text-red-500 hover:text-red-600 p-1.5 rounded">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 mt-3">
+                            {getPrioridadBadge(tarea.prioridad)}
+                            {tarea.fechaEntrega && (
+                              <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                                <Calendar size={14} />
+                                <span>{tarea.fechaEntrega}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
           </div>
