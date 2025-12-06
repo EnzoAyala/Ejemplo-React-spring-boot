@@ -52,7 +52,9 @@ const NotificationPanel = ({ notifications, onClose, onNotificationRead }) => {
             </div>
           ) : (
             <ul className="divide-y divide-light-divider dark:divide-dark-divider">
-              {notifications.map(notif => (
+              {notifications
+                .filter(n => n && typeof n === 'object')
+                .map(notif => (
                 <li
                   key={notif.idNotificacion}
                   className={`p-4 transition-colors duration-300 rounded-md ${!notif.leida
@@ -64,7 +66,7 @@ const NotificationPanel = ({ notifications, onClose, onNotificationRead }) => {
                     {notif.mensaje}
                   </p>
                   <div className="flex justify-end mt-3 space-x-3">
-                    {notif.tipo === 'invitacion_proyecto' && !notif.leida && (
+                    {notif.tipo === 'invitacion_proyecto' && !notif.leida && notif.proyecto && notif.proyecto.id && (
                       <>
                         <button
                           onClick={() => handleInvitationResponse(notif.proyecto.id, 'aceptado', notif.idNotificacion)}

@@ -31,4 +31,8 @@ public class NotificacionService {
         notificacion.setLeida(true);
         return notificacionRepository.save(notificacion);
     }
+
+    public void deleteByProyectoId(Long proyectoId) {
+        notificacionRepository.deleteByProyecto_IdProyecto(proyectoId);
+    }
 }

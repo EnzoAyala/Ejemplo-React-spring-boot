@@ -460,20 +460,29 @@ const ProyectosPage = () => {
                             {/* Botones de acción */}
                             <div className="flex gap-2 justify-end">
                               <button
-                                onClick={() => handleOpenCollaboratorsModal(project)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenCollaboratorsModal(project);
+                                }}
                                 className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-accent dark:hover:text-dark-accent transition-colors"
                                 title="Gestionar Colaboradores"
                               >
                                 <Users size={16} />
                               </button>
                               <button
-                                onClick={() => handleEdit(project)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(project);
+                                }}
                                 className="text-light-accent dark:text-dark-accent hover:opacity-80 transition-opacity"
                               >
                                 <Edit3 size={16} />
                               </button>
                               <button
-                                onClick={() => handleDelete(project.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(project.id);
+                                }}
                                 className="text-light-danger dark:text-dark-danger hover:opacity-80 transition-opacity"
                               >
                                 <Trash2 size={16} />

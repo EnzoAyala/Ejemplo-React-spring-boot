@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, Edit3, Trash2, ChevronDown, ChevronRight,
-  Search, Filter, ArrowLeft, Calendar
+  Search, ArrowLeft, Calendar
 } from "lucide-react";
 import TareaService from "../../services/tarea.service";
 import ProyectoService from "../../services/proyecto.service";

@@ -95,7 +95,11 @@ public class ProyectoService {
         return mapToProyectoResponse(proyectoActualizado);
     }
 
+    @Transactional
     public void deleteProyecto(Long id) {
+        // Primero eliminar notificaciones asociadas directamente al proyecto (invitaciones, etc.)
+        notificacionService.deleteByProyectoId(id);
+        // Luego borrar el proyecto; por cascada se eliminarán tareas y sus notificaciones/comentarios/subtareas/archivos
         proyectoRepository.deleteById(id);
     }
 

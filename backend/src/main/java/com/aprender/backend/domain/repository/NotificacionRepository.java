@@ -10,4 +10,5 @@ import java.util.List;
 public interface NotificacionRepository extends JpaRepository<Notificacion, Integer> {
     List<Notificacion> findByUsuario_IdAndLeida(Long usuarioId, boolean leida);
     List<Notificacion> findByUsuario_Id(Long usuarioId);
+    void deleteByProyecto_IdProyecto(Long proyectoId);
 }
