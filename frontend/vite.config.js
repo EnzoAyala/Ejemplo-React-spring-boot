@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    allowedHosts: [
+      'worksync-ihph.onrender.com'
+    ],
     host: true, 
     port: 5173,
   },
