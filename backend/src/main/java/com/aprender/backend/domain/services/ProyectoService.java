@@ -56,7 +56,7 @@ public class ProyectoService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        return proyectoUsuarioRepository.findByUsuario(user).stream()
+        return proyectoUsuarioRepository.findByUsuarioAndEstadoInvitacion(user, "aceptado").stream()
                 .map(Proyecto_usuario::getProyecto)
                 .map(this::mapToProyectoResponse)
                 .collect(Collectors.toList());
