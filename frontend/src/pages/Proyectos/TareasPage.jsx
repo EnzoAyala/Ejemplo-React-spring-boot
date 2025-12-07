@@ -415,7 +415,7 @@ const TareasPage = () => {
           onClick={closeDetails}
         >
           <div
-            className="w-full max-w-2xl bg-light-surface dark:bg-dark-surface rounded-xl shadow-xl p-6 animate-scale-in"
+            className="w-full max-w-6xl bg-light-surface dark:bg-dark-surface rounded-xl shadow-xl p-6 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* HEADER */}
