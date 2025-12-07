@@ -117,7 +117,7 @@ const CollaboratorsModal = ({ isOpen, onClose, project, onCollaboratorUpdate, cu
       onClick={onClose}
     >
       <div
-        className="bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-xl shadow-2xl w-full max-w-md mx-auto p-6 transition-all duration-300 ease-out transform scale-100 opacity-100"
+        className="bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-xl shadow-2xl w-full max-w-3xl mx-auto p-6 transition-all duration-300 ease-out transform scale-100 opacity-100"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
