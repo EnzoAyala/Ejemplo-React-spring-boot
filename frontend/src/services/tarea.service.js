@@ -22,6 +22,15 @@ const TareaService = {
 
   updateEstado(id, estado) {
     return api.put(TAREA_BASE + id + '/estado', { estado });
+  },
+
+  // Comentarios
+  getComentariosByTareaId(tareaId) {
+    return api.get(TAREA_BASE + tareaId + '/comentarios');
+  },
+
+  addComentario(tareaId, payload) {
+    return api.post(TAREA_BASE + tareaId + '/comentarios', payload);
   }
 };
 

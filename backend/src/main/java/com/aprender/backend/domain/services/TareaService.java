@@ -10,6 +10,12 @@ import com.aprender.backend.persistence.entity.Tarea;
 import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.User;
 import com.aprender.backend.domain.mappers.UserMapper;
+import com.aprender.backend.persistence.entity.Comentario;
+import com.aprender.backend.domain.repository.ComentarioRepository;
+import com.aprender.backend.domain.dto.request.ComentarioRequest;
+import com.aprender.backend.domain.dto.response.ComentarioResponse;
+import com.aprender.backend.domain.mappers.ComentarioMapper;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,6 +42,12 @@ public class TareaService {
 
     @Autowired
     private ProyectoService proyectoService; // Inject ProyectoService
+
+    @Autowired
+    private ComentarioRepository comentarioRepository;
+
+    @Autowired
+    private ComentarioMapper comentarioMapper;
 
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
@@ -125,5 +137,32 @@ public class TareaService {
                 fechaEntrega,
                 responsable
         );
+    }
+
+    // Comentarios
+    @Transactional(readOnly = true)
+    public List<ComentarioResponse> getComentarios(Long tareaId) {
+        tareaRepository.findById(tareaId).orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+        return comentarioRepository.findByTarea_IdTarea(tareaId).stream()
+                .map(comentarioMapper::toComentarioResponse)
+                .collect(Collectors.toList());
+    }
+
+    public ComentarioResponse addComentario(Long tareaId, ComentarioRequest request) {
+        Tarea tarea = tareaRepository.findById(tareaId)
+                .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        User autor = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Comentario c = new Comentario();
+        c.setContenido(request.getContenido());
+        c.setFecha(java.time.LocalDateTime.now());
+        c.setTarea(tarea);
+        c.setUsuario(autor);
+        Comentario saved = comentarioRepository.save(c);
+        return comentarioMapper.toComentarioResponse(saved);
     }
 }

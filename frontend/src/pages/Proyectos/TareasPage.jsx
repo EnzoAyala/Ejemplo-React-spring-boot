@@ -11,12 +11,12 @@ const TareasPage = () => {
   const { proyectoId } = useParams();
   const [proyecto, setProyecto] = useState(null);
   const [tareas, setTareas] = useState([]);
-  const [newTarea, setNewTarea] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
+  const [newTarea, setNewTarea] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media", responsablesIds: [] });
   const [expandedGroups, setExpandedGroups] = useState({ pendiente: true, en_progreso: true, en_revision: true, completada: true });
   const [showNewForm, setShowNewForm] = useState(false);
   const [draggedTarea, setDraggedTarea] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
+  const [editForm, setEditForm] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media", responsablesIds: [] });
 
   // -- Busqueda en URL y campo --
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,7 +61,7 @@ const TareasPage = () => {
     TareaService.createTarea({ ...newTarea, proyectoId })
       .then(() => {
         fetchTareas();
-        setNewTarea({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media" });
+        setNewTarea({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media", responsablesIds: [] });
         setShowNewForm(false);
       })
       .catch(error => console.error("Error al crear tarea:", error));
@@ -77,7 +77,7 @@ const TareasPage = () => {
 
   const handleEdit = (t) => {
     setEditingId(t.id);
-    setEditForm(t);
+    setEditForm({ ...t, responsablesIds: t.responsables?.map(r => r.id) || (t.responsable?.id ? [t.responsable.id] : []) });
   };
 
   const handleSaveEdit = (id) => {
@@ -110,6 +110,47 @@ const TareasPage = () => {
   const toggleGroup = (estado) => setExpandedGroups(prev => ({ ...prev, [estado]: !prev[estado] }));
 
   const estados = ["pendiente", "en_progreso", "en_revision", "completada"];
+
+  // Modal de detalles de tarea
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [comentarios, setComentarios] = useState([]);
+  const [nuevoComentario, setNuevoComentario] = useState("");
+
+  const openDetails = (tarea) => {
+    setSelectedTask(tarea);
+    setDetailsOpen(true);
+    // Cargar comentarios si existieran endpoints
+    if (tarea?.id) {
+      if (TareaService.getComentariosByTareaId) {
+        TareaService.getComentariosByTareaId(tarea.id)
+          .then(res => setComentarios(res.data))
+          .catch(() => setComentarios([]));
+      } else {
+        setComentarios([]);
+      }
+    }
+  };
+
+  const closeDetails = () => {
+    setDetailsOpen(false);
+    setSelectedTask(null);
+    setComentarios([]);
+    setNuevoComentario("");
+  };
+
+  const handleAddComentario = () => {
+    if (!nuevoComentario.trim() || !selectedTask) return;
+    if (TareaService.addComentario) {
+      TareaService.addComentario(selectedTask.id, { contenido: nuevoComentario })
+        .then(() => {
+          setNuevoComentario("");
+          return TareaService.getComentariosByTareaId(selectedTask.id);
+        })
+        .then(res => setComentarios(res.data))
+        .catch(err => console.error("Error comentarios:", err));
+    }
+  };
 
   const getPrioridadBadge = (p) => {
     const map = {
@@ -226,6 +267,30 @@ const TareasPage = () => {
                 <option value="media">Prioridad Media</option>
                 <option value="alta">Prioridad Alta</option>
               </select>
+              {/* Asignar responsables múltiples: solo colaboradores invitados */}
+              <div className="col-span-1 md:col-span-2">
+                <label className="text-xs text-gray-600 dark:text-gray-400">Responsables</label>
+                <div className="mt-1 grid grid-cols-2 md:grid-cols-3 gap-2 border border-light-divider dark:border-dark-divider rounded-lg p-2">
+                  {(proyecto?.colaboradores || []).map(c => (
+                    <label key={c.id} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={newTarea.responsablesIds.includes(c.id)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setNewTarea(prev => ({
+                            ...prev,
+                            responsablesIds: checked
+                              ? [...prev.responsablesIds, c.id]
+                              : prev.responsablesIds.filter(id => id !== c.id)
+                          }));
+                        }}
+                      />
+                      <span>{c.username}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="flex gap-2 mt-3">
               <button onClick={handleAdd} className="bg-light-primary dark:bg-dark-primary hover:opacity-90 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm">Agregar</button>
@@ -296,9 +361,9 @@ const TareasPage = () => {
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-start gap-2 flex-1">
                               <span className="text-gray-400 dark:text-gray-500 mt-1">⋮⋮</span>
-                              <div className="flex-1">
+                              <div className="flex-1 cursor-pointer" onClick={() => openDetails(tarea)}>
                                 <h3 className="text-sm font-semibold">{tarea.titulo}</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{tarea.descripcion || "Sin descripción"}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{tarea.descripcion || "Sin descripción"}</p>
                               </div>
                             </div>
                             <div className="flex gap-2">
@@ -328,6 +393,68 @@ const TareasPage = () => {
           </div>
         ))}
       </div>
+    {detailsOpen && selectedTask && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" onClick={closeDetails}>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-light-surface dark:bg-dark-surface rounded-xl shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold">{selectedTask.titulo}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{selectedTask.descripcion || 'Sin descripción'}</p>
+              </div>
+              <button onClick={closeDetails} className="px-3 py-1.5 border rounded-lg">Cerrar</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold">Detalles</h3>
+                <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <Calendar size={14} />
+                  <span>Fecha límite: {selectedTask.fechaEntrega || '—'}</span>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  Prioridad: {selectedTask.prioridad}
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  Responsables:
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {(selectedTask.responsables || (selectedTask.responsable ? [selectedTask.responsable] : [])).map((r) => (
+                      <span key={r.id} className="px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-xs">{r.username}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold">Comentarios</h3>
+                <div className="max-h-56 overflow-y-auto border border-light-divider dark:border-dark-divider rounded p-2 bg-white dark:bg-dark-elevated">
+                  {comentarios.length === 0 ? (
+                    <p className="text-xs text-gray-500">Sin comentarios</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {comentarios.map(c => (
+                        <li key={c.id} className="text-xs">
+                          <div className="font-semibold">{c.autor?.username || 'Usuario'}</div>
+                          <div className="text-gray-700 dark:text-gray-300">{c.contenido}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={nuevoComentario}
+                    onChange={(e) => setNuevoComentario(e.target.value)}
+                    placeholder="Agregar un comentario..."
+                    className="flex-1 border border-light-divider dark:border-dark-divider rounded px-3 py-2 text-sm bg-transparent"
+                  />
+                  <button onClick={handleAddComentario} className="px-3 py-2 bg-light-primary dark:bg-dark-primary text-white rounded text-sm">Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

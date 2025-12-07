@@ -2,6 +2,8 @@ package com.aprender.backend.web.controller;
 
 import com.aprender.backend.domain.dto.request.TareaRequest;
 import com.aprender.backend.domain.dto.response.TareaResponse;
+import com.aprender.backend.domain.dto.request.ComentarioRequest;
+import com.aprender.backend.domain.dto.response.ComentarioResponse;
 import com.aprender.backend.domain.services.TareaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -44,5 +46,16 @@ public class TareaController {
     public ResponseEntity<TareaResponse> updateEstado(@PathVariable Long id, @RequestBody Map<String, String> estadoRequest) {
         String estado = estadoRequest.get("estado");
         return ResponseEntity.ok(tareaService.updateEstado(id, estado));
+    }
+
+    // Comentarios
+    @GetMapping("/{id}/comentarios")
+    public ResponseEntity<List<ComentarioResponse>> getComentarios(@PathVariable Long id) {
+        return ResponseEntity.ok(tareaService.getComentarios(id));
+    }
+
+    @PostMapping("/{id}/comentarios")
+    public ResponseEntity<ComentarioResponse> addComentario(@PathVariable Long id, @RequestBody ComentarioRequest request) {
+        return ResponseEntity.ok(tareaService.addComentario(id, request));
     }
 }
