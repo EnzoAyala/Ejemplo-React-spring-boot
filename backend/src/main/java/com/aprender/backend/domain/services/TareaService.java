@@ -15,6 +15,7 @@ import com.aprender.backend.domain.repository.ComentarioRepository;
 import com.aprender.backend.domain.dto.request.ComentarioRequest;
 import com.aprender.backend.domain.dto.response.ComentarioResponse;
 import com.aprender.backend.domain.mappers.ComentarioMapper;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +49,9 @@ public class TareaService {
 
     @Autowired
     private ComentarioMapper comentarioMapper;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
@@ -163,6 +167,12 @@ public class TareaService {
         c.setTarea(tarea);
         c.setUsuario(autor);
         Comentario saved = comentarioRepository.save(c);
-        return comentarioMapper.toComentarioResponse(saved);
+
+        ComentarioResponse comentarioResponse = comentarioMapper.toComentarioResponse(saved);
+
+        // Enviar por WebSocket
+        messagingTemplate.convertAndSend("/topic/tarea/" + tareaId + "/comentarios", comentarioResponse);
+
+        return comentarioResponse;
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, Edit3, Trash2, ChevronDown, ChevronRight,
@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import TareaService from "../../services/tarea.service";
 import ProyectoService from "../../services/proyecto.service";
+import useSubscription from "../../hooks/useSubscription";
 
 const TareasPage = () => {
   const { proyectoId } = useParams();
@@ -139,15 +140,22 @@ const TareasPage = () => {
     setNuevoComentario("");
   };
 
+  const handleNewComment = useCallback((comment) => {
+    setComentarios((prev) => [...prev, comment]);
+  }, []);
+
+  useSubscription(
+    selectedTask ? `/topic/tarea/${selectedTask.id}/comentarios` : null,
+    handleNewComment
+  );
+
   const handleAddComentario = () => {
     if (!nuevoComentario.trim() || !selectedTask) return;
     if (TareaService.addComentario) {
       TareaService.addComentario(selectedTask.id, { contenido: nuevoComentario })
         .then(() => {
           setNuevoComentario("");
-          return TareaService.getComentariosByTareaId(selectedTask.id);
         })
-        .then(res => setComentarios(res.data))
         .catch(err => console.error("Error comentarios:", err));
     }
   };
