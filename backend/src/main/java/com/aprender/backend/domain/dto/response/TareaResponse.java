@@ -15,5 +15,5 @@ public class TareaResponse {
     private String estado;
     private String prioridad;
     private String fechaEntrega;
-    private UserResponseUser responsable;
+    private java.util.List<UserResponseUser> responsables;
 }

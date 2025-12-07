@@ -17,5 +17,5 @@ public class TareaRequest {
 
     private Long proyectoId;
 
-    private Long responsableId;
+    private java.util.List<Long> responsablesIds;
 }

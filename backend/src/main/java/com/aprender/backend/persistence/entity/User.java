@@ -84,6 +84,9 @@ public class User {
     @Column(name = "description")
     private String description;
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<TareaUsuario> tareasAsignadas;
+
     // Constructor para registro simplificado (sin ID, usado al crear un nuevo usuario)
     public User(String name, String lastname, String dni, String username, String email, String phone, String password) {
         this.name = name;

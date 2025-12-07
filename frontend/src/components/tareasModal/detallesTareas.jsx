@@ -71,7 +71,7 @@ const DetallesTareas = ({
               <div className="flex flex-col space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-medium text-gray-700 dark:text-gray-300">Responsables:</span>
                 <div className="flex flex-wrap gap-2">
-                  {(task.responsables || (task.responsable ? [task.responsable] : [])).map((r) => (
+                  {(task.responsables || []).map((r) => (
                     <span
                       key={r.id}
                       className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-medium shadow-sm"

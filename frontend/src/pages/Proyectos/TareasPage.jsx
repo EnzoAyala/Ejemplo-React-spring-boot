@@ -98,11 +98,11 @@ const TareasPage = () => {
 
   const handleEdit = (t) => {
     setEditingId(t.id);
-    setEditForm({ ...t, responsablesIds: t.responsables?.map(r => r.id) || (t.responsable?.id ? [t.responsable.id] : []) });
+    setEditForm({ ...t, responsablesIds: t.responsables?.map(r => r.id) || [] });
   };
 
   const handleSaveEdit = (id) => {
-    TareaService.updateTarea(id, editForm)
+    TareaService.updateTarea(id, { ...editForm, responsablesIds: editForm.responsablesIds })
       .then(() => {
         fetchTareas();
         setEditingId(null);

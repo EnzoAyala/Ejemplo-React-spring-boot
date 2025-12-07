@@ -7,6 +7,7 @@ import com.aprender.backend.domain.repository.TareaRepository;
 import com.aprender.backend.domain.dto.response.UserResponseUser;
 import com.aprender.backend.persistence.entity.Proyecto;
 import com.aprender.backend.persistence.entity.Tarea;
+import com.aprender.backend.persistence.entity.TareaUsuario;
 import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.User;
 import com.aprender.backend.domain.mappers.UserMapper;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,17 +65,6 @@ public class TareaService {
         Proyecto proyecto = proyectoRepository.findById(tareaRequest.getProyectoId())
                 .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
 
-        User responsable;
-        if (tareaRequest.getResponsableId() != null) {
-            responsable = userRepository.findById(tareaRequest.getResponsableId())
-                    .orElseThrow(() -> new RuntimeException("Usuario responsable no encontrado"));
-        } else {
-            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            String username = userDetails.getUsername();
-            responsable = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        }
-
         Tarea tarea = new Tarea();
         tarea.setTitulo(tareaRequest.getTitulo());
         tarea.setDescripcion(tareaRequest.getDescripcion());
@@ -83,7 +74,23 @@ public class TareaService {
         tarea.setPrioridad(tareaRequest.getPrioridad());
         tarea.setEstado("pendiente"); // Default state
         tarea.setProyecto(proyecto);
-        tarea.setResponsable(responsable);
+
+        List<TareaUsuario> responsables = new ArrayList<>();
+        if (tareaRequest.getResponsablesIds() != null && !tareaRequest.getResponsablesIds().isEmpty()) {
+            for (Long userId : tareaRequest.getResponsablesIds()) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + userId));
+                responsables.add(new TareaUsuario(tarea, user));
+            }
+        } else {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String username = userDetails.getUsername();
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            responsables.add(new TareaUsuario(tarea, user));
+        }
+
+        tarea.setResponsables(responsables);
         Tarea nuevaTarea = tareaRepository.save(tarea);
         proyectoService.recalculateAndSetProjectState(proyecto.getIdProyecto()); // Recalculate project state
         return mapToTareaResponse(nuevaTarea);
@@ -95,10 +102,15 @@ public class TareaService {
 
         Long proyectoId = tarea.getProyecto().getIdProyecto(); // Get project ID before potential update
 
-        if (tareaRequest.getResponsableId() != null) {
-            User responsable = userRepository.findById(tareaRequest.getResponsableId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            tarea.setResponsable(responsable);
+        if (tareaRequest.getResponsablesIds() != null) {
+            // Limpiar responsables actuales
+            tarea.getResponsables().clear();
+            // Agregar nuevos responsables
+            for (Long userId : tareaRequest.getResponsablesIds()) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + userId));
+                tarea.getResponsables().add(new TareaUsuario(tarea, user));
+            }
         }
 
         tarea.setTitulo(tareaRequest.getTitulo());
@@ -131,7 +143,10 @@ public class TareaService {
 
     private TareaResponse mapToTareaResponse(Tarea tarea) {
         String fechaEntrega = tarea.getFechaEntrega() != null ? tarea.getFechaEntrega().toString() : null;
-        UserResponseUser responsable = userMapper.toUserResponseUser(tarea.getResponsable());
+        List<UserResponseUser> responsables = tarea.getResponsables().stream()
+                .map(TareaUsuario::getUsuario)
+                .map(userMapper::toUserResponseUser)
+                .collect(Collectors.toList());
         return new TareaResponse(
                 tarea.getIdTarea(),
                 tarea.getTitulo(),
@@ -139,7 +154,7 @@ public class TareaService {
                 tarea.getEstado(),
                 tarea.getPrioridad(),
                 fechaEntrega,
-                responsable
+                responsables
         );
     }
 

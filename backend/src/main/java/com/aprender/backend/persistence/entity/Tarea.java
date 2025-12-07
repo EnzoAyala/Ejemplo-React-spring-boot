@@ -39,9 +39,8 @@ public class Tarea {
     @JoinColumn(name = "id_proyecto", nullable = false)
     private Proyecto proyecto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_responsable", nullable = false)
-    private User responsable;
+    @OneToMany(mappedBy = "tarea", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TareaUsuario> responsables;
 
     @OneToMany(mappedBy = "tarea", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubTarea> subtareas;
