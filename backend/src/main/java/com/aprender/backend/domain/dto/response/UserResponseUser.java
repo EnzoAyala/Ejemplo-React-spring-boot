@@ -21,5 +21,5 @@ public class UserResponseUser {
     private String gender;
     private String profilePictureUrl;
     private String description;
-
+    private String email;
 }

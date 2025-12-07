@@ -45,7 +45,8 @@ public class UserController {
                         user.getLastActive(),
                         user.getGender(),
                         user.getProfilePictureUrl(),
-                        user.getDescription()
+                        user.getDescription(),
+                        user.getEmail()
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);

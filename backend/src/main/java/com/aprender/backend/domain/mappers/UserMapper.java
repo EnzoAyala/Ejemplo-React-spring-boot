@@ -25,7 +25,8 @@ public class UserMapper {
                 user.getLastActive(),
                 user.getGender(),
                 user.getProfilePictureUrl(),
-                user.getDescription()
+                user.getDescription(),
+                user.getEmail()
         );
     }
 
