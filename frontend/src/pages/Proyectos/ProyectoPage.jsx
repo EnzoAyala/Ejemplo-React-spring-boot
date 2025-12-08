@@ -368,9 +368,24 @@ const ProyectosPage = () => {
                       >
                         {/* Project display logic */}
                         {editingId === project.id ? (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4">
-                            <div className="col-span-2 md:col-span-2">
+                          <div
+                            className="
+                                        grid grid-cols-1 md:grid-cols-4 gap-4 p-4
+                                        bg-light-elevated/50 dark:bg-dark-elevated/50
+                                        rounded-lg border-2 border-light-elevated dark:border-dark-elevated
+                                        animate-scale-in transition-all
+                                      "
+                          >
+                            {/* Campo Nombre */}
+                            <div className="col-span-1 md:col-span-2">
+                              <label
+                                htmlFor="project-name"
+                                className="block text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary mb-1"
+                              >
+                                Nombre del Proyecto
+                              </label>
                               <input
+                                id="project-name"
                                 type="text"
                                 value={editForm.nombre}
                                 onChange={(e) =>
@@ -379,11 +394,28 @@ const ProyectosPage = () => {
                                     nombre: e.target.value,
                                   })
                                 }
-                                className="w-full border rounded px-3 py-1.5 text-sm"
+                                className="
+                                            w-full rounded-md px-3 py-2 text-sm
+                                            bg-light-bg dark:bg-dark-surface
+                                            border-light-surface dark:border-dark-elevated
+                                            text-light-text dark:text-dark-text
+                                            focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent
+                                            transition-colors duration-200 shadow-sm
+                                          "
+                                placeholder="Escribe el nuevo nombre..."
                               />
                             </div>
-                            <div className="col-span-2 md:col-span-2">
+
+                            {/* Campo Descripción */}
+                            <div className="col-span-1 md:col-span-2">
+                              <label
+                                htmlFor="project-description"
+                                className="block text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary mb-1"
+                              >
+                                Descripción
+                              </label>
                               <input
+                                id="project-description"
                                 type="text"
                                 value={editForm.descripcion}
                                 onChange={(e) =>
@@ -392,101 +424,177 @@ const ProyectosPage = () => {
                                     descripcion: e.target.value,
                                   })
                                 }
-                                className="w-full border rounded px-3 py-1.5 text-sm"
+                                className="
+                                            w-full rounded-md px-3 py-2 text-sm
+                                            bg-light-bg dark:bg-dark-surface
+                                            border-light-surface dark:border-dark-elevated
+                                            text-light-text dark:text-dark-text
+                                            focus:ring-2 focus:ring-light-accent dark:focus:ring-dark-accent
+                                            transition-colors duration-200 shadow-sm
+                                          "
+                                placeholder="Breve descripción del proyecto..."
                               />
                             </div>
-                            <div className="flex gap-2 justify-end">
-                              <button
-                                onClick={() => handleSaveEdit(project.id)}
-                                className="px-3 py-1.5 bg-light-primary text-white rounded text-xs"
-                              >
-                                Guardar
-                              </button>
+
+                            {/* Botones de acción */}
+                            <div className="col-span-1 md:col-span-4 flex gap-3 justify-end pt-2">
                               <button
                                 onClick={handleCancelEdit}
-                                className="px-3 py-1.5 border rounded text-xs"
+                                className="
+                                            px-4 py-2 rounded-lg text-sm font-medium
+                                            bg-transparent border border-light-text-secondary dark:border-dark-text-secondary
+                                            text-light-text-secondary dark:text-dark-text-secondary
+                                            hover:bg-light-elevated dark:hover:bg-dark-elevated
+                                            transition-colors duration-200
+                                          "
                               >
                                 Cancelar
+                              </button>
+                              <button
+                                onClick={() => handleSaveEdit(project.id)}
+                                className="
+                                            px-4 py-2 rounded-lg text-sm font-medium
+                                            bg-light-primary dark:bg-dark-primary text-white
+                                            hover:bg-light-primary/90 dark:hover:bg-dark-primary/90
+                                            focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:ring-offset-2
+                                            transition-all duration-200 shadow-md shadow-light-primary/30 dark:shadow-dark-primary/30
+                                          "
+                              >
+                                Guardar Cambios
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4" onClick={() => handleProjectClick(project)}>
-                            {/* Normal project display */}
-                            <div className="flex gap-2 items-center">
-                              <span>📁</span>
-                              <span className="font-semibold">{project.nombre}</span>
+                          <div
+                            className="
+                                      flex flex-col p-5 h-full
+                                      bg-light-surface dark:bg-dark-surface
+                                      rounded-xl shadow-lg hover:shadow-xl
+                                      ring-1 ring-light-elevated dark:ring-dark-elevated
+                                      transition-all duration-300 ease-in-out cursor-pointer
+                                    "
+                            onClick={() => handleProjectClick(project)}
+                          >
+                            {/* Cabecera: Nombre y Estado */}
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex gap-2 items-center">
+                                <span className="text-xl">📁</span>
+                                <span className="font-extrabold text-xl text-light-text dark:text-dark-text">
+                                  {project.nombre}
+                                </span>
+                              </div>
+                              {/* Estado del proyecto (movido a la esquina superior derecha) */}
+                              <div>{getEstadoBadge(project.estado)}</div>
                             </div>
-                            <div className="truncate">
-                              <span className="text-sm text-gray-600">
+
+                            {/* Descripción */}
+                            <div className="mb-4 flex-grow">
+                              <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary line-clamp-2">
                                 {project.descripcion}
-                              </span>
+                              </p>
                             </div>
+
                             {/* Barra de progreso */}
-                            <div className="flex items-center">
-                              <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                            <div className="mb-4 pt-2 border-t border-light-elevated dark:border-dark-elevated">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs font-semibold text-light-text dark:text-dark-text">Progreso</span>
+                                <span className="text-sm font-bold text-light-accent dark:text-dark-accent">
+                                  {project.progreso?.toFixed(0)}%
+                                </span>
+                              </div>
+                              <div className="w-full bg-light-elevated rounded-full h-2 dark:bg-dark-elevated">
                                 <div
-                                  className="bg-blue-600 h-2 rounded-full"
+                                  className="bg-light-accent dark:bg-dark-accent h-2 rounded-full transition-all duration-500"
                                   style={{ width: `${project.progreso}%` }}
                                 ></div>
                               </div>
-                              <span className="ml-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                                {project.progreso?.toFixed(0)}%
-                              </span>
                             </div>
-                            {/* Colaboradores */}
-                            <div>
-                              <div className="flex -space-x-2 overflow-hidden">
-                                {project.colaboradores?.slice(0, 3).map((c) => (
-                                  <span
-                                    key={c.id}
-                                    title={c.username}
-                                    className="h-6 w-6 md:h-7 md:w-7 rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-200 flex items-center justify-center text-xs md:text-sm"
-                                  >
-                                    {c.username.charAt(0).toUpperCase()}
-                                  </span>
-                                ))}
-                                {project.colaboradores?.length > 3 && (
-                                  <span className="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full ring-2 ring-white dark:ring-gray-800 bg-gray-300 text-xs md:text-sm">
-                                    +{project.colaboradores.length - 3}
-                                  </span>
-                                )}
+
+                            {/* Colaboradores y Acciones (Se mantienen en la parte inferior) */}
+                            <div className="flex justify-between items-center pt-3 border-t border-light-elevated dark:border-dark-elevated">
+                              {/* Colaboradores */}
+                              <div>
+                                <span className="text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary block mb-1">
+                                  Colaboradores
+                                </span>
+                                <div className="flex -space-x-2 overflow-hidden">
+                                  {project.colaboradores?.slice(0, 4).map((c) => (
+                                    <span
+                                      key={c.id}
+                                      title={c.username}
+                                      className="
+                                                h-8 w-8 rounded-full ring-2 ring-light-surface dark:ring-dark-surface
+                                                bg-light-elevated dark:bg-dark-elevated
+                                                flex items-center justify-center text-xs font-medium
+                                                text-light-text dark:text-dark-text
+                                                hover:z-10 transition-transform hover:scale-110
+                                              "
+                                    >
+                                      {c.username.charAt(0).toUpperCase()}
+                                    </span>
+                                  ))}
+                                  {project.colaboradores?.length > 4 && (
+                                    <span
+                                      className="
+                                                  flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-light-surface dark:ring-dark-surface
+                                                  bg-light-text-secondary text-dark-text-secondary text-xs
+                                                "
+                                    >
+                                      +{project.colaboradores.length - 4}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            {/* Estado del proyecto */}
-                            <div>
-                              {getEstadoBadge(project.estado)}
-                            </div>
-                            {/* Botones de acción */}
-                            <div className="flex gap-2 justify-end">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenCollaboratorsModal(project);
-                                }}
-                                className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-accent dark:hover:text-dark-accent transition-colors"
-                                title="Gestionar Colaboradores"
-                              >
-                                <Users size={16} />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEdit(project);
-                                }}
-                                className="text-light-accent dark:text-dark-accent hover:opacity-80 transition-opacity"
-                              >
-                                <Edit3 size={16} />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(project.id);
-                                }}
-                                className="text-light-danger dark:text-dark-danger hover:opacity-80 transition-opacity"
-                              >
-                                <Trash2 size={16} />
-                              </button>
+
+                              {/* Botones de acción */}
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenCollaboratorsModal(project);
+                                  }}
+                                  className="
+                                            p-2 rounded-full
+                                            text-light-text-secondary dark:text-dark-text-secondary
+                                            hover:bg-light-elevated dark:hover:bg-dark-elevated
+                                            hover:text-light-accent dark:hover:text-dark-accent
+                                            transition-colors duration-200
+                                          "
+                                  title="Gestionar Colaboradores"
+                                >
+                                  <Users size={20} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(project);
+                                  }}
+                                  className="
+                                            p-2 rounded-full
+                                            text-light-accent dark:text-dark-accent
+                                            hover:bg-light-elevated/50 dark:hover:bg-dark-elevated/50
+                                            hover:opacity-90 transition-all duration-200
+                                          "
+                                  title="Editar Proyecto"
+                                >
+                                  <Edit3 size={20} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(project.id);
+                                  }}
+                                  className="
+                                            p-2 rounded-full
+                                            text-light-danger dark:text-dark-danger
+                                            hover:bg-light-danger/10 dark:hover:bg-dark-danger/10
+                                            hover:opacity-90 transition-all duration-200
+                                          "
+                                  title="Eliminar Proyecto"
+                                >
+                                  <Trash2 size={20} />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )}
