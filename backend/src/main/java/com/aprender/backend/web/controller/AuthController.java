@@ -9,14 +9,15 @@ import com.aprender.backend.domain.dto.request.SignupRequest;
 import com.aprender.backend.domain.dto.response.JwtResponse;
 import com.aprender.backend.domain.dto.response.MessageResponse;
 import com.aprender.backend.domain.dto.response.UserResponseAdmin;
-import com.aprender.backend.domain.repository.PasswordReserCodeRepository;
-import com.aprender.backend.domain.repository.RoleRepository;
-import com.aprender.backend.domain.repository.UserRepository;
+import com.aprender.backend.persistence.repository.PasswordReserCodeRepository;
+import com.aprender.backend.persistence.repository.RoleRepository;
+import com.aprender.backend.persistence.repository.UserRepository;
 import com.aprender.backend.domain.services.PasswordResetService;
 import com.aprender.backend.domain.services.UserDetailsImpl;
 import com.aprender.backend.persistence.entity.PasswordResetCode;
 import com.aprender.backend.persistence.entity.Role;
 import com.aprender.backend.persistence.entity.User;
+
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs

@@ -5,7 +5,8 @@ import com.aprender.backend.domain.dto.response.ChatMessageResponse;
 import com.aprender.backend.domain.services.MessageService;
 import com.aprender.backend.persistence.entity.Message;
 import com.aprender.backend.persistence.entity.User;
-import com.aprender.backend.domain.repository.UserRepository;
+import com.aprender.backend.persistence.repository.UserRepository;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

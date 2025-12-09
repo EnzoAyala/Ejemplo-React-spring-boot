@@ -7,70 +7,48 @@ import useWebSocket from '../../hooks/useWebSocket';
 import useUserSync from '../../hooks/useUserSync';
 import AdminService from '../../services/admin.service';
 import AuthService from '../../services/auth.service';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const BoardAdmin = () => {
-    // --- Estados del componente ---
-    const [users, setUsers] = useState([]);               // Lista de usuarios
-    const [loading, setLoading] = useState(true);         // Indicador de carga
-    const [error, setError] = useState(null);             // Mensaje de error
-    const [showModal, setShowModal] = useState(false);    // Visibilidad del modal
-    const [selectedUser, setSelectedUser] = useState(null); // Usuario seleccionado
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
-    // --- Búsqueda en URL y campo ---
     const [searchParams, setSearchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
-    // --- Hooks personalizados ---
-    const fetchUsers = useFetchUsers(setUsers, setLoading, setError); // Obtener usuarios
-    useWebSocket(setUsers, setError, setLoading);                     // Escuchar cambios en tiempo real
-    useUserSync(users, selectedUser, showModal, setSelectedUser, setShowModal); // Sincronizar modal
+    const fetchUsers = useFetchUsers(setUsers, setLoading, setError);
+    useWebSocket(setUsers, setError, setLoading);
+    useUserSync(users, selectedUser, showModal, setSelectedUser, setShowModal);
 
-    // Cargar usuarios al montar
-    useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
+    useEffect(() => { fetchUsers(); }, [fetchUsers]);
+    useEffect(() => { setSearchParams(searchTerm ? { search: searchTerm } : {}); }, [searchTerm, setSearchParams]);
 
-    // Actualizar URL según búsqueda
-    useEffect(() => {
-        setSearchParams(searchTerm ? { search: searchTerm } : {});
-    }, [searchTerm, setSearchParams]);
-
-    // Filtrar usuarios por nombre o ID
     const filteredUsers = users.filter((user) => {
         const uname = typeof user?.username === 'string' ? user.username : '';
         const idStr = user?.id != null ? String(user.id) : '';
         return uname.toLowerCase().includes(searchTerm.toLowerCase()) || idStr.includes(searchTerm);
     });
 
-    // Abrir modal con datos de usuario
-    const openModal = (user) => {
-        setSelectedUser(user);
-        setShowModal(true);
-    };
-
-    // Cerrar modal y limpiar selección
-    const closeModal = () => {
-        setShowModal(false);
-        setSelectedUser(null);
-    };
-
-    // Recargar usuarios tras actualizar roles
+    const openModal = (user) => { setSelectedUser(user); setShowModal(true); };
+    const closeModal = () => { setShowModal(false); setSelectedUser(null); };
     const handleRolesUpdated = fetchUsers;
 
-    // Eliminar usuario con confirmación
     const handleDeleteUser = (userId, username) => {
         if (window.confirm(`¿Eliminar al usuario ${username}?`)) {
             AdminService.deleteUser(userId)
-                .then(response => {
+                .then(response => { 
                     alert(response.data.message || `Usuario ${username} eliminado exitosamente`);
-                    fetchUsers();
+                    fetchUsers(); 
                 })
                 .catch(error => {
-                    const errorMessage =
-                        (error.response?.data?.message) || error.message || error.toString();
+                    const errorMessage = (error.response?.data?.message) || error.message || error.toString();
                     alert("Error al eliminar usuario: " + errorMessage);
                     console.error("Error al eliminar usuario:", error);
-
                     if ([401, 403].includes(error.response?.status)) {
                         AuthService.logout();
                         window.location.reload();
@@ -79,57 +57,100 @@ const BoardAdmin = () => {
         }
     };
 
-    // --- Renderizado condicional ---
-    if (loading) {
-        return <div className="flex justify-center items-center h-full text-light-text dark:text-dark-text">Cargando usuarios...</div>;
-    }
+    // --- Exportar a Excel ---
+    const exportToExcel = () => {
+        const data = users.map(u => ({
+            ID: u.id,
+            Username: u.username,
+            Email: u.email,
+            Role: u.roles?.map(r => r.name).join(", ") || "-",
+            Suscripcion: u.tipo || "BASIC",
+            FechaVencimiento: u.fechaFin || "-"
+        }));
 
-    if (error) {
-        return <div className="text-center p-4 text-light-danger dark:text-dark-danger">{error}</div>;
-    }
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Usuarios");
+        XLSX.writeFile(workbook, "usuarios_reporte.xlsx");
+    };
 
-    // --- Render principal ---
+    // --- Exportar a PDF ---
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        doc.text("Reporte de Usuarios", 14, 16);
+
+        const tableColumn = ["ID", "Username", "Email", "Rol", "Suscripción", "Fecha Vencimiento"];
+        const tableRows = users.map(u => [
+            u.id,
+            u.username,
+            u.email,
+            u.roles?.map(r => r.name).join(", ") || "-",
+            u.tipo || "BASIC",
+            u.fechaFin || "-"
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+            theme: 'grid',
+            headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+        });
+
+        doc.save("usuarios_reporte.pdf");
+    };
+
+    if (loading) return <div className="flex justify-center items-center h-full text-light-text dark:text-dark-text">Cargando usuarios...</div>;
+    if (error) return <div className="text-center p-4 text-light-danger dark:text-dark-danger">{error}</div>;
+
     return (
         <div className="container mx-auto px-4 py-6">
-            <h2 className="text-3xl font-bold text-light-primary dark:text-dark-primary mb-8 text-center">
+            <h2 className="text-3xl font-bold text-light-primary dark:text-dark-primary mb-4 text-center">
                 Gestión de Usuarios (Panel de Administrador)
             </h2>
 
-            {/* Búsqueda con botón para limpiar */}
-            <div className="relative mb-6 max-w-xs mx-auto">
+            <div className="flex justify-between items-center mb-6 max-w-xl mx-auto gap-2">
                 <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Buscar por nombre de usuario o ID"
-                    className="w-full pr-10 bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border transition-all"
+                    className="flex-1 pr-10 bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border transition-all"
                 />
                 {searchTerm && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <button
-                            onClick={() => setSearchTerm('')}
-                            className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-danger dark:hover:text-dark-danger"
-                            aria-label="Borrar búsqueda"
-                        >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14" />
-                            </svg>
-
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => setSearchTerm('')}
+                        className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-danger dark:hover:text-dark-danger"
+                        aria-label="Borrar búsqueda"
+                    >
+                        X
+                    </button>
                 )}
+
+                <button
+                    onClick={exportToExcel}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                >
+                    Exportar Excel
+                </button>
+                <button
+                    onClick={exportToPDF}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                >
+                    Exportar PDF
+                </button>
             </div>
 
-            {/* Tabla de usuarios */}
             <div className="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg">
-                <div className="relative overflow-x-auto shadow-xl rounded-lg animate-gradient-pulse">
+                <div className="relative overflow-x-auto shadow-xl rounded-lg">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                        <thead className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white animate-gradient-pulse">
+                        <thead className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white">
                             <tr>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">ID</th>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">User Name</th>
                                 <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Correo</th>
                                 <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Rol</th>
+                                <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Suscripción</th>
                                 <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
@@ -144,7 +165,6 @@ const BoardAdmin = () => {
                 </div>
             </div>
 
-            {/* Modal de detalles */}
             {showModal && selectedUser && (
                 <UserDetailsModal
                     user={selectedUser}

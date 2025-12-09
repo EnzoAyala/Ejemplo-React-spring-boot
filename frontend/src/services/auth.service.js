@@ -1,65 +1,80 @@
-import axios from 'axios';
+import axios from "axios";
 
-// URL base para autenticación (dinámica según el host del frontend)
 const API_URL = `${window.location.protocol}//${window.location.hostname}:8080/api/auth/`;
 
 class AuthService {
-  // Login: envía username y password y guarda el token si es correcto
-  login(username, password) {
-    return axios.post(API_URL + 'signin', { username, password })
-      .then(response => {
-        if (response.data.accessToken) {
-          localStorage.setItem('user', JSON.stringify(response.data));
-        }
-        return response.data;
-      });
+
+  // ✅ LOGIN UNIFICADO
+  async login(username, password) {
+    const response = await axios.post(API_URL + "signin", {
+      username,
+      password,
+    });
+
+    const data = response.data;
+
+    if (data.accessToken) {
+      // ✅ SOLO USAMOS "user"
+      localStorage.setItem("user", JSON.stringify(data));
+    }
+
+    return data;
   }
 
-  // Logout: elimina usuario local y notifica backend para invalidar token
+  // ✅ LOGOUT LIMPIO
   logout() {
-    axios.post(API_URL + 'signout', {}, { headers: this.getAuthHeader() });
-    localStorage.removeItem('user');
+    try {
+      axios.post(API_URL + "signout", {}, {
+        headers: this.getAuthHeader(),
+      });
+    } catch (e) {}
+
+    localStorage.removeItem("user");
   }
 
-  // Registro de nuevo usuario
   register(name, lastname, dni, username, email, phone, password, gender) {
-    return axios.post(API_URL + 'signup', {
-      name, lastname, dni, username, email, phone, password, gender
+    return axios.post(API_URL + "signup", {
+      name,
+      lastname,
+      dni,
+      username,
+      email,
+      phone,
+      password,
+      gender,
     });
   }
 
-  // Recuperar contraseña
   forgotPassword(data) {
-    return axios.post(API_URL + 'forgot-password', data);
+    return axios.post(API_URL + "forgot-password", data);
   }
 
-  // Validar código de restablecimiento de contraseña
   validateResetCode(data) {
-    return axios.post(API_URL + 'validate-reset-code', data);
+    return axios.post(API_URL + "validate-reset-code", data);
   }
 
-  // Restablecer contraseña
   resetPassword(data) {
-    return axios.post(API_URL + 'reset-password', data);
+    return axios.post(API_URL + "reset-password", data);
   }
 
-  // Obtiene usuario actual guardado en localStorage
   getCurrentUser() {
     try {
-      return JSON.parse(localStorage.getItem('user'));
+      return JSON.parse(localStorage.getItem("user"));
     } catch {
       return null;
     }
   }
 
-  // Construye header Authorization con token JWT si existe
+  // ✅ HEADER DESDE "user"
   getAuthHeader() {
-    const user = this.getCurrentUser();
-    if (user && user.accessToken) {
-      return { Authorization: 'Bearer ' + user.accessToken };
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.accessToken) {
+      return { Authorization: "Bearer " + user.accessToken };
     }
     return {};
   }
 }
 
 export default new AuthService();
+
+

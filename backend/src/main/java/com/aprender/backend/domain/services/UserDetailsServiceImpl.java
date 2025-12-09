@@ -1,8 +1,7 @@
 package com.aprender.backend.domain.services;
 
-import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.User;
-
+import com.aprender.backend.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,24 +9,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// Esta anotación marca esta clase como un servicio de Spring.
+/**
+ * Servicio que Spring Security utiliza para cargar los usuarios desde la base de datos.
+ * Construye un UserDetailsImpl a partir de la entidad User.
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired // Inyecta el UserRepository para acceder a los datos de usuario.
+    @Autowired
     private UserRepository userRepository;
 
-    // Este método es implementado de UserDetailsService.
-    // Spring Security lo llama cuando necesita cargar los detalles de un usuario.
     @Override
-    @Transactional // Asegura que la operación de carga se realice dentro de una transacción de base de datos.
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Busca el usuario en la base de datos por su nombre de usuario o email.
-        // En este caso, buscamos solo por username, pero podríamos extenderlo para email.
+        // Busca el usuario por username en la base de datos
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // Construye y devuelve un objeto UserDetailsImpl a partir del usuario encontrado.
+        // Construye y devuelve un UserDetailsImpl
         return UserDetailsImpl.build(user);
     }
 }

@@ -3,9 +3,9 @@ package com.aprender.backend.web.controller;
 import com.aprender.backend.domain.dto.request.ProfileUpdateRequest;
 import com.aprender.backend.domain.dto.response.MessageResponse;
 import com.aprender.backend.domain.dto.response.UserResponseUser;
-import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.domain.services.FileStorageService;
 import com.aprender.backend.persistence.entity.User;
+import com.aprender.backend.persistence.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

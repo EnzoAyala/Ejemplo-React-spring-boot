@@ -1,8 +1,8 @@
 package com.aprender.backend.web.socket;
 
 import com.aprender.backend.domain.dto.response.UserResponseAdmin;
-import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.User;
+import com.aprender.backend.persistence.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;

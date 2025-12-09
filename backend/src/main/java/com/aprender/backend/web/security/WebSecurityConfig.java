@@ -97,19 +97,22 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF para APIs sin estado (JWT)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/forgot-password").permitAll() // Permitir explícitamente forgot-password
-                        .requestMatchers("/api/auth/**", "/ws/info", "/ws/**", "/uploads/**").permitAll() // Login, Register, etc.
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        // Configuración estricta de roles:
-                        .requestMatchers("/api/user/**", "/api/messages/**").hasAnyRole("USER", "ADMIN") // Solo ROLE_USER puede acceder a /api/user/**
-                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN") // Solo ROLE_ADMIN puede acceder a /api/admin/**
-                        .anyRequest().authenticated() // Cualquier otra petición requiere autenticación (si no está mapeada arriba)
-                );
+        http.csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/forgot-password").permitAll()
+                .requestMatchers("/api/auth/**", "/ws/info", "/ws/**", "/uploads/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                //  AQUÍ ESTABA EL ERROR
+                .requestMatchers("/api/user/**", "/api/messages/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/pagos/**").hasAnyRole("USER", "ADMIN")
+
+                .anyRequest().authenticated()
+            );
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

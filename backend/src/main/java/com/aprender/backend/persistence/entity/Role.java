@@ -5,18 +5,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-@Data // Genera getters y setters
-@NoArgsConstructor // Genera constructor sin argumentos
-@AllArgsConstructor // Genera constructor con argumentos
-@Entity 
-@Table(name = "roles")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(
+    name = "roles",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = "name")
+    }
+)
 public class Role {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 20) // Limita la longitud de la columna a 20 caracteres
-    private String name;
-
+    @Column(nullable = false, length = 50, unique = true)
+    private String name; // ROLE_USER, ROLE_ADMIN, ROLE_PREMIUM
 }

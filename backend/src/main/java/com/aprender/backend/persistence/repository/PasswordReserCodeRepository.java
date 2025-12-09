@@ -1,4 +1,4 @@
-package com.aprender.backend.domain.repository;
+package com.aprender.backend.persistence.repository;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

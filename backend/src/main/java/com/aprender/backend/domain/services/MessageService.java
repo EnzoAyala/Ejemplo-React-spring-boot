@@ -1,9 +1,9 @@
 package com.aprender.backend.domain.services;
 
-import com.aprender.backend.domain.repository.MessageRepository;
-import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.persistence.entity.Message;
 import com.aprender.backend.persistence.entity.User;
+import com.aprender.backend.persistence.repository.MessageRepository;
+import com.aprender.backend.persistence.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;

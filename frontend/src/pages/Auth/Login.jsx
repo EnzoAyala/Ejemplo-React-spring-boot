@@ -32,22 +32,29 @@ const Login = () => {
     };
 
     // Función que maneja el envío del formulario
-    const handleLogin = (e) => {
-        e.preventDefault();
-        setMessage('');
-        setLoading(true);
+            const handleLogin = (e) => {
+            e.preventDefault();
+            setMessage('');
+            setLoading(true);
 
-        // Si la contraseña es válida, proceder con el login
-        if (password.length >= 6) {
-            AuthService.login(username, password)
-                .then(
-                    () => {
-                        // Login exitoso: redirigir y recargar para actualizar estado global
+            if (password.length >= 6) {
+                AuthService.login(username, password)
+                    .then((response) => {
+
+                        // GUARDAR TOKEN
+                        if (response.accessToken) {
+                            localStorage.setItem("token", response.accessToken);
+                        }
+
+                        // GUARDAR USUARIO COMPLETO
+                        localStorage.setItem("user", JSON.stringify(response));
+
+                        // REDIRECCIÓN
                         navigate('/home');
                         window.location.reload();
-                    },
-                    (error) => {
-                        // Extraer mensaje de error y mostrarlo
+
+                    })
+                    .catch((error) => {
                         const resMessage =
                             (error.response && error.response.data && error.response.data.message) ||
                             error.message ||
@@ -55,12 +62,12 @@ const Login = () => {
 
                         setLoading(false);
                         setMessage(resMessage);
-                    }
-                );
-        } else {
-            setLoading(false);
-        }
-    };
+                    });
+            } else {
+                setLoading(false);
+            }
+        };
+
 
     return (
         <div className="flex justify-center items-center min-h-[calc(100vh-150px)] py-10">
