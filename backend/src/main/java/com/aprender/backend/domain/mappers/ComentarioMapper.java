@@ -21,7 +21,8 @@ public class ComentarioMapper {
                 c.getIdComentario(),
                 c.getContenido(),
                 c.getFecha() != null ? c.getFecha().format(ISO) : null,
-                userMapper.toUserResponseUser(c.getUsuario())
+                userMapper.toUserResponseUser(c.getUsuario()),
+                c.getArchivoNombre()
         );
     }
 }

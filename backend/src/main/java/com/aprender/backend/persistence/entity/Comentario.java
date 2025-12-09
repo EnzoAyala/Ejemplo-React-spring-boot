@@ -19,6 +19,9 @@ public class Comentario {
     @Column(name = "id_comentario")
     private Integer idComentario;
 
+    @Column(name = "archivo_nombre")
+    private String archivoNombre;
+
     @Lob
     private String contenido;
 

@@ -2,14 +2,12 @@ package com.aprender.backend.domain.services;
 
 import com.aprender.backend.domain.dto.request.TareaRequest;
 import com.aprender.backend.domain.dto.response.TareaResponse;
+import com.aprender.backend.domain.repository.ArchivoRepository;
 import com.aprender.backend.domain.repository.ProyectoRepository;
 import com.aprender.backend.domain.repository.TareaRepository;
 import com.aprender.backend.domain.dto.response.UserResponseUser;
-import com.aprender.backend.persistence.entity.Proyecto;
-import com.aprender.backend.persistence.entity.Tarea;
-import com.aprender.backend.persistence.entity.TareaUsuario;
+import com.aprender.backend.persistence.entity.*;
 import com.aprender.backend.domain.repository.UserRepository;
-import com.aprender.backend.persistence.entity.User;
 import com.aprender.backend.domain.mappers.UserMapper;
 import com.aprender.backend.persistence.entity.Comentario;
 import com.aprender.backend.domain.repository.ComentarioRepository;
@@ -22,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -54,6 +54,12 @@ public class TareaService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
+    private ArchivoRepository archivoRepository;
 
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
@@ -167,7 +173,7 @@ public class TareaService {
                 .collect(Collectors.toList());
     }
 
-    public ComentarioResponse addComentario(Long tareaId, ComentarioRequest request) {
+    public ComentarioResponse addComentario(Long tareaId, ComentarioRequest request, MultipartFile file) {
         Tarea tarea = tareaRepository.findById(tareaId)
                 .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
 
@@ -181,6 +187,12 @@ public class TareaService {
         c.setFecha(java.time.LocalDateTime.now());
         c.setTarea(tarea);
         c.setUsuario(autor);
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file);
+            c.setArchivoNombre(fileName); // Asocia el archivo al comentario
+        }
+
         Comentario saved = comentarioRepository.save(c);
 
         ComentarioResponse comentarioResponse = comentarioMapper.toComentarioResponse(saved);
@@ -189,5 +201,36 @@ public class TareaService {
         messagingTemplate.convertAndSend("/topic/tarea/" + tareaId + "/comentarios", comentarioResponse);
 
         return comentarioResponse;
+    }
+
+    public Archivo storeFile(Long tareaId, MultipartFile file) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Tarea tarea = tareaRepository.findById(tareaId)
+                .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+
+        String fileName = fileStorageService.storeFile(file);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/tarea/download/")
+                .path(fileName)
+                .toUriString();
+
+        Archivo archivo = new Archivo();
+        archivo.setNombre(fileName);
+        archivo.setTipo(file.getContentType());
+        archivo.setTamano((int) file.getSize());
+        archivo.setUrl(fileDownloadUri);
+        archivo.setTarea(tarea);
+        archivo.setUsuario(user);
+
+        return archivoRepository.save(archivo);
+    }
+
+    public List<Archivo> getFiles(Long tareaId) {
+        return archivoRepository.findByTareaIdTarea(tareaId);
     }
 }

@@ -30,7 +30,30 @@ const TareaService = {
   },
 
   addComentario(tareaId, payload) {
-    return api.post(TAREA_BASE + tareaId + '/comentarios', payload);
+    return api.post(TAREA_BASE + tareaId + '/comentarios', payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+
+  // Archivos
+  getFiles(tareaId) {
+    return api.get(TAREA_BASE + tareaId + '/archivos');
+  },
+
+  uploadFile(tareaId, formData) {
+    return api.post(TAREA_BASE + tareaId + '/archivos', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+
+  downloadFile(filename) {
+    return api.get(TAREA_BASE + 'download/' + filename, {
+      responseType: 'blob'
+    });
   }
 };
 

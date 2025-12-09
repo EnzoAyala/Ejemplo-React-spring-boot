@@ -33,6 +33,7 @@ const TareasPage = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [comentarios, setComentarios] = useState([]);
   const [nuevoComentario, setNuevoComentario] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const commentsContainerRef = useRef(null);
 
   const estados = ["pendiente", "en_progreso", "en_revision", "completada"];
@@ -147,6 +148,7 @@ const TareasPage = () => {
     setSelectedTask(null);
     setComentarios([]);
     setNuevoComentario("");
+    setSelectedFile(null);
   };
 
   const handleNewComment = useCallback((comment) => {
@@ -161,9 +163,20 @@ const TareasPage = () => {
   const handleAddComentario = (e) => {
     e.preventDefault();
     if (!nuevoComentario.trim() || !selectedTask) return;
+  
+    const formData = new FormData();
+    formData.append('comentario', new Blob([JSON.stringify({ contenido: nuevoComentario })], { type: 'application/json' }));
+    
+    if (selectedFile) {
+      formData.append('file', selectedFile);
+    }
+  
     if (TareaService.addComentario) {
-      TareaService.addComentario(selectedTask.id, { contenido: nuevoComentario })
-        .then(() => setNuevoComentario(""))
+      TareaService.addComentario(selectedTask.id, formData)
+        .then(() => {
+          setNuevoComentario("");
+          setSelectedFile(null);
+        })
         .catch(err => console.error("Error comentarios:", err));
     }
   };
@@ -481,9 +494,12 @@ const TareasPage = () => {
         setNuevoComentario={setNuevoComentario}
         handleAddComentario={handleAddComentario}
         commentsContainerRef={commentsContainerRef}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
       />
     </div>
   );
 };
+
 
 export default TareasPage;

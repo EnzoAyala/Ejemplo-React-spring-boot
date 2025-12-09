@@ -12,4 +12,5 @@ public class ComentarioResponse {
     private String contenido;
     private String fecha;
     private UserResponseUser autor;
+    private String archivoNombre;
 }
