@@ -18,6 +18,55 @@ const DetallesTareas = ({
 }) => {
   const [commentFiles, setCommentFiles] = useState([]);
 
+  // ** Preview de Archivos **
+  const [hoverPreview, setHoverPreview] = useState(null);
+  const HoverPreview = ({ file }) => {
+    if (!file) return null;
+
+    const { url, tipo, nombre } = file;
+    const originalName = nombre.split("_").slice(1).join("_");
+
+    return (
+      <div
+        className="absolute top-0 right-[-330px] w-[300px] bg-white dark:bg-gray-900
+                 shadow-xl rounded-lg p-3 z-[999] border border-gray-200
+                 dark:border-gray-700"
+      >
+        <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 truncate">
+          {originalName}
+        </div>
+
+        {/* Imagen */}
+        {tipo?.startsWith("image") && (
+          <img src={url} className="w-full rounded-md max-h-[250px] object-cover" />
+        )}
+
+        {/* PDF */}
+        {tipo === "application/pdf" && (
+          <iframe src={url} className="w-full h-[250px] rounded-md" />
+        )}
+
+        {/* TXT */}
+        {tipo === "text/plain" && (
+          <iframe src={url} className="w-full h-[250px] rounded-md bg-white" />
+        )}
+
+        {/* Word */}
+        {(tipo === "application/msword" ||
+          tipo ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document") && (
+            <iframe
+              src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+                url
+              )}`}
+              className="w-full h-[250px] rounded-md"
+            />
+          )}
+      </div>
+    );
+  };
+
+
   useEffect(() => {
     if (isOpen && task && comentarios) {
       const filesFromComments = comentarios
@@ -195,7 +244,7 @@ const DetallesTareas = ({
             </div>
 
             {/* Columna Derecha: Comentarios */}
-            <div className="lg:col-span-2 space-y-4 flex flex-col">
+            <div className="lg:col-span-2 space-y-4 flex flex-col relative">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
                 Actividad
               </h3>
@@ -214,13 +263,27 @@ const DetallesTareas = ({
                           {c.archivoNombre && (
                             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
                               <Paperclip size={14} className="text-light-primary dark:text-dark-primary" />
+                              <span
+                                onMouseEnter={() =>
+                                  setHoverPreview({
+                                    nombre: c.archivoNombre,
+                                    tipo: c.archivoTipo, // asegúrate que lo envíes desde backend
+                                    url: `${import.meta.env.VITE_BACKEND_URL}/tareas/file/${c.archivoNombre}`,
+                                  })
+                                }
+                                onMouseLeave={() => setHoverPreview(null)}
+                                className="text-xs text-light-primary dark:text-dark-primary hover:underline cursor-pointer"
+                              >
+                                {c.archivoNombre.split("_").slice(1).join("_")}
+                              </span>
+
                               <button
                                 onClick={() => handleDownload(c.archivoNombre)}
-                                className="text-xs text-light-primary dark:text-dark-primary hover:underline"
-                                title={c.archivoNombre.split('_').slice(1).join('_')}
+                                className="ml-2 text-light-primary dark:text-dark-primary p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
                               >
-                                {c.archivoNombre.split('_').slice(1).join('_')}
+                                <Download size={14} />
                               </button>
+
                             </div>
                           )}
                         </div>
@@ -261,6 +324,10 @@ const DetallesTareas = ({
                 )}
               </form>
             </div>
+
+            {/* Preview de Archivos */}
+            {hoverPreview && <HoverPreview file={hoverPreview} />}
+
           </div>
         </div>
       </div>

@@ -90,50 +90,54 @@ const BoardAdmin = () => {
 
     // --- Render principal ---
     return (
-        <div className="container mx-auto px-4 py-6">
-            <h2 className="text-3xl font-bold text-light-primary dark:text-dark-primary mb-8 text-center">
-                Gestión de Usuarios (Panel de Administrador)
+        <div className="container mx-auto px-4 py-8">
+            <h2 className="text-3xl font-extrabold text-light-primary dark:text-dark-primary mb-10 text-center tracking-tight">
+                ✨ Gestión de Usuarios (Panel de Administrador)
             </h2>
 
             {/* Búsqueda con botón para limpiar */}
-            <div className="relative mb-6 max-w-xs mx-auto">
+            <div className="relative mb-8 max-w-sm mx-auto">
                 <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar por nombre de usuario o ID"
-                    className="w-full pr-10 bg-light-surface dark:bg-dark-surface rounded-lg shadow-sm border transition-all"
+                    placeholder="Buscar por nombre de usuario o ID..."
+                    // Estilos del input: light-elevated/dark-elevated como fondo, con focus en light-primary/dark-primary
+                    className="w-full pr-10 pl-4 py-2 border-2 border-light-elevated dark:border-dark-elevated bg-light-elevated dark:bg-dark-elevated text-light-text dark:text-dark-text rounded-xl shadow-md transition-all duration-300 focus:outline-none focus:border-light-primary dark:focus:border-dark-primary placeholder-light-text-secondary dark:placeholder-dark-text-secondary"
                 />
                 {searchTerm && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                         <button
                             onClick={() => setSearchTerm('')}
-                            className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-danger dark:hover:text-dark-danger"
+                            // Estilos del botón de limpiar: usa texto secundario con hover a danger
+                            className="text-light-text-secondary dark:text-dark-text-secondary hover:text-light-danger dark:hover:text-dark-danger transition-colors duration-200"
                             aria-label="Borrar búsqueda"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14" />
                             </svg>
-
                         </button>
                     </div>
                 )}
             </div>
 
             {/* Tabla de usuarios */}
-            <div className="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-xl shadow-lg">
-                <div className="relative overflow-x-auto shadow-xl rounded-lg animate-gradient-pulse">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                        <thead className="bg-gradient-to-r from-purple-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white animate-gradient-pulse">
+            {/* Contenedor de la tabla: usa light-surface/dark-surface */}
+            <div className="overflow-x-auto bg-light-surface dark:bg-dark-surface rounded-2xl shadow-2xl">
+                <div className="relative overflow-x-auto rounded-2xl">
+                    <table className="min-w-full divide-y divide-light-elevated dark:divide-dark-elevated text-sm">
+                        {/* Encabezado de la tabla (thead) */}
+                        <thead className="bg-light-elevated dark:bg-dark-elevated">
                             <tr>
-                                <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">User Name</th>
-                                <th className="px-6 py-4 text-left font-extrabold text-xs uppercase tracking-wider">Correo</th>
-                                <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Rol</th>
-                                <th className="px-6 py-4 text-center font-extrabold text-xs uppercase tracking-wider">Acciones</th>
+                                <th className="px-6 py-4 text-left font-bold text-xs uppercase tracking-wider text-light-primary dark:text-dark-primary">ID</th>
+                                <th className="px-6 py-4 text-left font-bold text-xs uppercase tracking-wider text-light-primary dark:text-dark-primary">User Name</th>
+                                <th className="px-6 py-4 text-left font-bold text-xs uppercase tracking-wider text-light-primary dark:text-dark-primary">Correo</th>
+                                <th className="px-6 py-4 text-center font-bold text-xs uppercase tracking-wider text-light-primary dark:text-dark-primary">Rol</th>
+                                <th className="px-6 py-4 text-center font-bold text-xs uppercase tracking-wider text-light-primary dark:text-dark-primary">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {/* Cuerpo de la tabla (tbody) */}
+                        <tbody className="divide-y divide-light-elevated dark:divide-dark-elevated">
                             <ShowUsers
                                 users={filteredUsers}
                                 onOpenModal={openModal}

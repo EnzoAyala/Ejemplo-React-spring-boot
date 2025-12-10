@@ -276,11 +276,13 @@ const ProfileModal = ({ user, onClose, onSave }) => {
             <div
                 role="dialog"
                 aria-modal="true"
-                className={`bg-white dark:bg-dark-surface rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg md:max-w-xl p-4 sm:p-6 md:p-8 transition-transform duration-300 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} max-h-[85vh] overflow-y-auto`}
+                // Fondo del modal: light-elevated/dark-elevated para distinguirlo del fondo
+                className={`bg-light-elevated dark:bg-dark-elevated rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg md:max-w-xl p-4 sm:p-6 md:p-8 transition-transform duration-300 ${isClosing ? 'animate-scale-out' : 'animate-scale-in'} max-h-[85vh] overflow-y-auto`}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-light-divider dark:border-dark-divider pb-3 sm:pb-4">
                     <h2 className="text-xl sm:text-2xl font-bold text-light-text dark:text-dark-text">Editar Perfil</h2>
+                    {/* Botón de cerrar: usa light-danger/dark-danger en hover */}
                     <button onClick={handleCloseProfileModal} className="text-light-text dark:text-dark-text hover:text-light-danger dark:hover:text-dark-danger transition">
                         <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path fillRule="evenodd" d="M6.225 4.811a.75.75 0 0 1 1.06 0L12 9.525l4.715-4.714a.75.75 0 1 1 1.06 1.06L13.06 10.5l4.715 4.714a.75.75 0 0 1-1.06 1.06L12 11.56l-4.715 4.714a.75.75 0 0 1-1.06-1.06l4.714-4.715-4.714-4.715a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
@@ -297,9 +299,11 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                             <img
                                 src={effectiveAvatarUrl}
                                 alt="Foto de Perfil"
-                                className="h-full w-full rounded-full object-cover border-4 border-light-primary dark:border-dark-primary shadow"
+                                // Borde de la imagen con primary color
+                                className="h-full w-full rounded-full object-cover border-4 border-light-primary dark:border-dark-primary shadow-lg"
                             />
-                            <div className="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-light-primary dark:bg-dark-primary text-white rounded-full">
+                            {/* Botón de subir foto: usa primary color */}
+                            <div className="absolute bottom-0 right-0 p-1.5 sm:p-2 bg-light-primary dark:bg-dark-primary text-white rounded-full shadow-md hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 transition-colors">
                                 <label className="cursor-pointer">
                                     <input
                                         type="file"
@@ -315,57 +319,64 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                             </div>
                         </div>
                         {imageError && (
-                            <p className="mt-3 text-center text-sm text-red-600 dark:text-red-400 px-2">{imageError}</p>
+                            <p className="mt-3 text-center text-sm text-light-danger dark:text-dark-danger px-2">{imageError}</p>
                         )}
                     </div>
 
                     {/* Username (solo lectura) */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Nombre de Usuario</label>
+                        <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Nombre de Usuario</label>
                         <input
                             type="text"
                             value={username}
                             readOnly
-                            className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                            // Input de solo lectura: usa surface/elevated para fondo y texto secundario
+                            className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text-secondary dark:text-dark-text-secondary rounded-lg shadow-inner cursor-not-allowed"
                         />
                     </div>
 
                     {/* Formulario de Información Personal */}
-                    <section>
-                        <h3 className="text-base sm:text-lg font-semibold text-light-text dark:text-dark-text mb-3 sm:mb-4">Información Personal</h3>
+                    <section className="pt-3 border-t border-light-divider dark:border-dark-divider">
+                        <h3 className="text-base sm:text-lg font-semibold text-light-primary dark:text-dark-primary mb-3 sm:mb-4">Información Personal</h3>
                         <form onSubmit={handleProfileUpdate} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                                {/* Nombre */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Nombre</label>
+                                    <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Nombre</label>
                                     <input
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                                        // Estilos de input: Usa surface/elevated con focus en primary
+                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                     />
                                 </div>
+                                {/* Apellido */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Apellido</label>
+                                    <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Apellido</label>
                                     <input
                                         type="text"
                                         value={lastname}
                                         onChange={(e) => setLastname(e.target.value)}
-                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                     />
                                 </div>
+                                {/* Descripción */}
                                 <div className='col-span-2'>
-                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                        Descripcion <span className="relative text-sm text-gray-700"> (Ingrese una breve descricion sobre ti) </span>
+                                    <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                                        Descripcion <span className="relative text-xs text-light-text-secondary/70 dark:text-dark-text-secondary/70 italic"> (Ingrese una breve descricion sobre ti) </span>
                                     </label>
                                     <textarea
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
-                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm resize-none"
+                                        rows={3}
+                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm resize-none transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                     />
                                 </div>
                             </div>
+                            {/* Teléfono */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Teléfono</label>
+                                <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Teléfono</label>
                                 <input
                                     type="tel"
                                     value={phone}
@@ -378,63 +389,98 @@ const ProfileModal = ({ user, onClose, onSave }) => {
                                     placeholder="Ej. 987654321"
                                     inputMode="numeric"
                                     pattern="[9][0-9]{8}"
-                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                 />
                             </div>
+                            {/* Botones de acción (Guardar/Cancelar) */}
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-4 sm:mt-6">
-                                <button type="button" onClick={handleCloseProfileModal} className="px-4 py-2 sm:px-6 sm:py-2 bg-gray-200 dark:bg-gray-700 text-light-text dark:text-dark-text font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancelar</button>
-                                <button type="submit" disabled={!!imageError} className="px-4 py-2 sm:px-6 sm:py-2 bg-light-primary dark:bg-dark-primary text-white font-semibold rounded-md hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed">Guardar Cambios</button>
+                                <button
+                                    type="button"
+                                    onClick={handleCloseProfileModal}
+                                    // Botón Cancelar: usa light-elevated/dark-elevated como fondo con hover más oscuro
+                                    className="px-4 py-2 sm:px-6 sm:py-2 bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text font-medium rounded-lg hover:bg-light-elevated dark:hover:bg-dark-elevated border-2 border-light-divider dark:border-dark-divider transition-colors duration-200"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!!imageError}
+                                    // Botón Guardar: usa light-primary/dark-primary
+                                    className="px-4 py-2 sm:px-6 sm:py-2 bg-light-primary dark:bg-dark-primary text-white font-semibold rounded-lg shadow-md hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Guardar Cambios
+                                </button>
                             </div>
                         </form>
                     </section>
 
                     {/* Formulario: Cambiar Contraseña */}
-                    <section>
-                        <h3 className="text-base sm:text-lg font-semibold text-light-text dark:text-dark-text mb-3 sm:mb-4">Cambiar Contraseña</h3>
+                    <section className="pt-3 border-t border-light-divider dark:border-dark-divider">
+                        <h3 className="text-base sm:text-lg font-semibold text-light-primary dark:text-dark-primary mb-3 sm:mb-4">Cambiar Contraseña</h3>
                         <form onSubmit={handlePasswordChange} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                                {/* Contraseña Actual */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Contraseña Actual</label>
+                                    <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Contraseña Actual</label>
                                     <input
                                         type="password"
                                         value={currentPassword}
                                         onChange={(e) => setCurrentPassword(e.target.value)}
-                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                     />
                                 </div>
+                                {/* Nueva Contraseña */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Nueva Contraseña</label>
+                                    <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Nueva Contraseña</label>
                                     <input
                                         type="password"
                                         value={newPassword}
                                         onChange={handleNewPasswordChange}
-                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                                        className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                     />
-                                    {newPasswordError && <p className="text-sm text-red-500 mt-1">{newPasswordError}</p>}
+                                    {newPasswordError && <p className="text-sm text-light-danger dark:text-dark-danger mt-1">{newPasswordError}</p>}
                                 </div>
                             </div>
+                            {/* Confirmar Nueva Contraseña */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Confirmar Nueva Contraseña</label>
+                                <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">Confirmar Nueva Contraseña</label>
                                 <input
                                     type="password"
                                     value={confirmPassword}
                                     onChange={handleConfirmPasswordChange}
-                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-light-surface dark:bg-dark-surface border border-light-divider dark:border-dark-divider rounded-md shadow-sm"
+                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 border-2 border-light-divider dark:border-dark-divider bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text rounded-lg shadow-sm transition-all duration-200 focus:border-light-primary dark:focus:border-dark-primary focus:ring-1 focus:ring-light-primary dark:focus:ring-dark-primary"
                                 />
-                                {confirmPasswordError && <p className="text-sm text-red-500 mt-1">{confirmPasswordError}</p>}
+                                {confirmPasswordError && <p className="text-sm text-light-danger dark:text-dark-danger mt-1">{confirmPasswordError}</p>}
                             </div>
+                            {/* Mensaje de éxito/error */}
                             {message && (
-                                <div className={`mt-4 sm:mt-6 p-3 sm:p-4 text-center rounded-md font-medium ${successful ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}>
+                                <div className={`mt-4 sm:mt-6 p-3 sm:p-4 text-center rounded-lg font-medium ${successful
+                                    ? 'bg-light-success/10 text-light-success dark:bg-dark-success/10 dark:text-dark-success'
+                                    : 'bg-light-danger/10 text-light-danger dark:bg-dark-danger/10 dark:text-dark-danger'
+                                    }`}>
                                     {message}
                                 </div>
                             )}
+                            {/* Botones de acción (Actualizar Contraseña/Cancelar) */}
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 mt-4 sm:mt-6">
-                                <button type="button" onClick={handleCloseProfileModal} className="px-4 py-2 sm:px-6 sm:py-2 bg-gray-200 dark:bg-gray-700 text-light-text dark:text-dark-text font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition">Cancelar</button>
-                                <button type="submit" className="px-4 py-2 sm:px-6 sm:py-2 bg-light-primary dark:bg-dark-primary text-white font-semibold rounded-md hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 transition">Actualizar Contraseña</button>
+                                <button
+                                    type="button"
+                                    onClick={handleCloseProfileModal}
+                                    // Botón Cancelar
+                                    className="px-4 py-2 sm:px-6 sm:py-2 bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text font-medium rounded-lg hover:bg-light-elevated dark:hover:bg-dark-elevated border-2 border-light-divider dark:border-dark-divider transition-colors duration-200"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    // Botón Actualizar: usa light-primary/dark-primary
+                                    className="px-4 py-2 sm:px-6 sm:py-2 bg-light-primary dark:bg-dark-primary text-white font-semibold rounded-lg shadow-md hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 transition"
+                                >
+                                    Actualizar Contraseña
+                                </button>
                             </div>
                         </form>
                     </section>
-
                 </div>
             </div>
         </div>

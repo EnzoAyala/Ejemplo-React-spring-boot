@@ -166,6 +166,7 @@ const TareasPage = () => {
   const openDetails = (tarea) => {
     setSelectedTask(tarea);
     setDetailsOpen(true);
+    document.body.style.overflow = 'hidden';
     if (tarea?.id && TareaService.getComentariosByTareaId) {
       TareaService.getComentariosByTareaId(tarea.id)
         .then(res => setComentarios(res.data))
@@ -177,6 +178,7 @@ const TareasPage = () => {
 
   const closeDetails = () => {
     setDetailsOpen(false);
+    document.body.style.overflow = 'auto';
     setSelectedTask(null);
     setComentarios([]);
     setNuevoComentario("");
