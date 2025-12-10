@@ -16,28 +16,18 @@ const DetallesTareas = ({
   selectedFile,
   setSelectedFile,
 }) => {
-  const [archivos, setArchivos] = useState([]);
+  const [commentFiles, setCommentFiles] = useState([]);
 
   useEffect(() => {
-    if (isOpen && task) {
-      TareaService.getFiles(task.id).then(response => {
-        setArchivos(response.data);
-      }).catch(err => console.error("Error fetching files", err));
+    if (isOpen && task && comentarios) {
+      const filesFromComments = comentarios
+        .filter(c => c.archivoNombre)
+        .map(c => ({ nombre: c.archivoNombre }));
+      setCommentFiles(filesFromComments);
     }
-  }, [isOpen, task]);
+  }, [isOpen, task, comentarios]);
 
-  useEffect(() => {
-    if (isOpen && task) {
-      // This part is to update the file list when a new comment with a file is added via websocket
-      const newFilesInComments = comentarios.filter(c => c.archivoNombre).map(c => c.archivoNombre);
-      const currentArchivosNombres = archivos.map(a => a.nombre);
-      if (newFilesInComments.some(f => !currentArchivosNombres.includes(f))) {
-        TareaService.getFiles(task.id).then(response => {
-          setArchivos(response.data);
-        });
-      }
-    }
-  }, [comentarios]);
+
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -103,7 +93,7 @@ const DetallesTareas = ({
         {/* BODY */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            
+
             {/* Columna Izquierda: Detalles y Archivos */}
             <div className="lg:col-span-1 space-y-6">
               {/* Detalles */}
@@ -120,8 +110,8 @@ const DetallesTareas = ({
                     </div>
                   </div>
                   <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
-                     <span className={`w-4 h-4 mt-0.5 rounded-full ${task.prioridad === 'alta' ? 'bg-red-500' : task.prioridad === 'media' ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
-                     <div className="flex flex-col">
+                    <span className={`w-4 h-4 mt-0.5 rounded-full ${task.prioridad === 'alta' ? 'bg-red-500' : task.prioridad === 'media' ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
+                    <div className="flex flex-col">
                       <span className="font-medium text-gray-700 dark:text-gray-300">Prioridad</span>
                       <span className="capitalize">{task.prioridad}</span>
                     </div>
@@ -143,10 +133,10 @@ const DetallesTareas = ({
                 </div>
               </div>
 
-               {/* Archivos de la Tarea */}
-               <div className="space-y-4">
+              {/* Archivos de la Tarea de referencia */}
+              <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
-                  Archivos de la tarea
+                  Archivos de referencia
                 </h3>
                 <div className="max-h-60 overflow-y-auto space-y-3 pr-2">
                   {task.archivos && task.archivos.length > 0 ? (
@@ -174,13 +164,41 @@ const DetallesTareas = ({
                   )}
                 </div>
               </div>
+
+              {/* Archivos de los comentarios de la tarea */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
+                  Archivos de Comentarios
+                </h3>
+                <div className="max-h-60 overflow-y-auto space-y-3 pr-2">
+                  {commentFiles.length > 0 ? (
+                    commentFiles.map((file, index) => (
+                      <div key={index} className="text-sm flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="w-8 h-8 flex items-center justify-center rounded-md bg-light-primary/10 dark:bg-dark-primary/10">
+                            <FileIcon size={16} className="text-light-primary dark:text-dark-primary" />
+                          </div>
+                          <span className="text-gray-700 dark:text-gray-300 truncate" title={file.nombre.split('_').slice(1).join('_')}>
+                            {file.nombre.split('_').slice(1).join('_')}
+                          </span>
+                        </div>
+                        <button onClick={() => handleDownload(file.nombre)} className="text-light-primary dark:text-dark-primary p-1 rounded-full hover:bg-light-primary/10 dark:hover:bg-dark-primary/10">
+                          <Download size={16} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">Sin archivos en comentarios</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Columna Derecha: Comentarios */}
             <div className="lg:col-span-2 space-y-4 flex flex-col">
-               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
-                  Actividad
-                </h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
+                Actividad
+              </h3>
               <div ref={commentsContainerRef} className="flex-1 overflow-y-auto max-h-[40vh] sm:max-h-[50vh] rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50 border border-light-divider dark:border-dark-divider">
                 {comentarios.length === 0 ? (
                   <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">Aún no hay comentarios.</p>
@@ -234,11 +252,11 @@ const DetallesTareas = ({
                 </div>
                 {selectedFile && (
                   <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                     <Paperclip size={12} />
+                    <Paperclip size={12} />
                     <span>Archivo listo para adjuntar: {selectedFile.name}</span>
-                     <button onClick={() => setSelectedFile(null)} className='text-red-500 hover:underline text-xs'>
-                        (Quitar)
-                     </button>
+                    <button onClick={() => setSelectedFile(null)} className='text-red-500 hover:underline text-xs'>
+                      (Quitar)
+                    </button>
                   </div>
                 )}
               </form>

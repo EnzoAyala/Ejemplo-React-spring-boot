@@ -20,7 +20,7 @@ public class Archivo {
     @Column(length = 150, nullable = false)
     private String nombre;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 255, nullable = false)
     private String tipo;
 
     @Column(name = "tamano")
