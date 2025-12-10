@@ -148,7 +148,7 @@ function App() {
     const token = currentUser?.accessToken;
     if (!token) return;
 
-    const socket = new SockJS(`${window.location.protocol}//${window.location.hostname}:8080/ws`);
+    const socket = new SockJS(`https://worksyncback.onrender.com/ws`);
     const client = Stomp.over(socket);
     client.debug = null;
     stompRef.current = client;

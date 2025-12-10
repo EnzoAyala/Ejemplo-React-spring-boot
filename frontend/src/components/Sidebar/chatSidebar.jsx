@@ -7,7 +7,7 @@ import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-const WS_URL = `${window.location.protocol}//${window.location.hostname}:8080/ws`;
+const WS_URL = `https://worksyncback.onrender.com/ws`;
 
 const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
     const [error, setError] = useState(null);
@@ -314,7 +314,7 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className="relative shrink-0">
                                             <img
-                                                src={user.profilePictureUrl ? `${window.location.protocol}//${window.location.hostname}:8080/uploads/${user.profilePictureUrl}` : (user.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
+                                                src={user.profilePictureUrl ? `https://worksyncback.onrender.com/uploads/${user.profilePictureUrl}` : (user.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
                                                 alt={user.name}
                                                 className="w-10 h-10 rounded-full"
                                             />

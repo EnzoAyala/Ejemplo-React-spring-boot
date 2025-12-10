@@ -53,7 +53,7 @@ const Header = ({
         const full = list.find((u) => u.id === currentUser.id) || null;
         setHeaderUser(full);
         if (full?.profilePictureUrl) {
-          const base = `${window.location.protocol}//${window.location.hostname}:8080/uploads/`;
+          const base = `https://worksyncback.onrender.com/uploads/`;
           setAvatarUrl(base + full.profilePictureUrl);
         } else {
           setAvatarUrl(null);

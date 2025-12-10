@@ -161,7 +161,7 @@ const Chat = () => {
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
                                         <img
-                                            src={selectedUser.profilePictureUrl ? `${window.location.protocol}//${window.location.hostname}:8080/uploads/${selectedUser.profilePictureUrl}` : (selectedUser.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
+                                            src={selectedUser.profilePictureUrl ? `https://worksyncback.onrender.com/uploads/${selectedUser.profilePictureUrl}` : (selectedUser.gender === 'MALE' ? 'https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7&rm=3&rs=1&pid=ImgDetMain&o=7&rm=3' : 'https://logowik.com/content/uploads/images/woman4906.jpg')}
                                             alt={selectedUser.name}
                                             className="w-10 h-10 rounded-full"
                                         />
