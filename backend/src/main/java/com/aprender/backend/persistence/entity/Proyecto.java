@@ -23,7 +23,7 @@ public class Proyecto {
     @Column(length = 150, nullable = false)
     private String nombre;
 
-    @Lob
+    
     private String descripcion;
 
     @Column(nullable = false)

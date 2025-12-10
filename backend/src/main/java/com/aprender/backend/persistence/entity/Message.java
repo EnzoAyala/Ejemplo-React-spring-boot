@@ -19,7 +19,7 @@ public class Message {
     private Long id;
 
     // Contenido cifrado del mensaje (AES). Guardado como Base64 (IV + ciphertext)
-    @Lob
+    
     @Column(name = "contenido", nullable = false, columnDefinition = "TEXT")
     private String contenido;
 
