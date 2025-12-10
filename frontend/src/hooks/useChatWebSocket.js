@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import AuthService from '../services/auth.service';
 
-const WS_URL = `${window.location.protocol}//${window.location.hostname}:8080/ws`;
+const WS_URL = `https://worksyncback.onrender.com/ws`;
 
 const useChatWebSocket = (chatId, onMessageReceived) => {
     const stompClient = useRef(null);

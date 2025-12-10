@@ -4,7 +4,7 @@ import Stomp from 'stompjs';
 import AuthService from '../services/auth.service';
 
 // URL del WebSocket (dinámica según host del frontend)
-const WS_URL = `${window.location.protocol}//${window.location.hostname}:8080/ws`;
+const WS_URL = `https://worksyncback.onrender.com/ws`;
 
 /**
  * Hook que maneja la conexión WebSocket para escuchar actualizaciones de usuarios.
