@@ -103,7 +103,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 1. Accesos públicos consolidados
-                        .requestMatchers("/api/auth/**", "/ws/**", "/uploads/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/ws/**", "/ws/**/**", "/uploads/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
                         // 2. Roles USER y ADMIN 
