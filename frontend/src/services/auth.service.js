@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base para autenticación (dinámica según el host del frontend)
-const API_URL = `${window.location.protocol}//${window.location.hostname}:8080/api/auth/`;
+const API_URL = `https://worksyncback.onrender.com/api/auth/`;
 
 class AuthService {
   // Login: envía username y password y guarda el token si es correcto
