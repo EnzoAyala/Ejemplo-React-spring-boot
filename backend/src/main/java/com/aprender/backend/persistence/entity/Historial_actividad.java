@@ -19,7 +19,7 @@ public class Historial_actividad {
     @Column(name = "id_actividad")
     private Integer idActividad;
 
-    @Lob
+    @Column(name = "descripcion", length = 500, nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
     @Column(nullable = false)

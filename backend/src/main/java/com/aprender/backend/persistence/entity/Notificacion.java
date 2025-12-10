@@ -17,7 +17,7 @@ public class Notificacion {
     @Column(name = "id_notificacion")
     private Integer idNotificacion;
 
-    @Lob
+    @Column(name = "mensaje", length = 500, nullable = false, columnDefinition = "TEXT")
     private String mensaje;
 
     @Column(length = 50)

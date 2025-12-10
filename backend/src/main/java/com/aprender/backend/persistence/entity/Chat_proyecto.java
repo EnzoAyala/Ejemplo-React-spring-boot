@@ -19,7 +19,7 @@ public class Chat_proyecto {
     @Column(name = "id_mensaje")
     private Integer idMensaje;
 
-    @Lob
+    @Column(name = "contenido", nullable = false, columnDefinition = "TEXT")
     private String contenido;
 
     @Column(nullable = false)

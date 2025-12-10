@@ -22,7 +22,7 @@ public class Comentario {
     @Column(name = "archivo_nombre")
     private String archivoNombre;
 
-    @Lob
+    @Column(name = "contenido ", length = 500, nullable = false, columnDefinition = "TEXT")
     private String contenido;
 
     private LocalDateTime fecha;

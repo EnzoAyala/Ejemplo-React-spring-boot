@@ -23,7 +23,7 @@ public class Tarea {
     @Column(length = 150, nullable = false)
     private String titulo;
 
-    @Lob
+    @Column(length = 500, nullable = false)
     private String descripcion;
 
     @Column(nullable = false)
