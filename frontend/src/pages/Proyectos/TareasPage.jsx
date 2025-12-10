@@ -3,7 +3,7 @@ import { NavLink, useParams, useSearchParams } from "react-router-dom";
 import {
   PlusCircle, Edit3, Trash2, Search, ArrowLeft, Calendar,
   Activity, CheckCircle, Clock, Users, MoreVertical, X,
-  Plus, MessageSquare, MoreHorizontal
+  Plus, MessageSquare, MoreHorizontal, FileUp
 } from "lucide-react";
 import TareaService from "../../services/tarea.service";
 import ProyectoService from "../../services/proyecto.service";
@@ -18,6 +18,7 @@ const TareasPage = () => {
   // Estado del formulario
   const [newTarea, setNewTarea] = useState({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media", responsablesIds: [] });
   const [showNewForm, setShowNewForm] = useState(false);
+  const [files, setFiles] = useState([]);
 
   // Estado Drag & Drop y Edición
   const [draggedTarea, setDraggedTarea] = useState(null);
@@ -78,12 +79,43 @@ const TareasPage = () => {
   };
 
   // -- HANDLERS TAREAS --
+  const handleFileChange = (event) => {
+    event.preventDefault();
+    const selectedFiles = event.dataTransfer ? Array.from(event.dataTransfer.files) : Array.from(event.target.files);
+    if (files.length + selectedFiles.length > 5) {
+      alert("No se pueden subir más de 5 archivos.");
+      return;
+    }
+
+    const totalSize = files.reduce((acc, file) => acc + file.size, 0) + selectedFiles.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 500 * 1024 * 1024) {
+      alert("El tamaño total de los archivos no puede exceder los 500MB.");
+      return;
+    }
+
+    setFiles([...files, ...selectedFiles]);
+  };
+
+  const removeFile = (index) => {
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
+  };
+
   const handleAdd = () => {
     if (!newTarea.titulo.trim()) return;
-    TareaService.createTarea({ ...newTarea, proyectoId })
+
+    const formData = new FormData();
+    formData.append('tarea', new Blob([JSON.stringify({ ...newTarea, proyectoId })], { type: 'application/json' }));
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    TareaService.createTarea(formData)
       .then(() => {
         fetchTareas();
         setNewTarea({ titulo: "", descripcion: "", fechaEntrega: "", prioridad: "media", responsablesIds: [] });
+        setFiles([]);
         setShowNewForm(false);
       })
       .catch(error => console.error("Error al crear tarea:", error));
@@ -291,9 +323,9 @@ const TareasPage = () => {
 
       {/* 4. MODAL FORMULARIO FLOTANTE */}
       {showNewForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-light-bg dark:bg-dark-surface rounded-xl shadow-2xl border border-light-elevated dark:border-dark-elevated w-full max-w-2xl animate-scale-in">
-            <div className="flex justify-between items-center p-6 border-b border-light-elevated dark:border-dark-elevated">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-gradient-pulse">
+          <div className="bg-light-bg dark:bg-dark-surface rounded-xl shadow-2xl border border-light-elevated dark:border-dark-elevated w-full max-w-2xl animate-scale-in sm:max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-light-elevated dark:border-dark-elevated sticky top-0 bg-light-bg dark:bg-dark-surface z-10">
               <h3 className="text-lg font-bold text-light-text dark:text-dark-text flex items-center gap-2">
                 <PlusCircle size={20} className="text-light-accent dark:text-dark-accent" /> Nueva Tarea
               </h3>
@@ -330,6 +362,45 @@ const TareasPage = () => {
               </div>
 
               <div className="col-span-2">
+                <label className="text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary mb-1 block">Archivos (Opcional)</label>
+                <div 
+                  className="mt-2 flex justify-center rounded-lg border border-dashed border-light-elevated dark:border-dark-elevated px-6 py-10 flex-col items-center"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleFileChange}
+                >
+                  <div className="text-center">
+                    <FileUp size={48} className="mx-auto text-gray-400" />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="file-upload"
+                        className="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                      >
+                        <span>Sube tus archivos</span>
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple onChange={handleFileChange} />
+                      </label>
+                      <p className="pl-1">o arrástralos aquí</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">Máximo 5 archivos, 500MB en total</p>
+                  </div>
+                </div>
+                {files.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-semibold text-light-text-secondary dark:text-dark-text-secondary">Archivos seleccionados:</p>
+                    <ul className="mt-2 space-y-2">
+                      {files.map((file, index) => (
+                        <li key={index} className="flex justify-between items-center bg-light-surface dark:bg-dark-elevated p-2 rounded-lg">
+                          <span className="text-sm text-light-text dark:text-dark-text truncate">{file.name}</span>
+                          <button onClick={() => removeFile(index)} className="text-red-500 hover:text-red-700">
+                            <X size={16} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="col-span-2">
                 <p className="text-xs font-semibold text-light-text-secondary dark:text-dark-text-secondary mb-2">Asignar Responsables</p>
                 <div className="flex flex-wrap gap-2">
                   {(proyecto?.colaboradores || []).map(c => (
@@ -343,8 +414,8 @@ const TareasPage = () => {
                         }))
                       }}
                       className={`px-3 py-1 rounded-full text-xs border transition-colors flex items-center gap-1 ${newTarea.responsablesIds.includes(c.id)
-                          ? 'bg-light-accent/10 border-light-accent text-light-accent dark:bg-dark-accent/20 dark:border-dark-accent dark:text-dark-accent'
-                          : 'bg-light-surface border-light-elevated text-light-text-secondary hover:bg-light-elevated dark:bg-dark-elevated dark:border-dark-elevated dark:text-dark-text-secondary dark:hover:bg-dark-elevated/80'
+                        ? 'bg-light-accent/10 border-light-accent text-light-accent dark:bg-dark-accent/20 dark:border-dark-accent dark:text-dark-accent'
+                        : 'bg-light-surface border-light-elevated text-light-text-secondary hover:bg-light-elevated dark:bg-dark-elevated dark:border-dark-elevated dark:text-dark-text-secondary dark:hover:bg-dark-elevated/80'
                         }`}
                     >
                       {newTarea.responsablesIds.includes(c.id) && <CheckCircle size={10} />}

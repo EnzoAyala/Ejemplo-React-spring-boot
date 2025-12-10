@@ -2,6 +2,7 @@ package com.aprender.backend.domain.services;
 
 import com.aprender.backend.domain.dto.request.TareaRequest;
 import com.aprender.backend.domain.dto.response.TareaResponse;
+import com.aprender.backend.domain.dto.response.ArchivoResponse;
 import com.aprender.backend.domain.repository.ArchivoRepository;
 import com.aprender.backend.domain.repository.ProyectoRepository;
 import com.aprender.backend.domain.repository.TareaRepository;
@@ -9,6 +10,7 @@ import com.aprender.backend.domain.dto.response.UserResponseUser;
 import com.aprender.backend.persistence.entity.*;
 import com.aprender.backend.domain.repository.UserRepository;
 import com.aprender.backend.domain.mappers.UserMapper;
+import com.aprender.backend.domain.mappers.ArchivoMapper;
 import com.aprender.backend.persistence.entity.Comentario;
 import com.aprender.backend.domain.repository.ComentarioRepository;
 import com.aprender.backend.domain.dto.request.ComentarioRequest;
@@ -61,10 +63,25 @@ public class TareaService {
     @Autowired
     private ArchivoRepository archivoRepository;
 
+    @Autowired
+    private ArchivoMapper archivoMapper;
+
     public List<TareaResponse> getTareasByProyectoId(Long proyectoId) {
         return tareaRepository.findByProyectoIdProyecto(proyectoId).stream()
                 .map(this::mapToTareaResponse)
                 .collect(Collectors.toList());
+    }
+
+    public TareaResponse createTarea(TareaRequest tareaRequest, List<MultipartFile> files) {
+        TareaResponse tareaResponse = createTarea(tareaRequest);
+
+        if (files != null && !files.isEmpty()) {
+            Tarea tarea = tareaRepository.findById(tareaResponse.getId()).orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+            for (MultipartFile file : files) {
+                storeFile(tarea.getIdTarea(), file);
+            }
+        }
+        return mapToTareaResponse(tareaRepository.findById(tareaResponse.getId()).get());
     }
 
     public TareaResponse createTarea(TareaRequest tareaRequest) {
@@ -153,6 +170,9 @@ public class TareaService {
                 .map(TareaUsuario::getUsuario)
                 .map(userMapper::toUserResponseUser)
                 .collect(Collectors.toList());
+        List<ArchivoResponse> archivos = archivoRepository.findByTareaIdTarea(tarea.getIdTarea()).stream()
+                .map(archivoMapper::toArchivoResponse)
+                .collect(Collectors.toList());
         return new TareaResponse(
                 tarea.getIdTarea(),
                 tarea.getTitulo(),
@@ -160,7 +180,8 @@ public class TareaService {
                 tarea.getEstado(),
                 tarea.getPrioridad(),
                 fechaEntrega,
-                responsables
+                responsables,
+                archivos
         );
     }
 

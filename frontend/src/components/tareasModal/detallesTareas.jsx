@@ -20,21 +20,24 @@ const DetallesTareas = ({
 
   useEffect(() => {
     if (isOpen && task) {
-      // Fetch all files for the task
-      TareaService.getFiles(task.idTarea).then(response => {
+      TareaService.getFiles(task.id).then(response => {
         setArchivos(response.data);
       }).catch(err => console.error("Error fetching files", err));
+    }
+  }, [isOpen, task]);
 
+  useEffect(() => {
+    if (isOpen && task) {
       // This part is to update the file list when a new comment with a file is added via websocket
       const newFilesInComments = comentarios.filter(c => c.archivoNombre).map(c => c.archivoNombre);
       const currentArchivosNombres = archivos.map(a => a.nombre);
       if (newFilesInComments.some(f => !currentArchivosNombres.includes(f))) {
-        TareaService.getFiles(task.idTarea).then(response => {
+        TareaService.getFiles(task.id).then(response => {
           setArchivos(response.data);
         });
       }
     }
-  }, [isOpen, task, comentarios]);
+  }, [comentarios]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -102,7 +105,7 @@ const DetallesTareas = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             
             {/* Columna Izquierda: Detalles y Archivos */}
-            <div className="space-y-6">
+            <div className="lg:col-span-1 space-y-6">
               {/* Detalles */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
@@ -146,9 +149,9 @@ const DetallesTareas = ({
                   Archivos de la tarea
                 </h3>
                 <div className="max-h-60 overflow-y-auto space-y-3 pr-2">
-                  {archivos.length > 0 ? (
-                    archivos.map((a) => (
-                      <div key={a.idArchivo} className="text-sm flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                  {task.archivos && task.archivos.length > 0 ? (
+                    task.archivos.map((a) => (
+                      <div key={a.id} className="text-sm flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                         <div className="flex items-center gap-3 overflow-hidden">
                           {isImage(a) ? (
                             <img src={a.url} alt={a.nombre} className="w-8 h-8 rounded-md object-cover" />
@@ -174,7 +177,7 @@ const DetallesTareas = ({
             </div>
 
             {/* Columna Derecha: Comentarios */}
-            <div className="space-y-4 lg:col-span-2 flex flex-col">
+            <div className="lg:col-span-2 space-y-4 flex flex-col">
                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-800 pb-2">
                   Actividad
                 </h3>
@@ -189,7 +192,7 @@ const DetallesTareas = ({
                           {c.autor?.username || 'Usuario'}
                         </div>
                         <div className="text-gray-700 dark:text-gray-300 bg-white dark:bg-dark-surface p-3 rounded-lg shadow-sm">
-                          <p>{c.contenido}</p>
+                          <p className="whitespace-pre-wrap">{c.contenido}</p>
                           {c.archivoNombre && (
                             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
                               <Paperclip size={14} className="text-light-primary dark:text-dark-primary" />

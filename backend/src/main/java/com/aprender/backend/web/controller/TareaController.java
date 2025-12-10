@@ -38,9 +38,9 @@ public class TareaController {
         return ResponseEntity.ok(tareaService.getTareasByProyectoId(proyectoId));
     }
 
-    @PostMapping("/nuevo") // Crear nueva tarea
-    public ResponseEntity<TareaResponse> createTarea(@RequestBody TareaRequest tareaRequest) {
-        return ResponseEntity.ok(tareaService.createTarea(tareaRequest));
+    @PostMapping(value = "/nuevo", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}) // Crear nueva tarea
+    public ResponseEntity<TareaResponse> createTarea(@RequestPart("tarea") TareaRequest tareaRequest, @RequestPart(name = "files", required = false) List<MultipartFile> files) {
+        return ResponseEntity.ok(tareaService.createTarea(tareaRequest, files));
     }
 
     @PutMapping("/{id}")

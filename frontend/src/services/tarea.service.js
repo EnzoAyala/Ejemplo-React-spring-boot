@@ -9,7 +9,11 @@ const TareaService = {
   },
 
   createTarea(tareaData) {
-    return api.post(TAREA_BASE + 'nuevo', tareaData);
+    return api.post(TAREA_BASE + 'nuevo', tareaData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   },
 
   updateTarea(id, tareaData) {
