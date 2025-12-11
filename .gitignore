@@ -2,7 +2,7 @@
 frontend/node_modules/
 
 # Archivos de configuración locales
-backend/src/main/resources/application.properties
+/backend/src/main/resources/application.properties
 
 # Archivos de construcción de Java/Gradle/Maven
 backend/target/
