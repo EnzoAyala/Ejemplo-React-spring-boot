@@ -67,7 +67,7 @@ public class WebSecurityConfig {
         // Permite el origen de tu frontend. ¡MUY IMPORTANTE!
         // En desarrollo, puedes usar "http://localhost:5173" o "*" para todos.
         // En producción, DEBE ser el dominio específico de tu frontend.
-        configuration.setAllowedOriginPatterns(Arrays.asList("https://worksync-ihph.onrender.com"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         // Permite los métodos HTTP que vas a usar
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Permite todas las cabeceras (incluyendo Authorization)
