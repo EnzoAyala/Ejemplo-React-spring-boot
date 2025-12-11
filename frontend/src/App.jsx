@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
 import './index.css';
@@ -10,11 +10,10 @@ import useTheme from './hooks/useTheme';
 import Header from './components/Header';
 import ProfileModal from './components/ProfileModal';
 import Chat from './components/Sidebar/Chat';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
 import UserService from './services/user.service';
 import MessageService from './services/message.service';
 import NotificationPanel from './components/NotificationPanel';
+import socketService from './services/socket.service'; // Importar el servicio centralizado
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -28,11 +27,8 @@ function App() {
   const [unreadChatsCount, setUnreadChatsCount] = useState(0);
   const [toast, setToast] = useState({ visible: false, text: '' });
   const [chatUsers, setChatUsers] = useState([]);
-  const userMapRef = React.useRef(new Map());
-  const stompRef = React.useRef(null);
-  const subsRef = React.useRef({});
-  const unreadSetRef = React.useRef(new Set());
-  const [wsReady, setWsReady] = useState(false);
+  const userMapRef = useRef(new Map());
+  const unreadSetRef = useRef(new Set());
 
   const [notifications, setNotifications] = useState([]);
   const [isNotificationPanelOpen, setNotificationPanelOpen] = useState(false);
@@ -46,6 +42,13 @@ function App() {
       setIsAdmin(user.roles?.includes('ROLE_ADMIN'));
       setIsUser(user.roles?.includes('ROLE_USER'));
       fetchNotifications(user.id);
+      socketService.connect(); // Conectar el socket al iniciar sesión
+    }
+    
+    return () => {
+      if (user) {
+        socketService.disconnect(); // Desconectar al cerrar sesión o desmontar App
+      }
     }
   }, []);
 
@@ -88,6 +91,7 @@ function App() {
 
   const logOut = () => {
     AuthService.logout();
+    socketService.disconnect(); // Asegurarse de desconectar al cerrar sesión
     setCurrentUser(undefined);
     setIsAdmin(false);
     setIsUser(false);
@@ -142,91 +146,51 @@ function App() {
     })();
   }, [currentUser?.id]);
 
-  // Conexión STOMP única para notificaciones globales
+  // Gestionar suscripciones a notificaciones y chats
   useEffect(() => {
-    if (!currentUser?.id) return;
-    const token = currentUser?.accessToken;
-    if (!token) return;
+    if (!currentUser?.id || !chatUsers.length) return;
 
-    const socket = new SockJS(`https://worksyncback.onrender.com/ws`);
-    const client = Stomp.over(socket);
-    client.debug = null;
-    stompRef.current = client;
+    const subscriptionIds = [];
 
-    client.connect({ Authorization: `Bearer ${token}` }, () => {
-      setWsReady(true);
-    }, (err) => {
-      console.error('Error WS App:', err);
-    });
-
-    return () => {
-      try {
-        Object.values(subsRef.current).forEach(s => { try { s.unsubscribe(); } catch (e) { /* ignore */ } });
-        subsRef.current = {};
-        if (stompRef.current?.connected) {
-          stompRef.current.disconnect(() => { /* disconnected */ });
-        }
-      } catch (e) { /* ignore */ }
-      setWsReady(false);
-    };
-  }, [currentUser?.id, currentUser?.accessToken]);
-
-  // Gestionar suscripciones a todos los chats del usuario para notificaciones
-  useEffect(() => {
-    const client = stompRef.current;
-    if (!client?.connected || !wsReady || !currentUser?.id) return;
-  
     // Suscripción general de notificaciones
-    const notificationSub = client.subscribe(`/user/${currentUser.username}/topic/notifications`, (message) => {
-      try {
-        const newNotification = JSON.parse(message.body);
+    const notificationSubId = socketService.subscribe(
+      `/user/${currentUser.username}/topic/notifications`, 
+      (newNotification) => {
         setNotifications(prev => [newNotification, ...prev]);
         setUnreadNotificationsCount(prev => prev + 1);
         setToast({ visible: true, text: newNotification.mensaje });
         setTimeout(() => setToast({ visible: false, text: '' }), 3000);
-      } catch (e) {
-        console.warn('WS App notification parse error', e);
       }
-    });
-    subsRef.current['notifications'] = notificationSub;
+    );
+    subscriptionIds.push(notificationSubId);
 
-    const desired = new Set();
-    (chatUsers || []).forEach(u => {
+    // Suscripciones a chats individuales
+    chatUsers.forEach(u => {
       const chatId = computeChatId(currentUser.id, u.id);
-      if (!chatId) return;
-      desired.add(chatId);
-      if (!subsRef.current[chatId]) {
-        const sub = client.subscribe(`/topic/chat/${chatId}`, (message) => {
-          try {
-            const payload = JSON.parse(message.body);
-            // Mostrar toast solo si el mensaje es para mí y no está leído
-            if (payload.receptorId === currentUser.id && !payload.status) {
-              const sender = userMapRef.current.get(payload.emisorId);
-              const name = sender?.name || 'un usuario';
-              setToast({ visible: true, text: `${name} te envió un mensaje` });
-              setTimeout(() => setToast({ visible: false, text: '' }), 3000);
+      if (chatId) {
+        const chatSubId = socketService.subscribe(`/topic/chat/${chatId}`, (payload) => {
+          // Mostrar toast solo si el mensaje es para mí y no está leído
+          if (payload.receptorId === currentUser.id && !payload.status) {
+            const sender = userMapRef.current.get(payload.emisorId);
+            const name = sender?.name || 'un usuario';
+            setToast({ visible: true, text: `${name} te envió un mensaje` });
+            setTimeout(() => setToast({ visible: false, text: '' }), 3000);
 
-              // Marcar chat como con no leídos (por conversación)
-              const otherUserId = payload.emisorId === currentUser.id ? payload.receptorId : payload.emisorId;
-              unreadSetRef.current.add(otherUserId);
-              setUnreadChatsCount(unreadSetRef.current.size);
-            }
-          } catch (e) {
-            console.warn('WS App parse error', e);
+            // Marcar chat como con no leídos
+            const otherUserId = payload.emisorId === currentUser.id ? payload.receptorId : payload.emisorId;
+            unreadSetRef.current.add(otherUserId);
+            setUnreadChatsCount(unreadSetRef.current.size);
           }
         });
-        subsRef.current[chatId] = sub;
+        subscriptionIds.push(chatSubId);
       }
     });
 
-    // Desuscribir los que ya no correspondan
-    Object.keys(subsRef.current).forEach((key) => {
-      if (key !== 'notifications' && !desired.has(key)) {
-        try { subsRef.current[key].unsubscribe(); } catch (e) { /* ignore */ }
-        delete subsRef.current[key];
-      }
-    });
-  }, [wsReady, chatUsers, currentUser?.id, currentUser?.username]);
+    // Limpieza: desuscribirse de todo al desmontar o si cambian las dependencias
+    return () => {
+      subscriptionIds.forEach(id => socketService.unsubscribe(id));
+    };
+  }, [chatUsers, currentUser?.id, currentUser?.username]);
 
   // Al abrir el panel de chat, recomputar chats no leídos después de que el chat marque como leídos
   useEffect(() => {
@@ -239,8 +203,6 @@ function App() {
   const handleSaveProfile = async (formData) => {
     try {
       const userId = currentUser.id;
-      // updateUserProfile asume interceptor con Authorization
-      // y maneja JSON o FormData transparente
       const { default: UserService } = await import('./services/user.service');
       await UserService.updateUserProfile(userId, formData);
       handleCloseProfileModal();

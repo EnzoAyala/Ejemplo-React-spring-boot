@@ -1,13 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import UserService from '../../services/user.service';
 import AuthService from '../../services/auth.service';
 import MessageService from '../../services/message.service';
 import useWebSocket from '../../hooks/useWebSocket';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
 import { XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-
-const WS_URL = `https://worksyncback.onrender.com/ws`;
+import socketService from '../../services/socket.service';
 
 const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
     const [error, setError] = useState(null);
@@ -17,13 +14,7 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
 
     // Meta por chat por usuario: { [userId]: { lastMessage, lastDate, lastSenderId, unreadCount } }
     const [chatMeta, setChatMeta] = useState({});
-    // Estado para saber si la conexión STOMP está lista
-    const [wsReady, setWsReady] = useState(false);
-
-    // Conexión STOMP para escuchar todos los chats del usuario autenticado
-    const stompClientRef = useRef(null);
-    const subscriptionsRef = useRef({});
-
+    
     const current = AuthService.getCurrentUser();
     const selfId = current?.id;
     const selfUsername = current?.username;
@@ -67,7 +58,6 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
                 const results = await Promise.all(targets.map(async (u) => {
                     try {
                         const { data } = await MessageService.getConversation(selfId, u.id);
-                        // ordenar por fecha asc ya viene; tomamos el último
                         const last = Array.isArray(data) && data.length > 0 ? data[data.length - 1] : null;
                         const unreadCount = Array.isArray(data)
                             ? data.filter(m => m.receptorId === selfId && !m.status).length
@@ -84,7 +74,6 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
                             unreadCount: 0,
                         }];
                     } catch (e) {
-                        // Si falla una conversación, no tumbar toda la carga
                         console.warn('No se pudo cargar conversación para usuario', u.id, e);
                         return [u.id, { lastMessage: null, lastDate: null, lastSenderId: null, unreadCount: 0 }];
                     }
@@ -105,94 +94,43 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
         return () => { cancelled = true; };
     }, [users, selfId, selfUsername]);
 
-    // Conexión STOMP única (no recrear por cambios de usuarios)
-    useEffect(() => {
-        if (!selfId) return;
-        const token = current?.accessToken;
-        if (!token) return;
-
-        const socket = new SockJS(WS_URL);
-        const client = Stomp.over(socket);
-        client.debug = null;
-        stompClientRef.current = client;
-
-        client.connect({ Authorization: `Bearer ${token}` }, () => {
-            setWsReady(true);
-        }, (err) => {
-            console.error('Error en el WebSocket del sidebar:', err);
-        });
-
-        // Limpieza de conexión
-        return () => {
-            try {
-                const subs = subscriptionsRef.current;
-                Object.values(subs).forEach(s => {
-                    try {
-                        s.unsubscribe();
-                    } catch (e) {
-                        console.error("Error al intentar desuscribirse:", e);
-                    }
-                });
-                subscriptionsRef.current = {};
-                if (stompClientRef.current?.connected) {
-                    stompClientRef.current.disconnect(() => { /* desconectado */ });
-                }
-            } catch (e) {
-                console.error("Error durante la limpieza de la conexión:", e);
-            }
-            setWsReady(false);
-        };
-    }, [selfId, current?.accessToken]);
-
-
     // Gestionar suscripciones por usuario (añadir/quitar sin reconectar)
     useEffect(() => {
-        const client = stompClientRef.current;
-        if (!client?.connected || !selfId || !wsReady) return;
+        if (!selfId || !Array.isArray(users) || users.length === 0) return;
 
-        const desired = new Set();
-        const list = Array.isArray(users) ? users : [];
-        list.forEach(u => {
+        const subscriptionIds = [];
+
+        users.forEach(u => {
             if (!u?.id || u.id === selfId) return;
             const chatId = computeChatId(selfId, u.id);
-            if (!chatId) return;
-            desired.add(chatId);
-            if (!subscriptionsRef.current[chatId]) {
-                const sub = client.subscribe(`/topic/chat/${chatId}`, (message) => {
-                    try {
-                        const payload = JSON.parse(message.body);
-                        const otherUserId = payload.emisorId === selfId ? payload.receptorId : payload.emisorId;
+            if (chatId) {
+                const subId = socketService.subscribe(`/topic/chat/${chatId}`, (payload) => {
+                    const otherUserId = payload.emisorId === selfId ? payload.receptorId : payload.emisorId;
 
-                        setChatMeta(prev => {
-                            const curr = prev[otherUserId] || { unreadCount: 0 };
-                            const isIncoming = payload.receptorId === selfId; // mensaje para mí
-                            const nextUnread = isIncoming && !payload.status ? (curr.unreadCount || 0) + 1 : curr.unreadCount || 0;
-                            return {
-                                ...prev,
-                                [otherUserId]: {
-                                    lastMessage: payload.contenido,
-                                    lastDate: payload.fecha,
-                                    lastSenderId: payload.emisorId,
-                                    unreadCount: nextUnread,
-                                }
-                            };
-                        });
-                    } catch (e) {
-                        console.warn('Error procesando mensaje WS en sidebar:', e);
-                    }
+                    setChatMeta(prev => {
+                        const curr = prev[otherUserId] || { unreadCount: 0 };
+                        const isIncoming = payload.receptorId === selfId; // mensaje para mí
+                        const nextUnread = isIncoming && !payload.status ? (curr.unreadCount || 0) + 1 : curr.unreadCount || 0;
+                        return {
+                            ...prev,
+                            [otherUserId]: {
+                                lastMessage: payload.contenido,
+                                lastDate: payload.fecha,
+                                lastSenderId: payload.emisorId,
+                                unreadCount: nextUnread,
+                            }
+                        };
+                    });
                 });
-                subscriptionsRef.current[chatId] = sub;
+                subscriptionIds.push(subId);
             }
         });
 
-        // Desuscribir chats que ya no son necesarios
-        Object.keys(subscriptionsRef.current).forEach((chatId) => {
-            if (!desired.has(chatId)) {
-                try { subscriptionsRef.current[chatId].unsubscribe(); } catch (e) { console.error(`Error al desuscribirse del chat con ID ${chatId}: `, e);}
-                delete subscriptionsRef.current[chatId];
-            }
-        });
-    }, [users, selfId, wsReady]);
+        // Desuscribir de todos los chats al limpiar
+        return () => {
+            subscriptionIds.forEach(id => socketService.unsubscribe(id));
+        };
+    }, [users, selfId]);
 
     // Filtro por búsqueda y orden por última actividad de chat (último mensaje)
     const filteredUsers = useMemo(() => {
@@ -360,3 +298,4 @@ const ChatSidebar = ({ onSelectUser, selectedUser, setSidebarOpen }) => {
 };
 
 export default ChatSidebar;
+
