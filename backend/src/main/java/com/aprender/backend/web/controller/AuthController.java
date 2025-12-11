@@ -176,8 +176,8 @@ public class AuthController {
         // Asigna roles al usuario. Por defecto, siempre será ROLE_USER para el
         // registro.
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
+            Role userRole = roleRepository.findByName("ROLE_PLAN_GRATUITO")
+                    .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_GRATUITO no se encuentra."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
@@ -187,9 +187,19 @@ public class AuthController {
                                 .orElseThrow(() -> new RuntimeException("Error: El rol ADMIN no se encuentra."));
                         roles.add(adminRole);
                         break;
+                    case "plan_casual":
+                        Role casualRole = roleRepository.findByName("ROLE_PLAN_CASUAL")
+                                .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_CASUAL no se encuentra."));
+                        roles.add(casualRole);
+                        break;
+                    case "plan_premium":
+                        Role premiumRole = roleRepository.findByName("ROLE_PLAN_PREMIUM")
+                                .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_PREMIUM no se encuentra."));
+                        roles.add(premiumRole);
+                        break;
                     default:
-                        Role userRole = roleRepository.findByName("ROLE_USER")
-                                .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
+                        Role userRole = roleRepository.findByName("ROLE_PLAN_GRATUITO")
+                                .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_GRATUITO no se encuentra."));
                         roles.add(userRole);
                 }
             });

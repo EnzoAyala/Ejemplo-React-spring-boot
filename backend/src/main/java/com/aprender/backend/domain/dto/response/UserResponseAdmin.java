@@ -18,7 +18,7 @@ public class UserResponseAdmin {
     private String lastname;
     private String dni;
     private String phone;
-    private List<String> roles; // Representa los roles como Strings (ej. "ROLE_USER", "ROLE_ADMIN")
+    private List<String> roles; // Representa los roles como Strings (ej. "ROLE_PLAN_GRATUITO", "ROLE_ADMIN")
     private Boolean isOnline;
     private LocalDateTime lastActive;
 }

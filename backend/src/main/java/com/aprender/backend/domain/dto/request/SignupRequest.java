@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank; // Para validar que no esté vac
 import jakarta.validation.constraints.Size; // Para validar longitud
 import jakarta.validation.constraints.Pattern; // Para validación de patrones (regex)
 
-import java.util.Set; // Para los roles, aunque por defecto será USER
+import java.util.Set; // Para los roles, aunque por defecto será PLAN_GRATUITO
 
 // DTO para la petición de registro de usuario
 public class SignupRequest {
@@ -40,10 +40,10 @@ public class SignupRequest {
     @Size(min = 6, max = 40, message = "La contraseña debe tener entre 6 y 40 caracteres") // La longitud de la contraseña en texto plano
     private String password;
 
-    // Campo para roles, aunque para el registro será siempre "user" por defecto.
+    // Campo para roles, aunque para el registro será siempre "plan_gratuito" por defecto.
     // Se puede usar para permitir que un admin registre otros roles si fuera
     // necesario.
-    private Set<String> roles; // Puede ser 'user', 'admin'
+    private Set<String> roles; // Puede ser 'plan_gratuito', 'plan_casual', 'plan_premium', 'admin'
 
     @NotBlank(message = "El género no puede estar vacío")
     private String gender;

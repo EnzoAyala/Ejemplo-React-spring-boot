@@ -11,7 +11,7 @@ public class RoleUpdateRequest {
 
     @NotNull
     @Size(min = 1, message = "Debe especificar al menos un rol")
-    private Set<String> roles; // ej. ["user"], ["admin"] o ["user", "admin"]
+    private Set<String> roles; // ej. ["plan_gratuito"], ["plan_casual"], ["plan_premium"], ["admin"]
 
     public Long getUserId() {
         return userId;

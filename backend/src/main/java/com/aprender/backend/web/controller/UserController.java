@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
-@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('PLAN_GRATUITO', 'PLAN_CASUAL', 'PLAN_PREMIUM', 'ADMIN')")
 public class UserController {
 
     @Autowired

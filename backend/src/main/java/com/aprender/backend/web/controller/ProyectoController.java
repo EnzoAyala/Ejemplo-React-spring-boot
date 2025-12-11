@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/proyectos/")
-@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('PLAN_GRATUITO', 'PLAN_CASUAL', 'PLAN_PREMIUM', 'ADMIN')")
 public class ProyectoController {
 
     @Autowired

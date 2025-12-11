@@ -106,8 +106,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**", "/ws/**", "/uploads/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 2. Roles USER y ADMIN 
-                        .requestMatchers("/api/user/**", "/api/messages/**", "/api/proyectos/**", "/api/tarea/**", "/api/notificaciones/**").hasAnyRole("USER", "ADMIN")
+                        // 2. Roles PLAN_GRATUITO y ADMIN 
+                        .requestMatchers("/api/user/**", "/api/messages/**", "/api/proyectos/**", "/api/tarea/**", "/api/notificaciones/**").hasAnyRole("PLAN_GRATUITO", "PLAN_CASUAL", "PLAN_PREMIUM", "ADMIN")
 
                         // 3. Solo ADMIN (Uso de hasRole para un solo rol)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
