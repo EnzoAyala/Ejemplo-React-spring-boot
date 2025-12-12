@@ -53,9 +53,9 @@ const Header = ({
         const full = list.find((u) => u.id === currentUser.id) || null;
         setHeaderUser(full);
         if (full?.profilePictureUrl) {
-          const base = `https://worksyncback.onrender.com/uploads/`;
+          const base = `http://localhost:8080/uploads/`;
           setAvatarUrl(base + full.profilePictureUrl);
-        } else {
+        } else {  
           setAvatarUrl(null);
         }
         // eslint-disable-next-line no-unused-vars
@@ -139,6 +139,12 @@ const Header = ({
                   >
                     Perfil
                   </button>
+                  <NavLink 
+                    to="/cambiar-plan"
+                    className="w-full block text-left px-4 py-2 text-base text-dark-surface dark:text-light-surface bg-light-surface dark:bg-dark-surface hover:bg-light-danger/10 dark:hover:bg-dark-danger/20 border-t border-slate-200 dark:border-slate-700 rounded-b-md transition"
+                  >
+                    Cambiar de Plan
+                  </NavLink>
                   <button
                     onClick={logOut}
                     className="w-full text-left px-4 py-2 text-base text-light-danger dark:text-dark-danger bg-light-surface dark:bg-dark-surface hover:bg-light-danger/10 dark:hover:bg-dark-danger/20 border-t border-slate-200 dark:border-slate-700 rounded-b-md transition"
@@ -167,170 +173,181 @@ const Header = ({
   );
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-light-surface/80 dark:bg-dark-surface/80 border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm transition-all duration-300">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 md:px-8 py-3">
-        <Link
-          to="/"
-          className="text-2xl font-bold text-light-primary dark:text-dark-primary tracking-tight"
-          onClick={handleCloseMobileMenu}
-        >
-          WorkSync
-        </Link>
-
-        <nav className="hidden md:flex items-center space-x-6">
-          {renderDesktopLinks()}
-        </nav>
-
-        <button
-          onClick={handleToggleMobileMenu}
-          className="md:hidden p-2 rounded-md text-light-text-secondary hover:text-light-primary hover:bg-slate-200 dark:text-dark-text-secondary dark:hover:text-dark-primary dark:hover:bg-dark-surface transition"
-          aria-label="Toggle menu"
-          aria-expanded={mobileMenuOpen}
-        >
-          {mobileMenuOpen ? (
-            <XMarkIcon className="h-6 w-6" />
-          ) : (
-            <Bars3Icon className="h-6 w-6" />
-          )}
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-1/2 top-14 transform -translate-x-1/2 z-50 w-40 rounded-md shadow-lg border bg-light-surface dark:bg-dark-surface border-slate-200 dark:border-slate-700 md:hidden"
+    <>
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-light-surface/80 dark:bg-dark-surface/80 border-b border-slate-200/60 dark:border-slate-700/60 shadow-sm transition-all duration-300">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 md:px-8 py-3">
+          <Link
+            to="/"
+            className="text-2xl font-bold text-light-primary dark:text-dark-primary tracking-tight"
+            onClick={handleCloseMobileMenu}
           >
-            <div className="py-3 px-4 space-y-2 text-center">
-              <NavLink
-                to="/home"
-                className={(navData) => getNavLinkClasses(navData) + " block"}
-                onClick={handleCloseMobileMenu}
-              >
-                Inicio
-              </NavLink>
+            WorkSync
+          </Link>
 
-              {!currentUser ? (
-                <>
-                  <NavLink
-                    to="/login"
-                    className={(navData) =>
-                      getNavLinkClasses(navData) + " block"
-                    }
-                    onClick={handleCloseMobileMenu}
-                  >
-                    Iniciar Sesión
-                  </NavLink>
-                </>
-              ) : (
-                <>
-                  {isUser && (
-                    <>
-                      <NavLink
-                        to="/chat"
-                        className={(navData) =>
-                          getNavLinkClasses(navData) + " block"
-                        }
-                        onClick={handleCloseMobileMenu}
-                      >
-                        Chat
-                      </NavLink>
-                      <NavLink
-                        to="/proyectos"
-                        className={(navData) =>
-                          getNavLinkClasses(navData) + " block"
-                        }
-                        onClick={handleCloseMobileMenu}
-                      >
-                        Mis Proyectos
-                      </NavLink>
-                    </>
-                  )}
-                  {isAdmin && (
-                    <>
-                      <NavLink
-                        to="/chat"
-                        className={(navData) =>
-                          getNavLinkClasses(navData) + " block"
-                        }
-                        onClick={handleCloseMobileMenu}
-                      >
-                        Chat
-                      </NavLink>
-                      <NavLink
-                        to="/proyectos"
-                        className={(navData) =>
-                          getNavLinkClasses(navData) + " block"
-                        }
-                        onClick={handleCloseMobileMenu}
-                      >
-                        Mis Proyectos
-                      </NavLink>
-                      <NavLink
-                        to="/gestion-usuarios"
-                        className={(navData) =>
-                          getNavLinkClasses(navData) + " block"
-                        }
-                        onClick={handleCloseMobileMenu}
-                      >
-                        Gestión de Usuarios
-                      </NavLink>
-                    </>
-                  )}
-                  <button
-                    onClick={() => {
-                      onOpenProfileModal();
-                      handleCloseMobileMenu();
-                    }}
-                    className="w-full text-center px-4 py-2 text-base text-dark-surface dark:text-light-surface bg-light-surface dark:bg-dark-surface hover:bg-light-danger/10 dark:hover:bg-dark-danger/20 border-t border-slate-200 dark:border-slate-700 rounded-b-md transition"
-                  >
-                    Perfil
-                    <img
-                      src={
-                        avatarUrl
-                          ? avatarUrl
-                          : headerUser?.gender === "MALE"
-                            ? "https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7"
-                            : "https://logowik.com/content/uploads/images/woman4906.jpg"
+          <nav className="hidden md:flex items-center space-x-6">
+            {renderDesktopLinks()}
+          </nav>
+
+          <button
+            onClick={handleToggleMobileMenu}
+            className="md:hidden p-2 rounded-md text-light-text-secondary hover:text-light-primary hover:bg-slate-200 dark:text-dark-text-secondary dark:hover:text-dark-primary dark:hover:bg-dark-surface transition"
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <XMarkIcon className="h-6 w-6" />
+            ) : (
+              <Bars3Icon className="h-6 w-6" />
+            )}
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute left-1/2 top-14 transform -translate-x-1/2 z-50 w-40 rounded-md shadow-lg border bg-light-surface dark:bg-dark-surface border-slate-200 dark:border-slate-700 md:hidden"
+            >
+              <div className="py-3 px-4 space-y-2 text-center">
+                <NavLink
+                  to="/home"
+                  className={(navData) => getNavLinkClasses(navData) + " block"}
+                  onClick={handleCloseMobileMenu}
+                >
+                  Inicio
+                </NavLink>
+
+                {!currentUser ? (
+                  <>
+                    <NavLink
+                      to="/login"
+                      className={(navData) =>
+                        getNavLinkClasses(navData) + " block"
                       }
-                      alt="Foto de perfil"
-                      className="w-6 h-6 justify-self-center rounded-full object-cover border border-light-divider dark:border-dark-divider"
-                    />
-                  </button>
-                  <button
-                    onClick={() => {
-                      logOut();
-                      handleCloseMobileMenu();
-                    }}
-                    className="w-full text-center bg-light-danger/10 text-light-danger hover:bg-light-danger/20 dark:bg-dark-danger/20 dark:text-dark-danger dark:hover:bg-dark-danger/30 font-semibold py-2 px-4 rounded-md text-sm transition"
-                  >
-                    Cerrar sesión
-                  </button>
-                </>
-              )}
-
-              <button
-                onClick={() => {
-                  toggleTheme();
-                  handleCloseMobileMenu();
-                }}
-                className="w-full flex justify-center p-2 rounded-full text-light-text-secondary hover:text-light-primary hover:bg-slate-200 dark:text-dark-text-secondary dark:hover:text-dark-primary dark:hover:bg-dark-surface transition"
-                aria-label="Toggle theme"
-              >
-                {theme === "light" ? (
-                  <MoonIcon className="h-5 w-5" />
+                      onClick={handleCloseMobileMenu}
+                    >
+                      Iniciar Sesión
+                    </NavLink>
+                  </>
                 ) : (
-                  <SunIcon className="h-5 w-5" />
+                  <>
+                    {isUser && (
+                      <>
+                        <NavLink
+                          to="/chat"
+                          className={(navData) =>
+                            getNavLinkClasses(navData) + " block"
+                          }
+                          onClick={handleCloseMobileMenu}
+                        >
+                          Chat
+                        </NavLink>
+                        <NavLink
+                          to="/proyectos"
+                          className={(navData) =>
+                            getNavLinkClasses(navData) + " block"
+                          }
+                          onClick={handleCloseMobileMenu}
+                        >
+                          Mis Proyectos
+                        </NavLink>
+                      </>
+                    )}
+                    {isAdmin && (
+                      <>
+                        <NavLink
+                          to="/chat"
+                          className={(navData) =>
+                            getNavLinkClasses(navData) + " block"
+                          }
+                          onClick={handleCloseMobileMenu}
+                        >
+                          Chat
+                        </NavLink>
+                        <NavLink
+                          to="/proyectos"
+                          className={(navData) =>
+                            getNavLinkClasses(navData) + " block"
+                          }
+                          onClick={handleCloseMobileMenu}
+                        >
+                          Mis Proyectos
+                        </NavLink>
+                        <NavLink
+                          to="/gestion-usuarios"
+                          className={(navData) =>
+                            getNavLinkClasses(navData) + " block"
+                          }
+                          onClick={handleCloseMobileMenu}
+                        >
+                          Gestión de Usuarios
+                        </NavLink>
+                        <NavLink
+                          to="/cambiar-plan"
+                          className={(navData) =>
+                            getNavLinkClasses(navData) + " block"
+                          }
+                          onClick={handleCloseMobileMenu}
+                        >
+                          Cambiar de Plan
+                        </NavLink>
+                      </>
+                    )}
+                    <button
+                      onClick={() => {
+                        onOpenProfileModal();
+                        handleCloseMobileMenu();
+                      }}
+                      className="w-full text-center px-4 py-2 text-base text-dark-surface dark:text-light-surface bg-light-surface dark:bg-dark-surface hover:bg-light-danger/10 dark:hover:bg-dark-danger/20 border-t border-slate-200 dark:border-slate-700 rounded-b-md transition"
+                    >
+                      Perfil
+                      <img
+                        src={
+                          avatarUrl
+                            ? avatarUrl
+                            : headerUser?.gender === "MALE"
+                              ? "https://th.bing.com/th/id/OIP.eJ4BA7hzUGjKZ0qUEfAgVQHaHa?o=7"
+                              : "https://logowik.com/content/uploads/images/woman4906.jpg"
+                        }
+                        alt="Foto de perfil"
+                        className="w-6 h-6 justify-self-center rounded-full object-cover border border-light-divider dark:border-dark-divider"
+                      />
+                    </button>
+                    <button
+                      onClick={() => {
+                        logOut();
+                        handleCloseMobileMenu();
+                      }}
+                      className="w-full text-center bg-light-danger/10 text-light-danger hover:bg-light-danger/20 dark:bg-dark-danger/20 dark:text-dark-danger dark:hover:bg-dark-danger/30 font-semibold py-2 px-4 rounded-md text-sm transition"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
                 )}
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+
+                <button
+                  onClick={() => {
+                    toggleTheme();
+                    handleCloseMobileMenu();
+                  }}
+                  className="w-full flex justify-center p-2 rounded-full text-light-text-secondary hover:text-light-primary hover:bg-slate-200 dark:text-dark-text-secondary dark:hover:text-dark-primary dark:hover:bg-dark-surface transition"
+                  aria-label="Toggle theme"
+                >
+                  {theme === "light" ? (
+                    <MoonIcon className="h-5 w-5" />
+                  ) : (
+                    <SunIcon className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+    </>
   );
 };
 

@@ -13,12 +13,14 @@ import ProyectoPage from '../pages/Proyectos/ProyectoPage';
 // ¡Importa el componente ProtectedRoute!
 import ProtectedRoute from '../components/ProtectedRoute';
 import ErrorAutenticacion from '../components/error/error_authentificacion';
+import PlanModal from "../components/PlanModal";
 
 const AppRoutes = () => (
     <Routes>
         {/* Ruta publicas (sin autenticación) */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/cambiar-plan" element={<PlanModal />} />
 
         {/* Rutas de autenticación protegidas para redirigir si ya estás logueado */}
         <Route
