@@ -51,7 +51,7 @@ public class AdminController {
                         user.getDni(),
                         user.getPhone(),
                         user.getRoles().stream()
-                                .map(role -> role.getName()) // Convierte el rol a String (ej. "ROLE_PLAN_GRATUITO")
+                                .map(role -> role.getName()) // Convierte el rol a String (ej. "ROLE_USER)
                                 .collect(Collectors.toList()),
                         user.isOnline(), 
                         user.getLastActive()

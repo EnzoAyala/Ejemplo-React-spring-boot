@@ -12,11 +12,13 @@ import com.aprender.backend.domain.dto.response.UserResponseAdmin;
 import com.aprender.backend.domain.repository.PasswordReserCodeRepository;
 import com.aprender.backend.domain.repository.RoleRepository;
 import com.aprender.backend.domain.repository.UserRepository;
+import com.aprender.backend.domain.repository.UserRolePlanRepository;
 import com.aprender.backend.domain.services.PasswordResetService;
 import com.aprender.backend.domain.services.UserDetailsImpl;
 import com.aprender.backend.persistence.entity.PasswordResetCode;
 import com.aprender.backend.persistence.entity.Role;
 import com.aprender.backend.persistence.entity.User;
+import com.aprender.backend.persistence.entity.UserRolePlan;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid; // Para habilitar las validaciones en los DTOs
@@ -54,6 +56,9 @@ public class AuthController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    UserRolePlanRepository userRolePlanRepository;
 
     @Autowired
     PasswordEncoder encoder; // El mismo BCryptPasswordEncoder que configuramos en SecurityConfig
@@ -119,8 +124,7 @@ public class AuthController {
                     user.getPhone(),
                     roles,
                     user.isOnline(),
-                    user.getLastActive()
-            );
+                    user.getLastActive());
             messagingTemplate.convertAndSend("/topic/user-updates", userResponse);
         }
 
@@ -176,8 +180,8 @@ public class AuthController {
         // Asigna roles al usuario. Por defecto, siempre será ROLE_USER para el
         // registro.
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName("ROLE_PLAN_GRATUITO")
-                    .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_GRATUITO no se encuentra."));
+            Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
@@ -187,6 +191,11 @@ public class AuthController {
                                 .orElseThrow(() -> new RuntimeException("Error: El rol ADMIN no se encuentra."));
                         roles.add(adminRole);
                         break;
+                    case "plan_gratuito":
+                        Role gartuitoRole = roleRepository.findByName("ROLE_PLAN_GRATUITO")
+                                .orElseThrow(
+                                        () -> new RuntimeException("Error: El rol PLAN_GRATUITO no se encuentra."));
+                        roles.add(gartuitoRole);
                     case "plan_casual":
                         Role casualRole = roleRepository.findByName("ROLE_PLAN_CASUAL")
                                 .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_CASUAL no se encuentra."));
@@ -198,8 +207,8 @@ public class AuthController {
                         roles.add(premiumRole);
                         break;
                     default:
-                        Role userRole = roleRepository.findByName("ROLE_PLAN_GRATUITO")
-                                .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_GRATUITO no se encuentra."));
+                        Role userRole = roleRepository.findByName("ROLE_USER")
+                                .orElseThrow(() -> new RuntimeException("Error: El rol USER no se encuentra."));
                         roles.add(userRole);
                 }
             });
@@ -208,6 +217,18 @@ public class AuthController {
         user.setRoles(roles);
         User savedUser = userRepository.save(user); // Guarda el nuevo usuario en la base de datos
 
+        // Verificar si el usario tiene algun plan
+        boolean hasPlan = userRolePlanRepository.existsByUserId(savedUser.getId());
+        if (hasPlan) {
+            Role freePlan = roleRepository.findByName("ROLE_PLAN_GRATUITO")
+                    .orElseThrow(() -> new RuntimeException("Error: El rol PLAN_GRATUITO no se encuentra."));
+
+            UserRolePlan urp = new UserRolePlan();
+            urp.setUser(savedUser);
+            urp.setPlan(freePlan);
+            userRolePlanRepository.save(urp);
+        }
+            
         // Publicar el evento de nuevo usuarios registrado
         eventPublisher.publishEvent(new OnNewUserRegisteredEvent(this, savedUser));
 
@@ -226,7 +247,7 @@ public class AuthController {
             String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
             Optional<User> userOptional = userRepository.findByUsername(username);
-            if(userOptional.isPresent()) {
+            if (userOptional.isPresent()) {
                 User user = userOptional.get();
                 user.setOnline(false);
                 user.setLastActive(java.time.LocalDateTime.now());
@@ -246,8 +267,7 @@ public class AuthController {
                         user.getPhone(),
                         roles,
                         user.isOnline(),
-                        user.getLastActive()
-                );
+                        user.getLastActive());
                 messagingTemplate.convertAndSend("/topic/user-updates", userResponse);
             }
 

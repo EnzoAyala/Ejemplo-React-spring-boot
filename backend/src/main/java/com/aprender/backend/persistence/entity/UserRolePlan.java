@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_roles")
-public class UserRole {
-
+@Table(name = "user_roles_plan")
+public class UserRolePlan {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,8 +20,8 @@ public class UserRole {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Rol principal → ROLE_USER, ROLE_ADMIN, etc.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
+    @JoinColumn(name = "plan_id", nullable = false)
+    private Role plan;
+
 }

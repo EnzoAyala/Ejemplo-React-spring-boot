@@ -16,18 +16,24 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Verifica si el rol ROLE_PLAN_GRATUITO ya existe en la base de datos
-        if (roleRepository.findByName("ROLE_PLAN_GRATUITO").isEmpty()) {
-            // Si no existe, lo crea y lo guarda
-            roleRepository.save(new Role(null, "ROLE_PLAN_GRATUITO")); // null para que el ID sea autogenerado
-            System.out.println("Role ROLE_PLAN_GRATUITO created.");
+        // Verifica si el rol ROLE_USER ya existe en la base de datos
+        if (roleRepository.findByName("ROLE_USER").isEmpty()) {
+            roleRepository.save(new Role(null, "ROLE_USER"));
+            System.out.println("Role ROLE_USER created.");
         }
-
+        
         // Verifica si el rol ROLE_ADMIN ya existe en la base de datos
         if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
             // Si no existe, lo crea y lo guarda
             roleRepository.save(new Role(null, "ROLE_ADMIN"));
             System.out.println("Role ROLE_ADMIN created.");
+        }
+        
+        // Verifica si el rol ROLE_PLAN_GRATUITO ya existe en la base de datos
+        if (roleRepository.findByName("ROLE_PLAN_GRATUITO").isEmpty()) {
+            // Si no existe, lo crea y lo guarda
+            roleRepository.save(new Role(null, "ROLE_PLAN_GRATUITO")); // null para que el ID sea autogenerado
+            System.out.println("Role ROLE_PLAN_GRATUITO created.");
         }
 
         // Verifica si el rol ROLE_PLAN_CASUAL ya existe en la base de datos
